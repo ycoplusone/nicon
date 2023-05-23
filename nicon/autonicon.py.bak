@@ -209,9 +209,7 @@ def fn_main():
                 complete_fold(path_copy)
 
 while(True):
-	print('-'*10,'폴더 정리','-'*10)
 	init_fold('c:\\ncnc')
 	time.sleep(1)
-	print('-'*10,'판매시작','-'*10)
 	fn_main()
 	time.sleep(5)
