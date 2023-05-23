@@ -202,6 +202,6 @@ def fn_main():
 
         
 
-
-    
+_xy = pyautogui.locateOnScreen('./nicon/reject.png')             
+print(_xy != None)
 

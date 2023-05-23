@@ -156,51 +156,55 @@ def fn_main():
             pyautogui.press('enter')
             time.sleep(base_sleep-2)
 
-            if len(noitem_xy) == 0:
-                print('noitem_xy 설정')
-                noitem_img = pyautogui.locateOnScreen('./nicon/noitem.png')
-                noitem_xy  = getXyinfo(noitem_img)
-                print('noitem_xy : ',noitem_xy)  
-            pyautogui.click(  noitem_xy['x'], noitem_xy['y']+120)
-            time.sleep(base_sleep-1)
+            _xy = pyautogui.locateOnScreen('./nicon/reject.png')             
+            if _xy != None:
+                break
+            else:
+                if len(noitem_xy) == 0:
+                    print('noitem_xy 설정')
+                    noitem_img = pyautogui.locateOnScreen('./nicon/noitem.png')
+                    noitem_xy  = getXyinfo(noitem_img)
+                    print('noitem_xy : ',noitem_xy)  
+                pyautogui.click(  noitem_xy['x'], noitem_xy['y']+120)
+                time.sleep(base_sleep-1)
 
-            if len(additem_xy) == 0:
-                print('additem_xy 설정')
-                additem_img = pyautogui.locateOnScreen('./nicon/additem.png')             
-                additem_xy  = getXyinfo(additem_img)
-                print('additem_xy : ',additem_xy)  
-            pyautogui.click(  additem_xy['x'], additem_xy['y'])
-            time.sleep(base_sleep-1)
-            
-            if len(exploer_xy) == 0:
-                print('exploer_xy 설정')
-                exploer_img = pyautogui.locateOnScreen('./nicon/exploer.png')             
-                exploer_xy  = getXyinfo(exploer_img)
-                print('exploer_xy : ',exploer_xy)  
-            pyautogui.click(  exploer_xy['x']+60, exploer_xy['y'])
-            time.sleep(base_sleep-1)       
-            path_copy = __i
-            pyperclip.copy( path_copy )
-            pyautogui.hotkey('ctrl', 'a')
-            pyautogui.hotkey('ctrl', 'v')
-            pyautogui.press('enter')
-            time.sleep(base_sleep-1)
+                if len(additem_xy) == 0:
+                    print('additem_xy 설정')
+                    additem_img = pyautogui.locateOnScreen('./nicon/additem.png')             
+                    additem_xy  = getXyinfo(additem_img)
+                    print('additem_xy : ',additem_xy)  
+                pyautogui.click(  additem_xy['x'], additem_xy['y'])
+                time.sleep(base_sleep-1)
+                
+                if len(exploer_xy) == 0:
+                    print('exploer_xy 설정')
+                    exploer_img = pyautogui.locateOnScreen('./nicon/exploer.png')             
+                    exploer_xy  = getXyinfo(exploer_img)
+                    print('exploer_xy : ',exploer_xy)  
+                pyautogui.click(  exploer_xy['x']+60, exploer_xy['y'])
+                time.sleep(base_sleep-1)       
+                path_copy = __i
+                pyperclip.copy( path_copy )
+                pyautogui.hotkey('ctrl', 'a')
+                pyautogui.hotkey('ctrl', 'v')
+                pyautogui.press('enter')
+                time.sleep(base_sleep-1)
 
-            pyautogui.click(  exploer_xy['x']+60, exploer_xy['y']-40)
-            time.sleep(base_sleep-2)
-            pyautogui.hotkey('ctrl', 'a')
-            time.sleep(base_sleep-2)
-            pyautogui.hotkey('alt', 'o')
-            time.sleep(base_sleep-2)
-            if len(ok_xy) == 0:
-                print('ok_xy 설정')
-                ok_img = pyautogui.locateOnScreen('./nicon/ok.png')             
-                ok_xy  = getXyinfo(ok_img)
-                print('ok_xy : ',ok_xy) 
-            pyautogui.click(  ok_xy['x'], ok_xy['y'])
-            time.sleep(base_sleep-1)
-            pyautogui.press('enter')
-            time.sleep(base_sleep-2)
-            complete_fold(path_copy)
+                pyautogui.click(  exploer_xy['x']+60, exploer_xy['y']-40)
+                time.sleep(base_sleep-2)
+                pyautogui.hotkey('ctrl', 'a')
+                time.sleep(base_sleep-2)
+                pyautogui.hotkey('alt', 'o')
+                time.sleep(base_sleep-2)
+                if len(ok_xy) == 0:
+                    print('ok_xy 설정')
+                    ok_img = pyautogui.locateOnScreen('./nicon/ok.png')             
+                    ok_xy  = getXyinfo(ok_img)
+                    print('ok_xy : ',ok_xy) 
+                pyautogui.click(  ok_xy['x'], ok_xy['y'])
+                time.sleep(base_sleep-1)
+                pyautogui.press('enter')
+                time.sleep(base_sleep-2)
+                complete_fold(path_copy)
 
 fn_main()
