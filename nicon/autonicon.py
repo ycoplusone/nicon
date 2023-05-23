@@ -17,7 +17,9 @@ def getXyinfo( obj ):
 
 def complete_fold(path):
     '''해당 path 의 이름 변경'''
-    base_dttm = datetime.today().strftime('%Y%m%d%H%M')        
+    #base_dttm = datetime.today().strftime('%Y%m%d%H%M') 
+    base_dttm = datetime.today().strftime('%Y%m%d%H%M%S') 
+    
     os.rename( path , path+'_'+base_dttm+'(완료)')
 
 def getXyinfo( obj ):
