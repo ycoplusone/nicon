@@ -212,6 +212,57 @@ class DbConn(object):
         
           
         except Exception as e:
-            print( 'get_nicon error' , e )              
+            print( 'get_nicon error' , e )        
+
+    def get_nicon_upload_list(self): 
+              
+        try :
+            _lists = []
+            query = (
+                " select  "
+                " SUBSTR(c.div_nm,1,1) div_nm "
+                " , a.category_id "
+                " , c.category_nm  "
+                " , b.prod_nm  "
+                " , concat(c.category_nm , '_' , b.prod_nm ) fold_nm "
+                " , b.amount "
+                " from ( "
+                " 	SELECT " 
+                " 	category_id  , prod_nm   "
+                " 	from nicon_job_list njl  "
+                " 	where use_yn = 'Y' "
+                " 	and send_type like '%V%' "
+                " 	group by category_id  , prod_nm "
+                " ) a "
+                " join ( "
+                " 	select "
+                " 	category_id  , name prod_nm , amount   "
+                " 	from nicon_info ni  "
+                " 	where refuse = 0 "
+                " ) b on (a.category_id = b.category_id and a.prod_nm = b.prod_nm)   "
+                " join nicon_category_info c on ( a.category_id = c.category_id  ) "
+                " order by 3,2 "
+            )
+            #query = query.format( **param )
+            cur = self.__conn.cursor(  pymysql.cursors.DictCursor)            
+            cur.execute( query )            
+            __dblists =  cur.fetchall()          
+            for i in __dblists:
+                
+                m_list = {}
+                m_list['div_nm'] = i['div_nm'].decode('utf-8')
+                m_list['category_id'] = i['category_id'].decode('utf-8')
+                m_list['category_nm'] = i['category_nm'].decode('utf-8')
+                m_list['prod_nm'] = i['prod_nm'].decode('utf-8')
+                m_list['fold_nm'] = i['fold_nm'].decode('utf-8')
+                m_list['amount'] = i['amount']
+
+                _lists.append(m_list)
+            return _lists 
+        
+        
+          
+        except Exception as e:
+            print( 'get_nicon error' , e )      
 
              

@@ -1,5 +1,5 @@
 import requests
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 import json
 import dbcon 
 #import schedule
@@ -7,12 +7,6 @@ import time
 from datetime import datetime
 #import requests
 import json
-
-import telegram
-#import asyncio
-
-
-
     
     
 
