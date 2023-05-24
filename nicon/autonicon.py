@@ -6,6 +6,7 @@ from datetime import datetime
 import time
 
 import dbcon
+import requests
 
 def getXyinfo( obj ):
     ''' Box(left=802, top=139, width=80, height=82) 값 받아서 x , y 좌표 리턴 '''
@@ -13,14 +14,32 @@ def getXyinfo( obj ):
     y = obj.top + (obj.height /2)
     return {'x' : x , 'y' : y}
 
-
+def send_telegram_message( message ):
+    '''텔러그램 판매 발송
+    '''
+    token = '6173895901:AAH54vZaLnXXZq9hngplJNeEJIDEzH2azbc' 
+    '''
+    -1001813504824 : 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
+    '''
+    base_dttm = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+    try: 
+        url = 'https://api.telegram.org/bot{}/sendMessage'.format(token)
+        data = {'chat_id': '-1001813504824', 'text': base_dttm+'\n'+message}
+        response = requests.post(url, data=data)
+        time.sleep(0.5)
+        print( 'send_telegram_message : ' , response.json() )               
+    except Exception as e:
+        print( 'telegram_send', e )
+    finally:
+        pass
 
 def complete_fold(path):
     '''해당 path 의 이름 변경'''
     #base_dttm = datetime.today().strftime('%Y%m%d%H%M') 
-    base_dttm = datetime.today().strftime('%Y%m%d%H%M%S') 
-    
-    os.rename( path , path+'_'+base_dttm+'(완료)')
+    base_dttm = datetime.today().strftime('%Y%m%d%H%M%S')
+    __path = path+'_'+base_dttm+'(완료)'
+    os.rename( path , __path)
+    return __path
 
 def getXyinfo( obj ):
     ''' Box(left=802, top=139, width=80, height=82) 값 받아서 x , y 좌표 리턴 '''
@@ -43,6 +62,16 @@ def getImg( str ):
         return './nicon/6.png'    
     elif str == '백':
         return './nicon/7.png'    
+    
+def base_fold_create():
+    base_root = 'c:\\ncnc'
+    dd = dbcon.DbConn()
+    list = dd.get_nicon_fold_list()
+    for i in list:
+        try :
+            os.mkdir(base_root+'\\'+i['fold_nm'])
+        except Exception as e:
+            print( 'base_fold_create' , e ) 
 
 def getfolelist(str):
     base = 'c:\\ncnc'
@@ -207,13 +236,22 @@ def fn_main():
                 pyautogui.click(  ok_xy['x'], ok_xy['y'])
                 time.sleep(base_sleep-1)
                 pyautogui.press('enter')
-                time.sleep(base_sleep-2)
-                complete_fold(path_copy)
+                time.sleep(base_sleep-2)                
+                telegram_str = ''
+                telegram_str += list['fold_nm']+' : '+list['amount']+'\n'
+                telegram_str += '원본 : '+path_copy+'\n'                
+                telegram_str += '완료 : '+complete_fold(path_copy)+'\n'                
+                send_telegram_message(telegram_str)
+
+# 기본폴더 생성
+base_fold_create()
 
 while(True):
 	print('-'*10,'폴더 정리','-'*10)
+    # 기본폴더 내 이미지 정리
 	init_fold('c:\\ncnc')
 	time.sleep(1)
 	print('-'*10,'판매시작','-'*10)
+    # 판매시작.
 	fn_main()
 	time.sleep(5)

@@ -11,7 +11,8 @@ from datetime import datetime
 import time
 
 import dbcon
-
+import logging
+import requests
 
 # 현재 사용하는 모니터의 해상도 출력
 print(pyautogui.size())
@@ -79,129 +80,34 @@ def complete_fold(path):
 #test_img = pyautogui.locateOnScreen('./nicon/1.png') 
 #print( getXyinfo(test_img)['x'] )
 
+#_xy = pyautogui.locateOnScreen('./nicon/reject.png')             
+#print(_xy != None)
+def base_fold_create():
+    base_root = 'c:\\ncnc'
+    dd = dbcon.DbConn()
+    list = dd.get_nicon_fold_list()
+    for i in list:
+        try :
+            os.mkdir(base_root+'\\'+i['fold_nm'])
+        except Exception as e:
+            print( 'base_fold_create' , e ) 
 
 
-def fn_main():
-    dd = dbcon.DbConn()    
-    base_sleep = 3
-    area_xy = {}
-    sale_xy = {}
-    search_xy = {}
-    nobrand_xy = {}
-    noitem_xy  = {}
-    additem_xy = {}
-    exploer_xy = {}
-    ok_xy = {}
-    __lists = dd.get_nicon_upload_list()
+def send_telegram_message( message ):
+    token = '6173895901:AAH54vZaLnXXZq9hngplJNeEJIDEzH2azbc' 
+    '''
+    -1001813504824 : 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
+    '''
+    base_dttm = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+    try: 
+        url = 'https://api.telegram.org/bot{}/sendMessage'.format(token)
+        data = {'chat_id': '-1001813504824', 'text': base_dttm+'\n'+message}
+        response = requests.post(url, data=data)
+        time.sleep(0.5)
+        print( 'send_telegram_message : ' , response.json() )               
+    except Exception as e:
+        print( 'telegram_send', e )
+    finally:
+        pass
 
-
-
-    for list in __lists:
-        print('시작.')
-        print(list)
-        prod_fold_list = getfolelist( list['fold_nm'] )
-        
-        for __i in prod_fold_list:
-            pyautogui.click(100, 150)
-            pyautogui.press('f5')
-            time.sleep(base_sleep-1)
-
-            if len(area_xy) == 0:
-                print('area_xy 설정')
-                area_xy = pyautogui.locateOnScreen('./nicon/area.png')             
-
-
-            if len(sale_xy) == 0:
-                print('sale_xy 설정')
-                sale_img = pyautogui.locateOnScreen('./nicon/sale.png') 
-                sale_xy  = getXyinfo(sale_img)
-            print(area_xy , sale_xy)
-
-            pyautogui.click(  sale_xy['x'], sale_xy['y'])
-            time.sleep(base_sleep-1)
-
-            div_img = pyautogui.locateOnScreen( getImg(list['div_nm'] )  )
-            div_xy  = getXyinfo(div_img)
-            pyautogui.click(  div_xy['x'], div_xy['y'])
-            time.sleep(base_sleep-1)
-
-            if len(search_xy) == 0:
-                print('search_xy 설정')
-                search_img = pyautogui.locateOnScreen('./nicon/search.png')
-                search_xy  = getXyinfo(search_img)
-                print('search_xy : ',search_xy)  
-            
-            pyautogui.click(  search_xy['x'], search_xy['y'])
-            time.sleep(base_sleep-1)
-            pyperclip.copy(list['category_nm'])
-            pyautogui.hotkey('ctrl', 'v')
-            pyautogui.press('enter')
-            time.sleep(base_sleep-2)
-
-            if len(nobrand_xy) == 0:
-                print('nobrand_xy 설정')
-                nobrand_img = pyautogui.locateOnScreen('./nicon/nobrand.png')
-                nobrand_xy  = getXyinfo(nobrand_img)
-                print('nobrand_xy : ',nobrand_xy)  
-            
-            pyautogui.click(  nobrand_xy['x']+140, nobrand_xy['y'])
-            time.sleep(base_sleep-1)
-
-            pyautogui.click(  search_xy['x'], search_xy['y'])
-            pyperclip.copy(list['prod_nm'])
-            pyautogui.hotkey('ctrl', 'v')
-            pyautogui.press('enter')
-            time.sleep(base_sleep-2)
-
-            if len(noitem_xy) == 0:
-                print('noitem_xy 설정')
-                noitem_img = pyautogui.locateOnScreen('./nicon/noitem.png')
-                noitem_xy  = getXyinfo(noitem_img)
-                print('noitem_xy : ',noitem_xy)  
-            pyautogui.click(  noitem_xy['x'], noitem_xy['y']+120)
-            time.sleep(base_sleep-1)
-
-            if len(additem_xy) == 0:
-                print('additem_xy 설정')
-                additem_img = pyautogui.locateOnScreen('./nicon/additem.png')             
-                additem_xy  = getXyinfo(additem_img)
-                print('additem_xy : ',additem_xy)  
-            pyautogui.click(  additem_xy['x'], additem_xy['y'])
-            time.sleep(base_sleep-1)
-            
-            if len(exploer_xy) == 0:
-                print('exploer_xy 설정')
-                exploer_img = pyautogui.locateOnScreen('./nicon/exploer.png')             
-                exploer_xy  = getXyinfo(exploer_img)
-                print('exploer_xy : ',exploer_xy)  
-            pyautogui.click(  exploer_xy['x']+60, exploer_xy['y'])
-            time.sleep(base_sleep-1)       
-            path_copy = __i
-            pyperclip.copy( path_copy )
-            pyautogui.hotkey('ctrl', 'a')
-            pyautogui.hotkey('ctrl', 'v')
-            pyautogui.press('enter')
-            time.sleep(base_sleep-1)
-
-            pyautogui.click(  exploer_xy['x']+60, exploer_xy['y']-40)
-            time.sleep(base_sleep-2)
-            pyautogui.hotkey('ctrl', 'a')
-            time.sleep(base_sleep-2)
-            pyautogui.hotkey('alt', 'o')
-            time.sleep(base_sleep-2)
-            if len(ok_xy) == 0:
-                print('ok_xy 설정')
-                ok_img = pyautogui.locateOnScreen('./nicon/ok.png')             
-                ok_xy  = getXyinfo(ok_img)
-                print('ok_xy : ',ok_xy) 
-            pyautogui.click(  ok_xy['x'], ok_xy['y'])
-            time.sleep(base_sleep-1)
-            pyautogui.press('enter')
-            time.sleep(base_sleep-2)
-            complete_fold(path_copy)
-
-        
-
-_xy = pyautogui.locateOnScreen('./nicon/reject.png')             
-print(_xy != None)
-
+send_telegram_message('문자테스트 입니다.')

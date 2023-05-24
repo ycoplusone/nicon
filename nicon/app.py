@@ -166,7 +166,7 @@ if __name__ == "__main__":
     while True:
         #schedule.run_pending()
         getNicon()
-        time.sleep(60)    
+        time.sleep(40)    
 #schedule.every(1).minutes.do(getNicon)
 
 
