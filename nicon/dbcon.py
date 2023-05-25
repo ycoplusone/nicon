@@ -223,12 +223,13 @@ class DbConn(object):
                 " SUBSTR(c.div_nm,1,1) div_nm "
                 " , a.category_id "
                 " , c.category_nm  "
-                " , b.prod_nm  "
-                " , concat(c.category_nm , '_' , b.prod_nm ) fold_nm "
+                " , a.prod_nm  "
+                " , concat(c.category_nm , '_' , a.prod_nm2 ) fold_nm "
                 " , b.amount "
                 " from ( "
                 " 	SELECT " 
                 " 	category_id  , prod_nm   "
+                "   , replace(replace(replace(replace( replace( replace( replace( replace(prod_nm,'/','') ,':','') ,'*','') , '?','') ,'',''),'<',''),'>',''),'|','') prod_nm2 "
                 " 	from nicon_job_list njl  "
                 " 	where use_yn = 'Y' "
                 " 	and send_type like '%V%' "
@@ -276,10 +277,11 @@ class DbConn(object):
                 " , a.category_id "
                 " , c.category_nm  "
                 " , a.prod_nm  "
-                " , concat(c.category_nm , '_' , a.prod_nm ) fold_nm "
+                " , concat(c.category_nm , '_' , a.prod_nm2 ) fold_nm "
                 " from ( "
                 " 	SELECT  "
                 " 	category_id  , prod_nm   "
+                "   , replace(replace(replace(replace( replace( replace( replace( replace(prod_nm,'/','') ,':','') ,'*','') , '?','') ,'',''),'<',''),'>',''),'|','') prod_nm2 "
                 " 	from nicon_job_list njl  "
                 " 	where use_yn = 'Y' "
                 " 	and send_type like '%V%' "
@@ -308,4 +310,20 @@ class DbConn(object):
         except Exception as e:
             print( 'get_nicon error' , e )    
 
-             
+
+    def insert_nicon_barcode(self , param ):
+        '''get_nicon'''
+        try :
+            cur = self.__conn.cursor()
+                        
+            query = (
+            " INSERT INTO nicon_barcode_info(base_fold, prod_fold, file_nm, barcode, reg_date)  "
+            " VALUES('{base_fold}', '{prod_fold}', '{file_nm}', '{barcode}', now()) "
+            )
+            query = query.format( **param )                      
+            cur.execute( query )
+            self.__conn.commit()
+        except Exception as e:
+            print( 'insert_nicon_barcode', e )
+        finally:
+            pass             

@@ -14,6 +14,12 @@ import dbcon
 import logging
 import requests
 
+# 바코드
+import pyzbar.pyzbar as pyzbar  # pip install pyzbar
+import numpy as np              # pip install numpy
+import cv2                      # pip install opencv-python
+
+
 # 현재 사용하는 모니터의 해상도 출력
 print(pyautogui.size())
 
@@ -93,21 +99,21 @@ def base_fold_create():
             print( 'base_fold_create' , e ) 
 
 
-def send_telegram_message( message ):
-    token = '6173895901:AAH54vZaLnXXZq9hngplJNeEJIDEzH2azbc' 
-    '''
-    -1001813504824 : 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
-    '''
-    base_dttm = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-    try: 
-        url = 'https://api.telegram.org/bot{}/sendMessage'.format(token)
-        data = {'chat_id': '-1001813504824', 'text': base_dttm+'\n'+message}
-        response = requests.post(url, data=data)
-        time.sleep(0.5)
-        print( 'send_telegram_message : ' , response.json() )               
-    except Exception as e:
-        print( 'telegram_send', e )
-    finally:
-        pass
 
-send_telegram_message('문자테스트 입니다.')
+
+#send_telegram_message('문자테스트 입니다.')
+'''
+data = {  'authority' : 'api2.ncnc.app'
+        , 'accept' : 'application/json, text/plain, */*'
+        , 'accept-language' : 'ko,en;q=0.9'
+        , 'authorization' : 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjI1MzMwLCJ0eXBlcyI6Imtha2FvLHBob25lIiwiYmFua0lkIjo0LCJpYXQiOjE2ODE4NjQyNTEsImV4cCI6MTc0NDkzNjI1MX0.7FR1Taz1ukOZntopSAD3A3wp8YRDiokXkQWt1wyJ4E4'
+        , 'origin': 'https://ncnc.app'
+        , 'referer': 'https://ncnc.app/'
+    }
+url = 'https://api2.ncnc.app/cons/confirmed?page=1'
+r = requests.get(url , headers=data )
+print( (r.content).decode('utf-8') )
+'''
+
+
+

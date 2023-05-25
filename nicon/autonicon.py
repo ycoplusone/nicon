@@ -5,6 +5,10 @@ import shutil
 from datetime import datetime
 import time
 
+import pyzbar.pyzbar as pyzbar  # pip install pyzbar
+import cv2                      # pip install opencv-python
+import numpy as np
+
 import dbcon
 import requests
 
@@ -81,8 +85,36 @@ def getfolelist(str):
     list = [ path_str+'\\'+X for X in temp_list if X[-4:-1] != '(완료']
     return list    
 
+def getCheck():
+    '''판매가능한 바코드들이 있는지 확인한다'''
+    _return_val = 0
+    __base = 'c:\\ncnc'    
+    __lists = os.listdir( __base )
+    for i in __lists:        
+        _dirs = os.listdir( __base+'\\'+i )        
+        _temp_list = [ X for X in _dirs if os.path.isdir( __base +'\\'+ i +'\\'+ X )]
+        _target_list = [ X for X in _temp_list if X[-4:-1] != '(완료']
+        print(  '처리폴더개수(', len(_target_list) , ') : ' , i )
+        _return_val += len(_target_list)        
+    return _return_val 
+
+def decode(im):
+    '''Find barcodes and QR codes
+    바코드 탐지하는 엔진 (바코드 및 QR코드 탐지)
+    ''' 
+    _str = None
+    try:
+        decodedObjects = pyzbar.decode(im)        
+        for obj in decodedObjects:
+            _str = obj.data.decode('utf-8')        
+    except Exception as e:
+        print(e)
+        return None
+    return _str
+
 def init_fold(str):
     '''폴더 정리.'''
+    dd = dbcon.DbConn()
     rootlist = os.listdir(str)
     rootdirs = [X for X in rootlist if os.path.isdir(str+'\\'+X)]
     for i in rootdirs:        
@@ -93,42 +125,67 @@ def init_fold(str):
         path_files =  [ os.path.join(dirname, x)  for x in listdir ]        
         file_names =  [ X for X in path_files if os.path.isfile(X)]
         file_nm    =  [ x for x in listdir ]
-                
+               
         cnt = 1 # 폴더 카운트        
         while( len(file_names) > 0):
-            default_fold_nm = base_dttm+(repr(cnt).zfill(3))
+            default_fold_nm = base_dttm+(repr(cnt).zfill(2))
+            prod_fold       = base_dttm+(repr(cnt).zfill(2))
             v_range = 0
             # 30개씩 볼더 복사 
             if len(file_names) >= 30:
                 default_fold_nm = dirname+'\\'+default_fold_nm+'_30' 
+                prod_fold       = prod_fold+'_30' 
                 v_range = 30       
             else :
                 default_fold_nm = dirname+'\\'+default_fold_nm+'_'+repr( len(file_names) ).zfill(2)
+                prod_fold       = prod_fold+'_'+repr( len(file_names) ).zfill(2)
                 v_range = len(file_names)
                 
             os.mkdir(default_fold_nm)
             
-            for i in range(v_range):                
-                shutil.move(file_names[0] , default_fold_nm+'\\'+file_nm[0] )
+            for j in range(v_range):                
+                __full_path = file_names[0]
+                __file_nm = os.path.basename(__full_path) 
+                __n = np.fromfile(__full_path, np.uint8)
+                __img = cv2.imdecode(__n, cv2.IMREAD_COLOR)
+                __barcode = decode(__img)               
+                param = {'base_fold':i , 'prod_fold':prod_fold ,'file_nm':__file_nm,'barcode': __barcode }
+                dd.insert_nicon_barcode(param)
+                shutil.move(file_names[0] , default_fold_nm )
                 del file_names[0]
                 del file_nm[0]        
             cnt = cnt+ 1
+            
 
+def fn_find_xy( _str , _region=None):
+    __xy = None
+    if _region == None :
+        __xy = pyautogui.locateOnScreen( _str )
+    else :
+        __xy = pyautogui.locateOnScreen( _str , region = _region )
+    return __xy
+
+def fn_click( _xy ):
+    pyautogui.click(  _xy['x'], _xy['y'])
+    time.sleep( 2 )
 
 def fn_main():
-    dd = dbcon.DbConn()    
+    dd = dbcon.DbConn()        
     base_sleep = 3
-    area_xy = {}
-    sale_xy = {}
-    search_xy = {}
-    nobrand_xy = {}
-    noitem_xy  = {}
-    additem_xy = {}
-    exploer_xy = {}
-    ok_xy = {}
-    __lists = dd.get_nicon_upload_list()
+    base_xy     = () # 500 , 900
+    area_xy     = {}
+    sale_xy     = {}
+    search_xy   = {}
+    nobrand_xy  = {}
+    noitem_xy   = {}
+    additem_xy  = {}
+    exploer_xy  = {}
+    ok_xy       = {}
+    __lists     = dd.get_nicon_upload_list()
 
-
+    if len(base_xy) == 0:
+        __xy = fn_find_xy('./nicon/basexy.png' )
+        base_xy = ( __xy.left-50 , __xy.top , 500 , 900 )
 
     for list in __lists:
         print('시작.')
@@ -140,33 +197,25 @@ def fn_main():
             pyautogui.press('f5')
             time.sleep(base_sleep-1)
 
-            if len(area_xy) == 0:
-                print('area_xy 설정')
-                area_xy = pyautogui.locateOnScreen('./nicon/area.png')             
-
-
             if len(sale_xy) == 0:
                 print('sale_xy 설정')
-                sale_img = pyautogui.locateOnScreen('./nicon/sale.png') 
+                sale_img = fn_find_xy('./nicon/sale.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/sale.png') 
                 sale_xy  = getXyinfo(sale_img)
-            print(area_xy , sale_xy)
+                print('sale_xy : ',sale_xy)
+            
+            fn_click( sale_xy )
 
-            pyautogui.click(  sale_xy['x'], sale_xy['y'])
-            time.sleep(base_sleep-1)
-
-            div_img = pyautogui.locateOnScreen( getImg(list['div_nm'] )  )
+            div_img = fn_find_xy( getImg(list['div_nm'] ) , base_xy ) #pyautogui.locateOnScreen( getImg(list['div_nm'] )  )
             div_xy  = getXyinfo(div_img)
-            pyautogui.click(  div_xy['x'], div_xy['y'])
-            time.sleep(base_sleep-1)
+            fn_click( div_xy )
 
             if len(search_xy) == 0:
                 print('search_xy 설정')
-                search_img = pyautogui.locateOnScreen('./nicon/search.png')
+                search_img = fn_find_xy('./nicon/search.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/search.png')
                 search_xy  = getXyinfo(search_img)
                 print('search_xy : ',search_xy)  
-            
-            pyautogui.click(  search_xy['x'], search_xy['y'])
-            time.sleep(base_sleep-1)
+            fn_click( search_xy )
+
             pyperclip.copy(list['category_nm'])
             pyautogui.hotkey('ctrl', 'v')
             pyautogui.press('enter')
@@ -174,46 +223,40 @@ def fn_main():
 
             if len(nobrand_xy) == 0:
                 print('nobrand_xy 설정')
-                nobrand_img = pyautogui.locateOnScreen('./nicon/nobrand.png')
-                print('nobrand_img : ',nobrand_img)  
+                nobrand_img = fn_find_xy('./nicon/nobrand.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/nobrand.png')
                 nobrand_xy  = getXyinfo(nobrand_img)
                 print('nobrand_xy : ',nobrand_xy)  
-
             pyautogui.click(  nobrand_xy['x']+140, nobrand_xy['y'])
             time.sleep(base_sleep-1)
 
-            pyautogui.click(  search_xy['x'], search_xy['y'])
+            fn_click( search_xy )                       
             pyperclip.copy(list['prod_nm'])
             pyautogui.hotkey('ctrl', 'v')
             pyautogui.press('enter')
             time.sleep(base_sleep-2)
 
-            _xy = pyautogui.locateOnScreen('./nicon/reject.png')             
+            _xy = fn_find_xy('./nicon/reject.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/reject.png')             
             if _xy != None:
                 break
             else:
                 if len(noitem_xy) == 0:
-                    print('noitem_xy 설정')
-                    noitem_img = pyautogui.locateOnScreen('./nicon/noitem.png')
+                    noitem_img = fn_find_xy('./nicon/noitem.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/noitem.png')
                     noitem_xy  = getXyinfo(noitem_img)
                     print('noitem_xy : ',noitem_xy)  
                 pyautogui.click(  noitem_xy['x'], noitem_xy['y']+120)
                 time.sleep(base_sleep-1)
 
                 if len(additem_xy) == 0:
-                    print('additem_xy 설정')
-                    additem_img = pyautogui.locateOnScreen('./nicon/additem.png')             
+                    additem_img = fn_find_xy('./nicon/additem.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/additem.png')             
                     additem_xy  = getXyinfo(additem_img)
                     print('additem_xy : ',additem_xy)  
-                pyautogui.click(  additem_xy['x'], additem_xy['y'])
-                time.sleep(base_sleep-1)
+                fn_click(additem_xy)
                 
                 if len(exploer_xy) == 0:
-                    print('exploer_xy 설정')
-                    exploer_img = pyautogui.locateOnScreen('./nicon/exploer.png')             
+                    exploer_img = fn_find_xy('./nicon/exploer.png') #pyautogui.locateOnScreen('./nicon/exploer.png')             
                     exploer_xy  = getXyinfo(exploer_img)
                     print('exploer_xy : ',exploer_xy)  
-                pyautogui.click(  exploer_xy['x']+60, exploer_xy['y'])
+                pyautogui.click(  exploer_xy['x']+60 , exploer_xy['y'] )
                 time.sleep(base_sleep-1)       
                 path_copy = __i
                 pyperclip.copy( path_copy )
@@ -222,36 +265,40 @@ def fn_main():
                 pyautogui.press('enter')
                 time.sleep(base_sleep-1)
 
-                pyautogui.click(  exploer_xy['x']+60, exploer_xy['y']-40)
+                pyautogui.click(  exploer_xy['x']+60 , exploer_xy['y']-40)
                 time.sleep(base_sleep-2)
+
                 pyautogui.hotkey('ctrl', 'a')
                 time.sleep(base_sleep-2)
                 pyautogui.hotkey('alt', 'o')
                 time.sleep(base_sleep-2)
                 if len(ok_xy) == 0:
-                    print('ok_xy 설정')
-                    ok_img = pyautogui.locateOnScreen('./nicon/ok.png')             
+                    ok_img = fn_find_xy('./nicon/ok.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/ok.png')             
                     ok_xy  = getXyinfo(ok_img)
                     print('ok_xy : ',ok_xy) 
-                pyautogui.click(  ok_xy['x'], ok_xy['y'])
-                time.sleep(base_sleep-1)
+                fn_click( ok_xy )
                 pyautogui.press('enter')
                 time.sleep(base_sleep-2)                
                 telegram_str = ''
-                telegram_str += list['fold_nm']+' : '+list['amount']+'\n'
-                telegram_str += '원본 : '+path_copy+'\n'                
-                telegram_str += '완료 : '+complete_fold(path_copy)+'\n'                
+                telegram_str += list['fold_nm']+' : '+str(list['amount'])+'\n'
+                telegram_str += '원본 : '+path_copy+'\n\n'                
+                telegram_str += '완료 : '+complete_fold(path_copy)
                 send_telegram_message(telegram_str)
+                pyautogui.press('enter')
+                time.sleep(base_sleep-2)
 
 # 기본폴더 생성
 base_fold_create()
+time.sleep(5)
 
 while(True):
-	print('-'*10,'폴더 정리','-'*10)
-    # 기본폴더 내 이미지 정리
-	init_fold('c:\\ncnc')
-	time.sleep(1)
-	print('-'*10,'판매시작','-'*10)
-    # 판매시작.
-	fn_main()
-	time.sleep(5)
+    check = getCheck()
+    if check >= 1:
+        print('-'*10,'판매시작','-'*10)
+        fn_main()
+        time.sleep(5)
+    else:
+        # 기본폴더 내 이미지 정리
+        print('-'*10,'이미지 정리','-'*10)
+        init_fold('c:\\ncnc')
+        time.sleep(10)
