@@ -94,7 +94,7 @@ def getCheck():
         _dirs = os.listdir( __base+'\\'+i )        
         _temp_list = [ X for X in _dirs if os.path.isdir( __base +'\\'+ i +'\\'+ X )]
         _target_list = [ X for X in _temp_list if X[-4:-1] != '(완료']
-        print(  '처리폴더개수(', len(_target_list) , ') : ' , i )
+        #print(  '처리폴더개수(', len(_target_list) , ') : ' , i )
         _return_val += len(_target_list)        
     return _return_val 
 
@@ -292,6 +292,7 @@ base_fold_create()
 time.sleep(5)
 
 while(True):
+    print('시작 ',datetime.today().strftime('%Y-%m-%d %H:%M'),'-----------------')
     check = getCheck()
     if check >= 1:
         print('-'*10,'판매시작','-'*10)
