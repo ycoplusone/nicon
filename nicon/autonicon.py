@@ -299,15 +299,15 @@ base_fold_create()
 time.sleep(5)
 
 while(True):
-    print('시작',datetime.today().strftime('%Y-%m-%d %H:%M'),'-'*10)
+    print('시작',datetime.today().strftime('%Y-%m-%d %H:%M:%S'),'-'*10)
     check = getCheck()
     try:
         if check >= 1:
-            print('판매시작','-'*10)
+            print('\t판매시작','-'*10)
             fn_main()            
         else:
             # 기본폴더 내 이미지 정리
-            print('이미지 정리','-'*10)
+            print('\t이미지 정리','-'*10)
             init_fold('c:\\ncnc')
         time.sleep(15)
     except Exception as e:
