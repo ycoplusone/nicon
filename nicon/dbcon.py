@@ -327,3 +327,27 @@ class DbConn(object):
             print( 'insert_nicon_barcode', e )
         finally:
             pass             
+
+
+    def upsert_nicon_sale_info(self , param ):
+        '''get_nicon'''
+        try :
+            cur = self.__conn.cursor()                        
+            query = (
+            " INSERT INTO nicon_sale_info (seq , prod_id   , prod_nm   , div_id   , category_id   , category_nm   ,askingPrice  , confirmExpireAt  ,expireAt  , createdAt  , rejectedReason    , lastCodeNumber    , currentStatus    , reg_date)  "
+            "                      VALUES({seq},'{prod_id}','{prod_nm}','{div_id}','{category_id}','{category_nm}','{askingPrice}', '{confirmExpireAt}','{expireAt}', '{createdAt}', '{rejectedReason}', '{lastCodeNumber}', '{currentStatus}', now() ) "
+            " on DUPLICATE key update askingPrice = '{askingPrice}' , reg_date = now()  "
+            " , confirmExpireAt  =  '{confirmExpireAt}'  "
+            " , expireAt		 = '{expireAt}'  "
+            " , createdAt	 	 = '{createdAt}'  "
+            " , lastCodeNumber = '{lastCodeNumber}'  "
+            " , currentStatus	 = '{currentStatus}' "
+            )
+            query = query.format( **param )     
+            #print(query)                 
+            cur.execute( query )
+            self.__conn.commit()
+        except Exception as e:
+            print( 'upsert_nicon_sale_info', e ,'\n',query ,'\n',param)
+        finally:
+            pass                     
