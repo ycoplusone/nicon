@@ -154,7 +154,11 @@ def fn_history():
 
 if __name__ == "__main__":    
     ''''''
-    fn_history()
+    #fn_history()
+    base_xy = ()
+    print(len(base_xy))
+    base_xy = (1,2,3,4)
+    print(len(base_xy))
 
     
     

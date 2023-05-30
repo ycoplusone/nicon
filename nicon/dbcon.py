@@ -222,7 +222,7 @@ class DbConn(object):
                 " select  "
                 " SUBSTR(c.div_nm,1,1) div_nm "
                 " , a.category_id "
-                " , c.category_nm  "
+                " , CONCAT(c.category_nm,'')  category_nm  "
                 " , a.prod_nm  "
                 " , concat(c.category_nm , '_' , a.prod_nm2 ) fold_nm "
                 " , b.amount "
@@ -248,20 +248,16 @@ class DbConn(object):
             cur = self.__conn.cursor(  pymysql.cursors.DictCursor)            
             cur.execute( query )            
             __dblists =  cur.fetchall()          
-            for i in __dblists:
-                
+            for i in __dblists:                
                 m_list = {}
-                m_list['div_nm'] = i['div_nm'].decode('utf-8')
-                m_list['category_id'] = i['category_id'].decode('utf-8')
-                m_list['category_nm'] = i['category_nm'].decode('utf-8')
-                m_list['prod_nm'] = i['prod_nm'].decode('utf-8')
-                m_list['fold_nm'] = i['fold_nm'].decode('utf-8')
-                m_list['amount'] = i['amount']
-
+                m_list['div_nm']        = i['div_nm'].decode('utf-8')
+                m_list['category_id']   = i['category_id'].decode('utf-8')
+                m_list['category_nm']   = i['category_nm'].decode('utf-8')
+                m_list['prod_nm']       = i['prod_nm'].decode('utf-8')
+                m_list['fold_nm']       = i['fold_nm'].decode('utf-8')
+                m_list['amount']        = i['amount']
                 _lists.append(m_list)
             return _lists 
-        
-        
           
         except Exception as e:
             print( 'get_nicon error' , e )    
@@ -348,6 +344,6 @@ class DbConn(object):
             cur.execute( query )
             self.__conn.commit()
         except Exception as e:
-            print( 'upsert_nicon_sale_info', e ,'\n',query ,'\n',param)
+            print( 'upsert_nicon_sale_info', e ,'\n',query ,'\n',param )
         finally:
             pass                     

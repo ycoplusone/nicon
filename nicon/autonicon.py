@@ -187,11 +187,12 @@ def fn_main():
         ok_xy       = {}
         __lists     = dd.get_nicon_upload_list()
 
-        if len(base_xy) == 0:
-            __xy = fn_find_xy('./nicon/basexy.png' )
-            base_xy = ( __xy.left-50 , __xy.top , 500 , 900 )
 
         for list in __lists:
+            if len(base_xy) == 0:
+                __xy = fn_find_xy('./nicon/basexy.png' )
+                base_xy = ( __xy.left-50 , __xy.top , 550 , 1050 )            
+                
             print('시작.')
             print(list)
             prod_fold_list = getfolelist( list['fold_nm'] )
@@ -277,7 +278,7 @@ def fn_main():
                     pyautogui.hotkey('alt', 'o')
                     time.sleep(base_sleep-2)
                     if len(ok_xy) == 0:
-                        ok_img = fn_find_xy('./nicon/ok.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/ok.png')             
+                        ok_img = fn_find_xy('./nicon/ok.png'  ) #pyautogui.locateOnScreen('./nicon/ok.png')             
                         ok_xy  = getXyinfo(ok_img)
                         print('ok_xy : ',ok_xy) 
                     fn_click( ok_xy )

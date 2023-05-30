@@ -34,7 +34,7 @@ def send_telegram_message( message ,send_type ):
     
     -1001813504824 : 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
     '''
-    base_dttm = datetime.today().strftime('%Y-%m-%d %H:%M')
+    base_dttm = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         
     try: 
         if 'V' in send_type: #우정이 전용방
