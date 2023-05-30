@@ -7,6 +7,8 @@ import time
 
 import pyzbar.pyzbar as pyzbar  # pip install pyzbar
 import cv2                      # pip install opencv-python
+from PIL import ImageGrab , Image # pip install pillow
+
 import numpy as np
 
 import dbcon
@@ -253,6 +255,9 @@ def fn_main():
                 time.sleep(base_sleep-2.7)
                 fn_click( ok_xy , base_sleep-1.0)
 
+                #완료 이미지 생성
+                mk_image()
+                
                 test = None #fn_find_xy('./nicon/except.png' )
                 if test != None:
                     '''예외 발생'''
@@ -353,6 +358,17 @@ def getting_xy():
     #print(test,test_xy)
 
     print('time : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )
+
+def mk_image():
+    '''캡쳐 만들기'''
+    try:
+        base_dttm = datetime.today().strftime('%Y%m%d_%H%M%S')
+        img = ImageGrab.grab()
+        imgCrop = img.crop()
+        file_name = 'c:\\ncnc\\{}{}'.format(base_dttm,'.png')
+        imgCrop.save(file_name)
+    except Exception as e:
+        print('mk_image : ',e)
 
 
 if __name__ == "__main__":   
