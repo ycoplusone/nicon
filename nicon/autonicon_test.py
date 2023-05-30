@@ -148,17 +148,250 @@ def fn_history():
                 param['category_nm']  = _conCategory2['name']            
                 dd.upsert_nicon_sale_info(param)
 
+def send_telegram_message( message ):
+    '''텔러그램 판매 발송    '''
+    token = '6173895901:AAH54vZaLnXXZq9hngplJNeEJIDEzH2azbc'     
+    #-1001813504824 : 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.    
+    base_dttm = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+    try: 
+        url = 'https://api.telegram.org/bot{}/sendMessage'.format(token)
+        data = {'chat_id': '-1001813504824', 'text': base_dttm+'\n'+message}
+        response = requests.post(url, data=data)
+        time.sleep(0.5)
+        print( 'send_telegram_message : ' , response.json() )               
+    except Exception as e:
+        print( 'telegram_send', e )
+    finally:
+        pass
+
+def fn_find_xy( _str , _region=None):
+    __xy = None
+    if _region == None :
+        __xy = pyautogui.locateOnScreen( _str )
+    else :
+        __xy = pyautogui.locateOnScreen( _str , region = _region )
+    return __xy
+
+def fn_click( _xy , _sleep=2.0 ):
+    pyautogui.click(  _xy['x'], _xy['y'])
+    time.sleep( _sleep )
+
+
             
+def fn_main():
+    try:
+        global base_xy , area_xy , sale_xy , search_xy , nobrand_xy , noitem_xy , additem_xy , exploer_xy , ok_xy
+        dd = dbcon.DbConn()        
+        base_sleep = 3        
+        __lists     = dd.get_nicon_upload_list()
+
+        for list in __lists:
+            if len(base_xy) == 0:
+                __xy = fn_find_xy('./nicon/basexy.png' )
+                base_xy = ( __xy.left-50 , __xy.top , 550 , 1050 )            
+                
+            print('시작.')
+            print(list)
+            prod_fold_list = getfolelist( list['fold_nm'] )
             
+            for __i in prod_fold_list:
+                pyautogui.click(100, 150)
+                pyautogui.press('f5')
+                time.sleep(base_sleep-1)
+
+                if len(sale_xy) == 0:
+                    print('sale_xy 설정')
+                    sale_img = fn_find_xy('./nicon/sale.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/sale.png') 
+                    sale_xy  = getXyinfo(sale_img)
+                    print('sale_xy : ',sale_xy)
+                
+                fn_click( sale_xy )
+
+                div_img = fn_find_xy( getImg(list['div_nm'] ) , base_xy ) #pyautogui.locateOnScreen( getImg(list['div_nm'] )  )
+                div_xy  = getXyinfo(div_img)
+                fn_click( div_xy )
+
+                if len(search_xy) == 0:
+                    print('search_xy 설정')
+                    search_img = fn_find_xy('./nicon/search.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/search.png')
+                    search_xy  = getXyinfo(search_img)
+                    print('search_xy : ',search_xy)  
+                fn_click( search_xy )
+
+                pyperclip.copy(list['category_nm'])
+                pyautogui.hotkey('ctrl', 'v')
+                pyautogui.press('enter')
+                time.sleep(base_sleep-1)
+
+                if len(nobrand_xy) == 0:
+                    print('nobrand_xy 설정')
+                    nobrand_img = fn_find_xy('./nicon/nobrand.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/nobrand.png')
+                    nobrand_xy  = getXyinfo(nobrand_img)
+                    print('nobrand_xy : ',nobrand_xy)  
+                pyautogui.click(  nobrand_xy['x']+140, nobrand_xy['y'])
+                time.sleep(base_sleep-1)
+
+                fn_click( search_xy )                       
+                pyperclip.copy(list['prod_nm'])
+                pyautogui.hotkey('ctrl', 'v')
+                pyautogui.press('enter')
+                time.sleep(base_sleep-2)
+
+                _xy = fn_find_xy('./nicon/reject.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/reject.png')             
+                if _xy != None:
+                    break
+                else:
+                    if len(noitem_xy) == 0:
+                        noitem_img = fn_find_xy('./nicon/noitem.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/noitem.png')
+                        noitem_xy  = getXyinfo(noitem_img)
+                        print('noitem_xy : ',noitem_xy)  
+                    pyautogui.click(  noitem_xy['x'], noitem_xy['y']+120)
+                    time.sleep(base_sleep-1)
+
+                    if len(additem_xy) == 0:
+                        additem_img = fn_find_xy('./nicon/additem.png' , base_xy ) #pyautogui.locateOnScreen('./nicon/additem.png')             
+                        additem_xy  = getXyinfo(additem_img)
+                        print('additem_xy : ',additem_xy)  
+                    fn_click(additem_xy)
+                    
+                    if len(exploer_xy) == 0:
+                        exploer_img = fn_find_xy('./nicon/exploer.png') #pyautogui.locateOnScreen('./nicon/exploer.png')             
+                        exploer_xy  = getXyinfo(exploer_img)
+                        print('exploer_xy : ',exploer_xy)  
+                    pyautogui.click(  exploer_xy['x']+60 , exploer_xy['y'] )
+                    time.sleep(base_sleep-1)       
+                    path_copy = __i
+                    pyperclip.copy( path_copy )
+                    pyautogui.hotkey('ctrl', 'a')
+                    pyautogui.hotkey('ctrl', 'v')
+                    pyautogui.press('enter')
+                    time.sleep(base_sleep-1)
+
+                    pyautogui.click(  exploer_xy['x']+60 , exploer_xy['y']-40)
+                    time.sleep(base_sleep-2)
+
+                    pyautogui.hotkey('ctrl', 'a')
+                    time.sleep(base_sleep-2)
+                    pyautogui.hotkey('alt', 'o')
+                    time.sleep(base_sleep-2)
+                    if len(ok_xy) == 0:
+                        ok_img = fn_find_xy('./nicon/ok.png'  ) #pyautogui.locateOnScreen('./nicon/ok.png')             
+                        ok_xy  = getXyinfo(ok_img)
+                        print('ok_xy : ',ok_xy) 
+                    fn_click( ok_xy )
+                    pyautogui.press('enter')
+                    time.sleep(base_sleep-2)                
+                    telegram_str = ''
+                    telegram_str += list['fold_nm']+' : '+str(list['amount'])+'\n'
+                    telegram_str += '원본 : '+path_copy+'\n\n'                
+                    telegram_str += '완료 : '+complete_fold(path_copy)
+                    send_telegram_message(telegram_str)
+                    pyautogui.press('enter')
+                    time.sleep(base_sleep-2)
+    except Exception as e:
+        print('fn_main',e)            
+
+def getting_xy():
+    global base_xy , area_xy , sale_xy , search_xy , nobrand_xy , noitem_xy , additem_xy , exploer_xy , ok_xy
+    __sleep = 3.0
+
+    print('time : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )
+    pyautogui.click(100, 150)
+    pyautogui.press('f5')
+    time.sleep(__sleep-1.7)     
+
+    print('bati : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )    
+    __xy = fn_find_xy('./nicon/basexy.png' )
+    base_xy = ( __xy.left-50 , __xy.top , 550 , 1050 )       
+ 
+    print('sati : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )    
+    sale_img = fn_find_xy('./nicon/sale.png' , base_xy )
+    sale_xy  = getXyinfo(sale_img)
+    fn_click( sale_xy , __sleep-2.4 )
+
+    print('diti : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )    
+    div_img = fn_find_xy( './nicon/1.png' , base_xy )
+    div_xy  = getXyinfo(div_img)
+    fn_click( div_xy , __sleep-2.4 )
+
+    print('seti : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )        
+    search_img = fn_find_xy('./nicon/search.png' , base_xy )
+    search_xy  = getXyinfo(search_img)
+    fn_click( search_xy , __sleep-2.8 )
+
+    print('bati : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )    
+    pyperclip.copy( '스타벅스' )
+    pyautogui.hotkey('ctrl', 'v')
+    pyautogui.press('enter')
+    time.sleep( __sleep-2.8 )    
+
+    print('nbti : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )    
+    nobrand_img = fn_find_xy('./nicon/nobrand.png' , base_xy )
+    nobrand_xy  = getXyinfo(nobrand_img)
+    nobrand_xy['x'] = nobrand_xy['x']+140
+    fn_click( nobrand_xy , __sleep-2.5 )
+
+    print('seti : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )    
+    fn_click( search_xy , __sleep-2.5 ) 
+    pyperclip.copy('오늘의 커피 T')
+    #pyperclip.copy('부드러운 디저트 세트 (부드러운 생크림 카스텔라 + 아메리카노 T 2)')    
+    pyautogui.hotkey('ctrl', 'v')
+    pyautogui.press('enter')
+    time.sleep(__sleep-2.7)
+
+
+    print('niti : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )    
+    noitem_img = fn_find_xy('./nicon/noitem.png' , base_xy )
+    noitem_xy  = getXyinfo(noitem_img)
+    noitem_xy['y'] = noitem_xy['y']+120
+    fn_click( noitem_xy , __sleep-2.5 )
+
+    
+    print('adti : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )    
+    additem_img = fn_find_xy('./nicon/additem.png' , base_xy )
+    additem_xy  = getXyinfo(additem_img)    
+    fn_click(additem_xy , __sleep-2.0 )
+
+    print('exti : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )    
+    exploer_img = fn_find_xy('./nicon/exploer.png') #pyautogui.locateOnScreen('./nicon/exploer.png')             
+    exploer_xy  = getXyinfo(exploer_img)
+    exploer_xy['x'] = exploer_xy['x']+60
+    fn_click(exploer_xy , __sleep-2.5 )
+
+    print('pcti : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )    
+    path_copy = 'C:\\ncnc\\test.png'
+    pyperclip.copy( path_copy )
+    pyautogui.hotkey('ctrl', 'a')
+    pyautogui.hotkey('ctrl', 'v')
+    pyautogui.press('enter')
+    time.sleep(__sleep-1)    
+
+    print('okti : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )    
+    ok_img = fn_find_xy('./nicon/ok.png'  )
+    ok_xy  = getXyinfo(ok_img)
+
+    
+    
+
+    print('time : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )
 
 
 if __name__ == "__main__":    
-    ''''''
-    #fn_history()
-    base_xy = ()
-    print(len(base_xy))
-    base_xy = (1,2,3,4)
-    print(len(base_xy))
+        base_xy     = () # 500 , 900
+        area_xy     = {}
+        sale_xy     = {}
+        search_xy   = {}
+        nobrand_xy  = {}
+        noitem_xy   = {}
+        additem_xy  = {}
+        exploer_xy  = {}
+        ok_xy       = {}    
+        
+        
+        getting_xy()
+        print( base_xy , area_xy , sale_xy , search_xy , nobrand_xy , noitem_xy , additem_xy , exploer_xy , ok_xy )
+
+
 
     
     
