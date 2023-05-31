@@ -126,7 +126,10 @@ def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
 
 def fnInit():
     '''크룸 초기화'''
-    _rt = webdriver.Chrome('chromedriver.exe') # http://chromedriver.chromium.org/ 다운로드 크롬 버젼 확인해야함.
+    options = webdriver.ChromeOptions()
+    #options.add_argument('headless')
+    options.add_argument('window-size=1024x768')    
+    _rt = webdriver.Chrome('chromedriver.exe' , options=options) # http://chromedriver.chromium.org/ 다운로드 크롬 버젼 확인해야함.
     _rt.get('https://ncnc.app/sell/wait-confirmed')
     _rt.implicitly_wait(5)    
     return _rt
