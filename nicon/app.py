@@ -1,7 +1,7 @@
 import requests
 #from bs4 import BeautifulSoup
 import json
-import dbcon 
+import lib.dbcon as dbcon 
 import schedule
 import time
 from datetime import datetime

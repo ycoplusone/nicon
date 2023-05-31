@@ -1,4 +1,4 @@
-import dbcon 
+import lib.dbcon as dbcon 
 import requests
 dd = dbcon.DbConn()
 

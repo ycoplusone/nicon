@@ -1,7 +1,7 @@
 
 import pyzbar.pyzbar as pyzbar  # pip install pyzbar
 import cv2                      # pip install opencv-python
-import dbcon
+import lib.dbcon as dbcon
 
 import numpy as np
 import os

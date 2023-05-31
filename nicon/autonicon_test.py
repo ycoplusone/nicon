@@ -10,7 +10,7 @@ import shutil
 from datetime import datetime
 import time
 
-import dbcon
+import lib.dbcon as dbcon
 import logging
 import requests
 

@@ -11,7 +11,7 @@ from PIL import ImageGrab , Image # pip install pillow
 
 import numpy as np
 
-import dbcon
+import lib.dbcon as dbcon
 import requests
 
 def getXyinfo( obj ):
@@ -231,7 +231,7 @@ def fn_main():
                 fn_click( noitem_xy , base_sleep-2.5 )
 
                 # 기프티콘 추가 윈도우 탐색기 호출
-                fn_click(additem_xy , base_sleep-2.0 )
+                fn_click(additem_xy , base_sleep-1.0 )
                 
                 # 탐색기 텍스트 부분
                 fn_click(exploer_xy , base_sleep-2.8 )
@@ -333,7 +333,7 @@ def getting_xy():
     print('adti : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )    
     additem_img = fn_find_xy('./nicon/additem.png' , base_xy )
     additem_xy  = getXyinfo(additem_img)    
-    fn_click(additem_xy , __sleep-2.0 )
+    fn_click(additem_xy , __sleep-1.0 )
 
     print('exti : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )    
     exploer_img = fn_find_xy('./nicon/exploer.png') #pyautogui.locateOnScreen('./nicon/exploer.png')             
