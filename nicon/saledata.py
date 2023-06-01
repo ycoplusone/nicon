@@ -1,7 +1,10 @@
-import dbcon
+import lib.dbcon as dbcon
 from datetime import datetime
 import time
 import requests
+
+import lib.util as w2ji
+import random
 
 def fn_history():
     datetime_format = '%Y-%m-%dT%H:%M:%S.%fZ'
@@ -54,4 +57,10 @@ def fn_history():
 
 
 if __name__ == "__main__":
-    fn_history()
+    #fn_history()
+    
+    #w2ji.mk_image()   
+
+    # 0 이상 1 미만의 랜덤 실수 생성
+    random_float = random.randint(1,10)
+    print(random_float)

@@ -196,7 +196,7 @@ def fnRewindSec():
     print(_rewind_sec)
     schedule.clear()
     schedule.every( _rewind_sec ).seconds.do( getNicon )  
-    schedule.every(1).days.do( fn_history )
+    schedule.every().day.at('00:10').do(fn_history)
     schedule.every(30).minutes.do( fnRewindSec )
 
 
@@ -211,7 +211,8 @@ if __name__ == "__main__":
     # 상품정보 수집
     schedule.every( _rewind_sec ).seconds.do( getNicon )    
     # 판매정보 수집
-    schedule.every(1).days.do( fn_history )
+    #schedule.every().days.do( fn_history )
+    schedule.every().day.at('00:10').do(fn_history)
     # 반복 초 변경
     schedule.every(30).minutes.do( fnRewindSec )    
     
