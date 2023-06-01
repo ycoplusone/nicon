@@ -3,7 +3,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.alert import Alert
 import pyperclip #복사
@@ -13,30 +12,37 @@ import lib.util as w2ji
 import lib.dbcon as dbcon
 import pyautogui
 
-
-'''
-btns = driver.find_elements( By.XPATH , '//*[@id="grid"]/div[*]')
-print(len(btns))
-print(btns[0].text) #0번 요소의 텍스트
-print()
-'''
 def fnClick(str):
     global driver
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, str ))).click()
+    time.sleep(0.2)
 
 def fnCopyNpaste( _str ):
     global driver
     pyperclip.copy( _str )
     ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
+    time.sleep(0.1)
 
 def fnEnter():
     '''엔터입력'''    
-    pyautogui.press('enter')
+    global driver
+    pyautogui.press('enter')    
 
 def fnReadAlert():
-    global driver
-    alert = Alert(driver)
-    return alert.text
+    _rt = '문구 없음'
+    try:
+        global driver
+        WebDriverWait(driver, 3).until(
+            EC.alert_is_present()
+            , '없다고'
+        )
+        alert = Alert(driver)
+        _rt = alert.text        
+        return _rt
+    except Exception as e:
+        print('fnReadAlert',e)
+        return _rt
+
 
 
 def fnLoging():
@@ -136,6 +142,7 @@ def fnInit():
 
 if __name__ == "__main__":   
     ''''''
+    
     _lastupdate = '' # 업데이트 시간 저장
     _dbconn = dbcon.DbConn() #db연결    
 
@@ -174,7 +181,6 @@ if __name__ == "__main__":
         else:
             print('\t','nicon_state 변경 없음')
         time.sleep(5)
-    
 
     #driver = fnInit() #초기화    
     

@@ -7,6 +7,8 @@ import time
 from datetime import datetime
 #import requests
 import json
+import random
+import lib.util as w2ji
     
     
 
@@ -177,23 +179,49 @@ def fn_history():
                 dd.upsert_nicon_sale_info(param)
 
 
-def fn_test():
-    print('aaa')
+def fn_test(str):
+    print('fn_test' , str , w2ji.getNow() )
+
+def fn_test1():    
+    global _rewind_sec , scheduler1
+    _rewind_sec = random.randint(1,10)
+    print('fn_test1',_rewind_sec)
+    schedule.clear()
+    schedule.every( _rewind_sec ).seconds.do( lambda: fn_test('scheduler zzz')  )
+    schedule.every(30).seconds.do( fn_test1 )      
+
+
+def fnRewindSec():
+    global _rewind_sec , _db_conn
+    _rewind_sec = _db_conn.getNiconStateRewindSec()
+    print(_rewind_sec)
+    schedule.clear()
+    schedule.every( _rewind_sec ).seconds.do( getNicon )  
+    schedule.every(1).days.do( fn_history )
+    schedule.every(30).minutes.do( fnRewindSec )
+
 
 if __name__ == "__main__":    
-    schedule.every(40).seconds.do( getNicon )
+    #_rewind_sec = 5
+    #schedule.every( _rewind_sec ).seconds.do( lambda: fn_test('scheduler1') )
+    #schedule.every(15).seconds.do( fn_test1 )
+
+    _db_conn = dbcon.DbConn()
+    _rewind_sec = _db_conn.getNiconStateRewindSec()    
+    
+    # 상품정보 수집
+    schedule.every( _rewind_sec ).seconds.do( getNicon )    
+    # 판매정보 수집
     schedule.every(1).days.do( fn_history )
+    # 반복 초 변경
+    schedule.every(30).minutes.do( fnRewindSec )    
+    
     while True:
         schedule.run_pending()
         time.sleep(1)
+    
 
-    #fn_history()
 
-    #while False:
-        #schedule.run_pending()
-        #getNicon()
-        #time.sleep(40)    
-        #schedule.every(1).minutes.do(getNicon)
 
 
     

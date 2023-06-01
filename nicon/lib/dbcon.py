@@ -174,6 +174,7 @@ class DbConn(object):
             query = (
             " update nicon_state  "
             " set last_date = now() "
+            " , pre_update_date = last_date"
             )            
             query = query.format( )                      
             cur.execute( query )
@@ -207,7 +208,24 @@ class DbConn(object):
             return _lists 
             '''
         except Exception as e:
-            print( 'getNiconState error' , e )        
+            print( 'getNiconState error' , e )  
+
+    def getNiconStateRewindSec(self):       
+        '''데이터 마지막 갱신 시간을 확인한다.''' 
+        try :
+            _lists = []
+            query = (
+                " select rewind_sec from nicon_state  "
+            )
+            #query = query.format( **param )
+            cur = self.__conn.cursor(  pymysql.cursors.DictCursor)            
+            cur.execute( query )            
+
+            __dblists =  cur.fetchall()    
+            return (__dblists[0]['rewind_sec']) 
+
+        except Exception as e:
+            print( 'getNiconStateRewindSec error' , e )
 
         
 
