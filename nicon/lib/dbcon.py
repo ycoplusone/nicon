@@ -173,8 +173,9 @@ class DbConn(object):
                         
             query = (
             " update nicon_state  "
-            " set last_date = now() "
-            " , pre_update_date = last_date"
+            " set  "
+            " pre_update_date = last_date"
+            " , last_date = now() "
             )            
             query = query.format( )                      
             cur.execute( query )
