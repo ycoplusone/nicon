@@ -8,7 +8,6 @@ from datetime import datetime
 #import requests
 import json
 import random
-import lib.util as w2ji
     
     
 
@@ -180,7 +179,7 @@ def fn_history():
 
 
 def fn_test(str):
-    print('fn_test' , str , w2ji.getNow() )
+    print('fn_test' , str  )
 
 def fn_test1():    
     global _rewind_sec , scheduler1
