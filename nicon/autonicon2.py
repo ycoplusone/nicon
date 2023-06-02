@@ -204,4 +204,4 @@ if __name__ == "__main__":
                         fnSale(fold_nm , amt, _fold_nm, files ) # 판매
         else:
             print('\t','nicon_state 변경 없음')
-        time.sleep(5)
+        time.sleep(3)
