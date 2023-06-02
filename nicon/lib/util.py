@@ -7,11 +7,16 @@ import pyzbar.pyzbar as pyzbar  # pip install pyzbar
 import cv2                      # pip install opencv-python
 import requests
 import time
+from pytz import timezone
+#from pytz import timezone
+
+
+
 
 def mk_image():
     '''캡쳐 만들기'''
     try:
-        base_dttm = datetime.today().strftime('%Y%m%d_%H%M%S')
+        base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M%S')
         img = ImageGrab.grab()
         imgCrop = img.crop()
         file_name = 'c:\\ncnc\\{}{}'.format(base_dttm,'.png')
@@ -21,7 +26,7 @@ def mk_image():
 
 def getNow():
     '''현재시간 '''
-    return datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+    return datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
 
 def decode(im):
     '''Find barcodes and QR codes
@@ -56,7 +61,7 @@ def init_fold( _dbconn ):
         rootdirs = [X for X in rootlist if os.path.isdir(str+'\\'+X)]
         for i in rootdirs:        
             dirname = str+'\\'+i
-            base_dttm = datetime.today().strftime('%Y%m%d_%H%M_')        
+            base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M_')        
             listdir = os.listdir(dirname)
 
             path_files =  [ os.path.join(dirname, x)  for x in listdir ]        
@@ -115,7 +120,7 @@ def send_telegram_message( message ):
     '''
     -1001813504824 : 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
     '''
-    base_dttm = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+    base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
     try: 
         url = 'https://api.telegram.org/bot{}/sendMessage'.format(token)
         data = {'chat_id': '-1001813504824', 'text': base_dttm+'\n'+message}
@@ -130,7 +135,7 @@ def send_telegram_message( message ):
 def complete_fold(path):
     '''해당 path 의 이름 변경'''
     #base_dttm = datetime.today().strftime('%Y%m%d%H%M') 
-    base_dttm = datetime.today().strftime('%Y%m%d%H%M%S')
+    base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d%H%M%S')
     __path = path+'_'+base_dttm+'(완료)'
     os.rename( path , __path)
     return __path

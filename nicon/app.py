@@ -8,6 +8,7 @@ from datetime import datetime
 #import requests
 import json
 import random
+from pytz import timezone
     
     
 
@@ -35,7 +36,7 @@ def send_telegram_message( message ,send_type ):
     
     -1001813504824 : 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
     '''
-    base_dttm = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+    base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
         
     try: 
         if 'V' in send_type: #우정이 전용방
@@ -62,8 +63,7 @@ def send_telegram_message( message ,send_type ):
 
 def getNicon():
     try:
-        s_time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        #print('s-time : ', datetime.today().strftime('%Y-%m-%d %H:%M:%S') )
+        s_time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')        
         dd = dbcon.DbConn()    
         dd.update_nicon_state();
         
@@ -123,7 +123,7 @@ def getNicon():
             else : 
                 print(response.status_code)
             
-        e_time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        e_time = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
         print('start / end time : {} ~ {}'.format(s_time , e_time) )    
     
     except Exception as e:

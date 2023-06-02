@@ -12,16 +12,31 @@ import lib.util as w2ji
 import lib.dbcon as dbcon
 import pyautogui
 
+
+def fnText(str):
+    global driver
+    _rt = ''
+    try:        
+        time.sleep(0.1)
+        _html = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, str )))
+        #print('fnTxt',_html.text)
+        return _html.text
+    except Exception as e:
+        print('fnText error : ',e)
+        return _rt
+
 def fnClick(str):
     global driver
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, str ))).click()
-    time.sleep(0.2)
+    time.sleep(0.1)
+    WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, str ))).click()
+    
 
 def fnCopyNpaste( _str ):
     global driver
+    time.sleep(0.1)
     pyperclip.copy( _str )
     ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
-    time.sleep(0.1)
+    
 
 def fnEnter():
     '''엔터입력'''    
@@ -104,9 +119,17 @@ def fnDiv02( _str = '투썸플레이스' ):
 
 def fnDiv03( _str = '아메리카노 R' ):
     '''하분류 찾기(상품 차지)'''
+    _state = False
     fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') #검색바 클릭
-    fnCopyNpaste( _str )
-    fnClick( '//*[@id="items-container"]/a[2]') # 두번째 아이콘 클릭
+    fnCopyNpaste( _str )    
+    _sale_type = fnText( '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[2]/div[2]' ) #상품판매상태 확인
+    if (_sale_type == '매입보류') or (_sale_type=='') :
+        w2ji.send_telegram_message( _str+' : '+ '매입보류' )
+        _state = False
+    else :
+        fnClick( '//*[@id="items-container"]/a[2]') # 두번째 아이콘 클릭
+        _state = True
+    return _state
 
 def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
     '''판매 '''
@@ -174,21 +197,11 @@ if __name__ == "__main__":
                     driver.refresh() #브라이져 새로고침
                     fnDiv01( div01_str )  # 대분류 첫글짜 매개변수
                     fnDiv02( div02_str )   # 중분류명 매개변수
-                    fnDiv03( div03_str )   # 상품명 매개변수
-                    files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
-                    fnSale(fold_nm , amt, _fold_nm, files ) # 판매
-
+                    _bool_03 = fnDiv03( div03_str )   # 상품명 매개변수
+                    if _bool_03:
+                        print('판매시작')
+                        files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
+                        fnSale(fold_nm , amt, _fold_nm, files ) # 판매
         else:
             print('\t','nicon_state 변경 없음')
         time.sleep(5)
-
-    #driver = fnInit() #초기화    
-    
-    #fnLoging() #매개변수 없음
-    #driver.refresh() #브라이져 새로고침
-    #fnDiv01()  # 대분류 첫글짜 매개변수
-    #fnDiv02()   # 중분류명 매개변수
-    #fnDiv03()   # 상품명 매개변수
-    #fnSale()
-
-    
