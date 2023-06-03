@@ -134,8 +134,7 @@ def fnDiv03( _str = '아메리카노 R' ):
 def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
     '''판매 '''
     global driver
-    fnClick( '//*[@id="warning-agree"]/label/div' ) # 동의 체크
-
+    
     for file in _files:
         driver.find_element(By.CSS_SELECTOR , "input[type='file']").send_keys(file) #파일 등록
     
@@ -176,6 +175,14 @@ if __name__ == "__main__":
     
     driver = fnInit() #초기화        
     fnLoging() #매개변수 없음
+
+
+    fnDiv01( )  # 대분류 첫글짜 매개변수
+    fnDiv02( )   # 중분류명 매개변수
+    fnDiv03( )   # 상품명 매개변수	
+    fnClick( '//*[@id="warning-agree"]/label/div' ) # 동의 체크
+    driver.refresh() #브라이져 새로고침
+	
     
     while(True):
         print('시작 : ',w2ji.getNow() )
