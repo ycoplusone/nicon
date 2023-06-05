@@ -39,9 +39,12 @@ def fnCopyNpaste( _str ):
     
 
 def fnEnter():
-    '''엔터입력'''    
-    global driver
-    pyautogui.press('enter')    
+    '''엔터입력'''   
+    try:      
+        global driver
+        pyautogui.press('enter')    
+    except Exception as e:
+        print('fnText error : ',e)  
 
 def fnReadAlert():
     _rt = '문구 없음'
