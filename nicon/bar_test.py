@@ -12,6 +12,7 @@ import lib.util as w2ji
 import lib.dbcon as dbcon
 import pyautogui
 
+
 def fnText(str):
     global driver
     _rt = ''
@@ -56,6 +57,8 @@ def fnReadAlert():
     except Exception as e:
         print('fnReadAlert',e)
         return _rt
+
+
 
 def fnLoging():
     '''로그인'''
@@ -119,7 +122,7 @@ def fnDiv03( _str = '아메리카노 R' ):
     _state = False
     fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') #검색바 클릭
     fnCopyNpaste( _str )    
-    _sale_type = fnText( '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[2]/div[2]' )
+    _sale_type = fnText( '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[2]/div[2]' ) #상품판매상태 확인
     if (_sale_type == '매입보류') or (_sale_type=='') :
         w2ji.send_telegram_message( _str+' : '+ '매입보류' )
         _state = False
@@ -127,13 +130,11 @@ def fnDiv03( _str = '아메리카노 R' ):
         fnClick( '//*[@id="items-container"]/a[2]') # 두번째 아이콘 클릭
         _state = True
     return _state
-    
 
 def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
     '''판매 '''
     global driver
-    fnClick( '//*[@id="warning-agree"]/label/div' ) # 동의 체크
-
+    
     for file in _files:
         driver.find_element(By.CSS_SELECTOR , "input[type='file']").send_keys(file) #파일 등록
     
@@ -163,56 +164,56 @@ def fnInit():
 
 if __name__ == "__main__":   
     ''''''
+    
     _lastupdate = '' # 업데이트 시간 저장
     _dbconn = dbcon.DbConn() #db연결    
 
+
+    w2ji.into_rename_barcode()
+
+    '''
     print('기본폴더 생성','-'*10)
+    w2ji.base_fold_create(_dbconn) #기초폴더 생성
+    
+    w2ji.init_fold(_dbconn) #폴더내 파일 정리.
+    
     driver = fnInit() #초기화        
     fnLoging() #매개변수 없음
+
+
+    fnDiv01( )  # 대분류 첫글짜 매개변수
+    fnDiv02( )   # 중분류명 매개변수
+    fnDiv03( )   # 상품명 매개변수	
+    fnClick( '//*[@id="warning-agree"]/label/div' ) # 동의 체크
+    driver.refresh() #브라이져 새로고침
+	
     
-
-    print('시작 : ',w2ji.getNow() )
-
-
-    
-
-
-    __lists    = [
-                {
-                'div_nm' : '카'
-                , 'category_id' : '00'
-                , 'category_nm' : '스타벅스'
-                , 'prod_nm' :  '카라멜 마키아또 T'
-                , 'fold_nm' : '스타벅스_카라멜 마키아또 T'
-                , 'amount' :  4800
-                } 
-                ,
-                {
-                'div_nm' : '카'
-                , 'category_id' : '00'
-                , 'category_nm' : '스타벅스'
-                , 'prod_nm' :  '카페아메리카노 T'
-                , 'fold_nm' : '스타벅스_카페아메리카노 T'
-                , 'amount' :  3800
-                }
-                ]
-    print( '__lists : ', __lists ,'\n')    
-    for list in __lists:
-        print('list : ',list)
-        div01_str = list['div_nm']
-        div02_str = list['category_nm']
-        div03_str = list['prod_nm']
-        fold_nm   = list['fold_nm']
-        amt       = str( list['amount'] )
-        prod_fold_list = w2ji.getfolelist( fold_nm )
-        for _fold_nm in prod_fold_list:
-            driver.refresh() #브라이져 새로고침
-            fnDiv01( div01_str )  # 대분류 첫글짜 매개변수
-            fnDiv02( div02_str )   # 중분류명 매개변수
-            _bool_03 = fnDiv03( div03_str )   # 상품명 매개변수
-            if _bool_03:
-                print('판매시작')
-                #files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
-                #fnSale(fold_nm , amt, _fold_nm, files ) # 판매
-    
-
+    while(True):
+        print('시작 : ',w2ji.getNow() )
+        _tmp = _dbconn.getNiconState()
+        if _lastupdate != _tmp:
+            print('\t','작업 수행')
+            _lastupdate = _tmp
+            __lists    = _dbconn.get_nicon_upload_list()
+            print( '__lists : ', __lists ,'\n')
+            for list in __lists:
+                print(list)
+                div01_str = list['div_nm']
+                div02_str = list['category_nm']
+                div03_str = list['prod_nm']
+                fold_nm   = list['fold_nm']
+                amt       = str( list['amount'] )
+                prod_fold_list = w2ji.getfolelist( fold_nm )
+                for _fold_nm in prod_fold_list:
+                    driver.refresh() #브라이져 새로고침
+                    fnDiv01( div01_str )  # 대분류 첫글짜 매개변수
+                    fnDiv02( div02_str )   # 중분류명 매개변수
+                    _bool_03 = fnDiv03( div03_str )   # 상품명 매개변수
+                    if _bool_03:
+                        print('판매시작')
+                        files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
+                        fnSale(fold_nm , amt, _fold_nm, files ) # 판매
+        else:
+            print('\t','nicon_state 변경 없음')
+        time.sleep(3)
+        '''

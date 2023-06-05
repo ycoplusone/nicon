@@ -171,6 +171,8 @@ if __name__ == "__main__":
     print('기본폴더 생성','-'*10)
     w2ji.base_fold_create(_dbconn) #기초폴더 생성
     
+    w2ji.into_rename_barcode() #파일명 바코드 명으로 변경작업 바코드 생성 못하면   None으로 치환된다.
+
     w2ji.init_fold(_dbconn) #폴더내 파일 정리.
     
     driver = fnInit() #초기화        

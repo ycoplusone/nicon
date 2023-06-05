@@ -6,6 +6,8 @@ import requests
 import lib.util as w2ji
 import random
 
+from pytz import timezone
+
 def fn_history():
     datetime_format = '%Y-%m-%dT%H:%M:%S.%fZ'
     data = {  
@@ -62,5 +64,7 @@ if __name__ == "__main__":
     #w2ji.mk_image()   
 
     # 0 이상 1 미만의 랜덤 실수 생성
-    random_float = random.randint(1,10)
-    print(random_float)
+    #random_float = random.randint(1,10)    
+    #print(random_float)
+    print( datetime.now(timezone('Asia/Seoul')) )
+    print(     datetime.now(timezone('US/Hawaii')).strftime('%Y%m%d_%H%M%S') )

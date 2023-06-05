@@ -52,6 +52,35 @@ def base_fold_create( _dbconn ):
         except Exception as e:
             print( 'base_fold_create' , e ) 
 
+def into_rename_barcode():
+    '''파일명 바코드로 변환'''
+    try:
+        ''''''
+        str = 'c:\\ncnc'  
+        rootlist = os.listdir(str)
+        rootdirs = [X for X in rootlist if os.path.isdir(str+'\\'+X)]
+        for i in rootdirs:        
+            dirname = str+'\\'+i            
+            listdir = os.listdir(dirname)
+            path_files =  [ os.path.join(dirname, x)  for x in listdir ]        
+            file_names =  [ X for X in path_files if os.path.isfile(X)]
+            file_nm    =  [ x for x in listdir ]                
+            uniq = 1
+            for ii in file_names:                
+                __sp = os.path.splitext(ii)
+                __exc = __sp[1] # 확장자
+
+                __n = np.fromfile(ii, np.uint8)
+                __img = cv2.imdecode(__n, cv2.IMREAD_COLOR)
+                __barcode = decode(__img)      
+                __rename_file_nm=dirname+'\\'+'{0}_{1}{2}'.format(__barcode,uniq,__exc)
+                #__rename_file_nm = dirname+'\\'+__barcode+'_'+str(uniq)+__exc
+                os.rename( ii , __rename_file_nm )
+                uniq +=1
+
+    except Exception as e :
+        print('into_rename_barcode : ',e)
+
 def init_fold( _dbconn ):
     '''폴더 정리.'''
     try:
@@ -77,7 +106,7 @@ def init_fold( _dbconn ):
                 if len(file_names) >= 10:
                     default_fold_nm = dirname+'\\'+default_fold_nm+'_10' 
                     prod_fold       = prod_fold+'_10' 
-                    v_range = 10       
+                    v_range = 30       
                 else :
                     default_fold_nm = dirname+'\\'+default_fold_nm+'_'+repr( len(file_names) ).zfill(2)
                     prod_fold       = prod_fold+'_'+repr( len(file_names) ).zfill(2)
