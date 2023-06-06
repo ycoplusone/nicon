@@ -42,9 +42,11 @@ def fnEnter():
     '''엔터입력'''   
     try:      
         global driver
-        pyautogui.press('enter')    
+        #pyautogui.press('enter')    
+	#search.send_keys(Keys.ENTER)
+        ActionChains(driver).send_keys(Keys.ENTER)
     except Exception as e:
-        print('fnText error : ',e)  
+        print('fnEnter error : ',e)  
 
 def fnReadAlert():
     _rt = '문구 없음'
@@ -153,6 +155,8 @@ def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
     w2ji.mk_image() # 스샷 생성
     # 완료 메세지
     # 폴더 완료 적용    
+    fnEnter() #엔터
+    fnEnter() #엔터
     fnEnter() #엔터
 
 def fnInit():
