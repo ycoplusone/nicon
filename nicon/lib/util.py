@@ -106,7 +106,7 @@ def init_fold( _dbconn ):
                 if len(file_names) >= 10:
                     default_fold_nm = dirname+'\\'+default_fold_nm+'_10' 
                     prod_fold       = prod_fold+'_10' 
-                    v_range = 30       
+                    v_range = 10       
                 else :
                     default_fold_nm = dirname+'\\'+default_fold_nm+'_'+repr( len(file_names) ).zfill(2)
                     prod_fold       = prod_fold+'_'+repr( len(file_names) ).zfill(2)
