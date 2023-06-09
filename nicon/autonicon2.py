@@ -17,7 +17,7 @@ def fnText(str):
     global driver
     _rt = ''
     try:        
-        time.sleep(0.1)
+        time.sleep(0.3)
         _html = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, str )))
         #print('fnTxt',_html.text)
         return _html.text
@@ -27,13 +27,13 @@ def fnText(str):
 
 def fnClick(str):
     global driver
-    time.sleep(0.1)
+    time.sleep(0.3)
     WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, str ))).click()
     
 
 def fnCopyNpaste( _str ):
     global driver
-    time.sleep(0.1)
+    time.sleep(0.2)
     pyperclip.copy( _str )
     ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
     
@@ -47,12 +47,12 @@ def fnEnter():
         print('fnEnter error : ',e)  
 
 def fnReadAlert():
-    _rt = '문구 없음'
+    _rt = '문구없음'
     try:
         global driver
         WebDriverWait(driver, 3).until(
             EC.alert_is_present()
-            , '문구 없음'
+            , '문구없음'
         )
         alert = Alert(driver)
         _rt = alert.text        
@@ -155,24 +155,26 @@ def fnDiv03( _str = '아메리카노 R' ):
 def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
     '''판매 '''
     global driver
+    try:
+        for file in _files:
+            driver.find_element(By.CSS_SELECTOR , "input[type='file']").send_keys(file) #파일 등록
     
-    for file in _files:
-        driver.find_element(By.CSS_SELECTOR , "input[type='file']").send_keys(file) #파일 등록
-    
-    fnClick('//*[@id="app"]/div/div[2]/div/section/div/div/div/section/button') # 판매 등록
-    time.sleep(1)    
-    alert_txt = fnReadAlert() # 알림창 읽기
-
-    telegram_str = '정상 : '+alert_txt+'\n\n'
-    telegram_str += _nm +' : '+ _amt +'\n\n'
-    telegram_str += '원본 : '+ _fold_nm +'\n\n'
-    telegram_str += '완료 : '+ w2ji.complete_fold(_fold_nm)
-    w2ji.send_telegram_message(  telegram_str )
-    w2ji.mk_image() # 스샷 생성
-    # 완료 메세지
-    # 폴더 완료 적용    
-    driver.refresh() #브라이져 새로고침
-
+        fnClick('//*[@id="app"]/div/div[2]/div/section/div/div/div/section/button') # 판매 등록
+        time.sleep(1)    
+        alert_txt = fnReadAlert() # 알림창 읽기
+        if alert_txt != '문구없음':
+            telegram_str = '정상 : '+alert_txt+'\n\n'
+            telegram_str += _nm +' : '+ _amt +'\n\n'
+            telegram_str += '원본 : '+ _fold_nm +'\n\n'
+            telegram_str += '완료 : '+ w2ji.complete_fold(_fold_nm)
+            w2ji.send_telegram_message(  telegram_str )
+            w2ji.mk_image() # 스샷 생성
+            # 완료 메세지
+            # 폴더 완료 적용    
+        time.sleep(0.3)
+        driver.refresh() #브라이져 새로고침
+    except Exception as e:
+        print('fnSale',e)
 
 def fnInit():
     '''크룸 초기화'''
@@ -198,7 +200,8 @@ if __name__ == "__main__":
 
     w2ji.init_fold(_dbconn) #폴더내 파일 정리.
     
-    driver = fnInit() #초기화        
+    driver = fnInit() #초기화    
+    time.sleep(1)
     fnLoging() #매개변수 없음
 
     fnDiv01( )  # 대분류 첫글짜 매개변수
