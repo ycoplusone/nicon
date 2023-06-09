@@ -50,9 +50,9 @@ def fnReadAlert():
     _rt = '문구 없음'
     try:
         global driver
-        WebDriverWait(driver, 5).until(
+        WebDriverWait(driver, 3).until(
             EC.alert_is_present()
-            , '없다고'
+            , '문구 없음'
         )
         alert = Alert(driver)
         _rt = alert.text        
