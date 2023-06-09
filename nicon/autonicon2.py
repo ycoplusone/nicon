@@ -42,8 +42,6 @@ def fnEnter():
     '''엔터입력'''   
     try:      
         global driver
-        #pyautogui.press('enter')    
-	#search.send_keys(Keys.ENTER)
         ActionChains(driver).send_keys(Keys.ENTER)
     except Exception as e:
         print('fnEnter error : ',e)  
@@ -70,7 +68,7 @@ def fnLoging():
     global driver
     __id = 'ycoplusone'
     __ps = 'Nitkfkdgo1!'    
-
+    time.sleep(0.2)
     fnClick('//*[@id="app"]/div/div[2]/div/section/section/nav/section/button')
 
     fnClick('//*[@id="app"]/div/div[2]/div/div/div/section/div[4]/a/span')
@@ -90,51 +88,69 @@ def fnLoging():
     time.sleep(0.5)
 
 def fnDiv01( str = '카' ):
-    '''대분류 찾기'''    
-    fnClick( '//*[@id="app"]/div/div[2]/div/section/div/section/section[1]/div/button')
-    
-    _div01 = ''
-    if str == '카':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[2]/div'
-    elif str == '편':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[3]/div'
-    elif str == '빵':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[4]/div'
-    elif str == '피':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[5]/div'
-    elif str == '문':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[6]/div'
-    elif str == '외':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[7]/div'
-    elif str == '백':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[8]/div'
-    elif str == '휴':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[9]/div'        
-        print(_div01)
-    fnClick(_div01)
-    time.sleep(0.5)
+    '''대분류 찾기'''
+    _state = False    
+    try:
+        fnClick( '//*[@id="app"]/div/div[2]/div/section/div/section/section[1]/div/button')    
+        _div01 = ''
+        if str == '카':
+            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[2]/div'
+        elif str == '편':
+            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[3]/div'
+        elif str == '빵':
+            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[4]/div'
+        elif str == '피':
+            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[5]/div'
+        elif str == '문':
+            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[6]/div'
+        elif str == '외':
+            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[7]/div'
+        elif str == '백':
+            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[8]/div'
+        elif str == '휴':
+            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[9]/div'        
+            print(_div01)
+        fnClick(_div01)
+        time.sleep(0.25)
+        _state = True
+        return _state
+    except Exception as e:
+        print('ERROR fnDiv01',e)
+        return _state
 
 def fnDiv02( _str = '투썸플레이스' ):
-    '''중분류 찾기(카테고리 찾기)'''
-    
-    fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') # 검색바 클릭
-    fnCopyNpaste( _str )
-    fnClick( '//*[@id="items-container"]/a[2]') #두번째 아이콘 클릭
-    time.sleep(0.5)
+    '''중분류 찾기(카테고리 찾기)'''    
+    _state = False
+    try:
+        fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') # 검색바 클릭
+        fnCopyNpaste( _str )
+        fnClick( '//*[@id="items-container"]/a[2]') #두번째 아이콘 클릭
+        time.sleep(0.25)
+        _state = True
+        return _state
+    except Exception as e:
+        print('ERROR fnDiv02',e)
+        return _state
+
 
 def fnDiv03( _str = '아메리카노 R' ):
     '''하분류 찾기(상품 차지)'''
     _state = False
-    fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') #검색바 클릭
-    fnCopyNpaste( _str )    
-    _sale_type = fnText( '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[2]/div[2]' ) #상품판매상태 확인
-    if (_sale_type == '매입보류') or (_sale_type=='') :
-        w2ji.send_telegram_message( _str+' : '+ '매입보류' )
-        _state = False
-    else :
-        fnClick( '//*[@id="items-container"]/a[2]') # 두번째 아이콘 클릭
-        _state = True
-    return _state
+    try:
+        fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') #검색바 클릭
+        fnCopyNpaste( _str )    
+        time.sleep(0.2) # 딜레이.
+        _sale_type = fnText( '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[2]/div[2]' ) #상품판매상태 확인
+        if (_sale_type == '매입보류') or (_sale_type=='') :
+            w2ji.send_telegram_message( _str+' : '+ '매입보류' )
+            _state = False
+        else :
+            fnClick( '//*[@id="items-container"]/a[2]') # 두번째 아이콘 클릭
+            _state = True
+        return _state
+    except Exception as e:
+        print('ERROR fnDiv03',e)
+        return _state
 
 def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
     '''판매 '''
@@ -155,9 +171,8 @@ def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
     w2ji.mk_image() # 스샷 생성
     # 완료 메세지
     # 폴더 완료 적용    
-    fnEnter() #엔터
-    fnEnter() #엔터
-    fnEnter() #엔터
+    driver.refresh() #브라이져 새로고침
+
 
 def fnInit():
     '''크룸 초기화'''
@@ -166,7 +181,8 @@ def fnInit():
     options.add_argument('window-size=1024x768')    
     _rt = webdriver.Chrome('chromedriver.exe' , options=options) # http://chromedriver.chromium.org/ 다운로드 크롬 버젼 확인해야함.
     _rt.get('https://ncnc.app/sell/wait-confirmed')
-    _rt.implicitly_wait(5)    
+    _rt.implicitly_wait(5)  
+    time.sleep(1)  
     return _rt
 
 if __name__ == "__main__":   
@@ -185,13 +201,11 @@ if __name__ == "__main__":
     driver = fnInit() #초기화        
     fnLoging() #매개변수 없음
 
-
     fnDiv01( )  # 대분류 첫글짜 매개변수
     fnDiv02( )   # 중분류명 매개변수
     fnDiv03( )   # 상품명 매개변수	
     fnClick( '//*[@id="warning-agree"]/label/div' ) # 동의 체크
-    driver.refresh() #브라이져 새로고침
-	
+    driver.refresh() #브라이져 새로고침	
     
     while(True):
         print('시작 : ',w2ji.getNow() )
@@ -200,9 +214,8 @@ if __name__ == "__main__":
             print('\t','작업 수행')
             _lastupdate = _tmp
             __lists    = _dbconn.get_nicon_upload_list()
-            print( '__lists : ', __lists ,'\n')
             for list in __lists:
-                print(list)
+                print('list : ',list)
                 div01_str = list['div_nm']
                 div02_str = list['category_nm']
                 div03_str = list['prod_nm']
@@ -211,13 +224,18 @@ if __name__ == "__main__":
                 prod_fold_list = w2ji.getfolelist( fold_nm )
                 for _fold_nm in prod_fold_list:
                     driver.refresh() #브라이져 새로고침
-                    fnDiv01( div01_str )  # 대분류 첫글짜 매개변수
-                    fnDiv02( div02_str )   # 중분류명 매개변수
-                    _bool_03 = fnDiv03( div03_str )   # 상품명 매개변수
-                    if _bool_03:
-                        print('판매시작')
-                        files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
-                        fnSale(fold_nm , amt, _fold_nm, files ) # 판매
+                    try:
+                        _bool_01 = fnDiv01( div01_str )   # 대분류 첫글짜 매개변수
+                        if _bool_01:
+                            _bool_02 = fnDiv02( div02_str )   # 중분류명 매개변수
+                            if _bool_02:
+                                _bool_03 = fnDiv03( div03_str )   # 상품명 매개변수
+                                if _bool_03:
+                                    print('판매시작')
+                                    files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
+                                    fnSale(fold_nm , amt, _fold_nm, files ) # 판매
+                    except Exception as e:
+                        print( '판매 작업중 오류',e )
         else:
             print('\t','nicon_state 변경 없음')
         time.sleep(3)
