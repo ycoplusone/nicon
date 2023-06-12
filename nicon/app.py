@@ -65,8 +65,6 @@ def getNicon():
     try:
         s_time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')        
         dd = dbcon.DbConn()    
-        dd.update_nicon_state();
-        
         __lists = dd.get_job_list()
                            
         for ii in __lists:
@@ -125,6 +123,7 @@ def getNicon():
             
         e_time = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
         print('start / end time : {} ~ {}'.format(s_time , e_time) )    
+        dd.update_nicon_state();
     
     except Exception as e:
         print( 'getNicon', e )
