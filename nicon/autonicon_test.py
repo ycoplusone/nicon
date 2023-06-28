@@ -27,7 +27,7 @@ import cv2                      # pip install opencv-python
 #print(pyautogui.position())
 
 # 
-#pyautogui.mouseInfo()
+pyautogui.mouseInfo()
 
 
 # 절대 좌표로 이동

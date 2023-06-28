@@ -133,7 +133,7 @@ def fnDiv02( _str = '투썸플레이스' ):
         return _state
 
 
-def fnDiv03( _str = '아메리카노 L' ):
+def fnDiv03( _str = '아메리카노 R' ):
     '''하분류 찾기(상품 차지)'''
     _state = False
     try:
