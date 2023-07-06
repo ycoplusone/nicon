@@ -1,219 +1,42 @@
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.alert import Alert
-import pyperclip #복사
-import time
+import barcode
+from barcode.writer import ImageWriter
+from PIL import Image , ImageFont , ImageDraw
+'''바코드 이미지 생성'''
 
-import lib.util as w2ji
-import lib.dbcon as dbcon
-import pyautogui
+def mk_barcode_img(str):
+    barcode_num = str
+    file_path = 'c:\\ncnc\\'+barcode_num
+    options = {"module_width":0.51, "module_height":16, "font_size": 10, "text_distance": 4, "quiet_zone": 1}
+    #image_writer = ImageWriter().set_options(options)
+    code128 = barcode.get_barcode_class('code128')
+    my_ean = code128( barcode_num, writer=ImageWriter())
+    file_nm = my_ean.save( file_path , options )
+    return file_nm
 
+def mk_img( code , ps , ex ):
+    '''텍스트 추가하기'''
+    pass_word = '비밀번호 : '+ps
+    ex_date   = '유효기간 : '+ex    
+    _path = 'c:\\ncnc\\'+code+'.png'
+    #바코드 이미지 가져오기
+    _barcode_img = Image.open( mk_barcode_img(code) ) 
 
-def fnText(str):
-    global driver
-    _rt = ''
-    try:        
-        time.sleep(0.1)
-        _html = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, str )))
-        #print('fnTxt',_html.text)
-        return _html.text
-    except Exception as e:
-        print('fnText error : ',e)
-        return _rt
+    #
+    _target_img = Image.open('./test_img/megabox_bg.png')
+    _font = ImageFont.truetype('./test_img/PyeongChang-Regular.ttf', 24)
+    out_img = ImageDraw.Draw( _target_img )
+    out_img.text(xy=(310,480), text=pass_word , font=_font , fill=(0,0,0) )
+    out_img.text(xy=(250,520), text=ex_date   , font=_font , fill=(0,0,0) ) 
+    #out_img = ImageDraw.Draw(_target_img)
+    #_target_img.show()
+    _target_img.paste( _barcode_img, (110,200) )
+    _target_img.save( _path )
 
-def fnClick(str):
-    global driver
-    time.sleep(0.1)
-    WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, str ))).click()
-    
+#mk_barcode_img('109688459860')
 
-def fnCopyNpaste( _str ):
-    global driver
-    time.sleep(0.1)
-    pyperclip.copy( _str )
-    ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
-    
+lists = [['109601453760','6216','20231031 까지'],['109643453260','9105','20231031 까지'],['109625453160','6119','20231031 까지'],['109624453460','0856','20231031 까지'],['109622453560','6669','20231031 까지'],['109627453260','5858','20231031 까지'],['109678453160','8751','20231031 까지'],['109629453860','5104','20231031 까지'],['109676453460','4528','20231031 까지'],['109650454360','1618','20231031 까지'],['109655454560','1562','20231031 까지'],['109661454660','3042','20231031 까지'],['109656454260','5565','20231031 까지'],['109662454760','4179','20231031 까지'],['109613454260','6123','20231031 까지'],['109610455760','8211','20231031 까지'],['109667454360','6054','20231031 까지'],['109674454360','6158','20231031 까지'],['109629454260','7455','20231031 까지'],['109628454360','1142','20231031 까지'],['109624455560','8809','20231031 까지'],['109653455360','3394','20231031 까지'],['109622455860','3154','20231031 까지'],['109615455760','7147','20231031 까지'],['109671455160','8772','20231031 까지'],['109618455760','6197','20231031 까지'],['109647455860','2418','20231031 까지'],['109600456760','5676','20231031 까지'],['109676455360','3864','20231031 까지'],['109629455860','9354','20231031 까지'],['105658453261','7188','20231031 까지'],['109645456760','0846','20231031 까지'],['105687453461','4232','20231031 까지'],['109644456760','7309','20231031 까지'],['105600454261','3413','20231031 까지'],['105631454661','6273','20231031 까지'],['109683456160','8880','20231031 까지'],['105686453261','1943','20231031 까지'],['105635453661','7340','20231031 까지'],['105629453061','1877','20231031 까지'],['105634454161','4721','20231031 까지'],['105693454461','9451','20231031 까지'],['105686454861','9674','20231031 까지'],['105685454461','0711','20231031 까지'],['105657454761','9974','20231031 까지'],['105620455861','4774','20231031 까지'],['105659454261','1911','20231031 까지'],['105672454661','2274','20231031 까지'],['105671455661','7900','20231031 까지'],['105618454061','0061','20231031 까지'],['105665455761','9875','20231031 까지'],['105667455661','8243','20231031 까지'],['105664455161','3752','20231031 까지'],['105628455261','2511','20231031 까지'],['105639455761','9134','20231031 까지'],['105646455461','1068','20231031 까지'],['105670456161','5323','20231031 까지'],['105661456761','1487','20231031 까지'],['105672456561','0605','20231031 까지'],['105673456861','8083','20231031 까지'],['105635456261','5872','20231031 까지'],['105660457061','0168','20231031 까지'],['105696456661','4691','20231031 까지'],['105671457661','0793','20231031 까지'],['105679456161','4534','20231031 까지'],['105643457461','6170','20231031 까지'],['105608456461','0536','20231031 까지'],['105624456561','0742','20231031 까지'],['105617456261','9144','20231031 까지'],['105632457461','6383','20231031 까지'],['105625457061','8914','20231031 까지'],['105667457461','9861','20231031 까지'],['105674457761','0332','20231031 까지'],['109615457861','8394','20231031 까지'],['109668457561','2071','20231031 까지'],['109679457261','6122','20231031 까지'],['105646457261','7831','20231031 까지'],['105678457861','5079','20231031 까지'],['109647457661','3389','20231031 까지'],['109616457661','4924','20231031 까지'],['109654458461','9842','20231031 까지'],['109663458461','0503','20231031 까지'],['109640458861','6565','20231031 까지'],['109671458661','2656','20231031 까지'],['109636456860','6522','20231031 까지'],['109657456660','1045','20231031 까지'],['109622458861','3057','20231031 까지'],['109698456260','4727','20231031 까지'],['109649456160','9977','20231031 까지'],['109670457260','7352','20231031 까지'],['109681457760','3111','20231031 까지'],['109615457860','6061','20231031 까지'],['109654457260','0541','20231031 까지'],['109608457060','0728','20231031 까지'],['109662457660','4902','20231031 까지'],['109636457460','6491','20231031 까지'],['109609457660','0471','20231031 까지'],['109627457760','5487','20231031 까지'],['109630458360','2519','20231031 까지'],['109623457060','8352','20231031 까지'],['109666458360','6839','20231031 까지'],['109623458560','7311','20231031 까지'],['109617458660','8811','20231031 까지'],['109684458860','1555','20231031 까지'],['109671459260','8144','20231031 까지'],['109662459760','4111','20231031 까지'],['109658458860','3019','20231031 까지'],['109665458660','5241','20231031 까지'],['109630459060','0166','20231031 까지'],['109679458860','4227','20231031 까지'],['109643459360','4795','20231031 까지'],['109634459260','3590','20231031 까지'],['109659459860','7380','20231031 까지'],['109675459960','3946','20231031 까지'],['100620450561','1873','20231031 까지'],['109616459760','3510','20231031 까지'],['109677459160','3929','20231031 까지'],['100641450961','8101','20231031 까지'],['100652450561','7251','20231031 까지']]
+print(len(lists))
 
-def fnEnter():
-    '''엔터입력'''    
-    global driver
-    pyautogui.press('enter')    
-
-def fnReadAlert():
-    _rt = '문구 없음'
-    try:
-        global driver
-        WebDriverWait(driver, 5).until(
-            EC.alert_is_present()
-            , '없다고'
-        )
-        alert = Alert(driver)
-        _rt = alert.text        
-        return _rt
-    except Exception as e:
-        print('fnReadAlert',e)
-        return _rt
-
-
-
-def fnLoging():
-    '''로그인'''
-    global driver
-    __id = 'ycoplusone'
-    __ps = 'Nitkfkdgo1!'    
-
-    fnClick('//*[@id="app"]/div/div[2]/div/section/section/nav/section/button')
-
-    fnClick('//*[@id="app"]/div/div[2]/div/div/div/section/div[4]/a/span')
-
-    fnClick( '//*[@id="app"]/div/div[2]/div/div/div/button[4]/div') 
-    
-
-    fnClick( '//*[@id="username"]')    
-    fnCopyNpaste( __id )
-    
-
-    fnClick( '//*[@id="password"]')    
-    fnCopyNpaste( __ps )    
-
-    fnClick( '//*[@id="app"]/div/div[2]/div/div/div/button')        
-    fnClick( '//*[@id="app"]/div/nav/a[2]')
-    time.sleep(0.5)
-
-def fnDiv01( str = '카' ):
-    '''대분류 찾기'''    
-    fnClick( '//*[@id="app"]/div/div[2]/div/section/div/section/section[1]/div/button')
-    
-    _div01 = ''
-    if str == '카':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[2]/div'
-    elif str == '편':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[3]/div'
-    elif str == '빵':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[4]/div'
-    elif str == '피':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[5]/div'
-    elif str == '문':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[6]/div'
-    elif str == '외':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[7]/div'
-    elif str == '백':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[8]/div'
-    elif str == '휴':
-        _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[9]/div'        
-        print(_div01)
-    fnClick(_div01)
-    time.sleep(0.5)
-
-def fnDiv02( _str = '투썸플레이스' ):
-    '''중분류 찾기(카테고리 찾기)'''
-    
-    fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') # 검색바 클릭
-    fnCopyNpaste( _str )
-    fnClick( '//*[@id="items-container"]/a[2]') #두번째 아이콘 클릭
-    time.sleep(0.5)
-
-def fnDiv03( _str = '아메리카노 R' ):
-    '''하분류 찾기(상품 차지)'''
-    _state = False
-    fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') #검색바 클릭
-    fnCopyNpaste( _str )    
-    _sale_type = fnText( '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[2]/div[2]' ) #상품판매상태 확인
-    if (_sale_type == '매입보류') or (_sale_type=='') :
-        w2ji.send_telegram_message( _str+' : '+ '매입보류' )
-        _state = False
-    else :
-        fnClick( '//*[@id="items-container"]/a[2]') # 두번째 아이콘 클릭
-        _state = True
-    return _state
-
-def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
-    '''판매 '''
-    global driver
-    
-    for file in _files:
-        driver.find_element(By.CSS_SELECTOR , "input[type='file']").send_keys(file) #파일 등록
-    
-    fnClick('//*[@id="app"]/div/div[2]/div/section/div/div/div/section/button') # 판매 등록
-    time.sleep(1)    
-    alert_txt = fnReadAlert() # 알림창 읽기
-
-    telegram_str = '정상 : '+alert_txt+'\n\n'
-    telegram_str += _nm +' : '+ _amt +'\n\n'
-    telegram_str += '원본 : '+ _fold_nm +'\n\n'
-    telegram_str += '완료 : '+ w2ji.complete_fold(_fold_nm)
-    w2ji.send_telegram_message(  telegram_str )
-    w2ji.mk_image() # 스샷 생성
-    # 완료 메세지
-    # 폴더 완료 적용    
-    fnEnter() #엔터
-
-def fnInit():
-    '''크룸 초기화'''
-    options = webdriver.ChromeOptions()
-    #options.add_argument('headless')
-    options.add_argument('window-size=1024x768')    
-    _rt = webdriver.Chrome('chromedriver.exe' , options=options) # http://chromedriver.chromium.org/ 다운로드 크롬 버젼 확인해야함.
-    _rt.get('https://ncnc.app/sell/wait-confirmed')
-    _rt.implicitly_wait(5)    
-    return _rt
-
-if __name__ == "__main__":   
-    ''''''
-    
-    _lastupdate = '' # 업데이트 시간 저장
-    _dbconn = dbcon.DbConn() #db연결    
-
-
-    w2ji.into_rename_barcode()
-
-    '''
-    print('기본폴더 생성','-'*10)
-    w2ji.base_fold_create(_dbconn) #기초폴더 생성
-    
-    w2ji.init_fold(_dbconn) #폴더내 파일 정리.
-    
-    driver = fnInit() #초기화        
-    fnLoging() #매개변수 없음
-
-
-    fnDiv01( )  # 대분류 첫글짜 매개변수
-    fnDiv02( )   # 중분류명 매개변수
-    fnDiv03( )   # 상품명 매개변수	
-    fnClick( '//*[@id="warning-agree"]/label/div' ) # 동의 체크
-    driver.refresh() #브라이져 새로고침
-	
-    
-    while(True):
-        print('시작 : ',w2ji.getNow() )
-        _tmp = _dbconn.getNiconState()
-        if _lastupdate != _tmp:
-            print('\t','작업 수행')
-            _lastupdate = _tmp
-            __lists    = _dbconn.get_nicon_upload_list()
-            print( '__lists : ', __lists ,'\n')
-            for list in __lists:
-                print(list)
-                div01_str = list['div_nm']
-                div02_str = list['category_nm']
-                div03_str = list['prod_nm']
-                fold_nm   = list['fold_nm']
-                amt       = str( list['amount'] )
-                prod_fold_list = w2ji.getfolelist( fold_nm )
-                for _fold_nm in prod_fold_list:
-                    driver.refresh() #브라이져 새로고침
-                    fnDiv01( div01_str )  # 대분류 첫글짜 매개변수
-                    fnDiv02( div02_str )   # 중분류명 매개변수
-                    _bool_03 = fnDiv03( div03_str )   # 상품명 매개변수
-                    if _bool_03:
-                        print('판매시작')
-                        files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
-                        fnSale(fold_nm , amt, _fold_nm, files ) # 판매
-        else:
-            print('\t','nicon_state 변경 없음')
-        time.sleep(3)
-        '''
+for i in lists:
+    #print(i[0],i[1],i[2])
+    mk_img(i[0],i[1],i[2])
