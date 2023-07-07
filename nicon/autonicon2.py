@@ -169,6 +169,13 @@ def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
             telegram_str += '완료 : '+ w2ji.complete_fold(_fold_nm)
             w2ji.send_telegram_message(  telegram_str )
             w2ji.mk_image() # 스샷 생성
+        else:
+            telegram_str = '이상 ---- \n\n'
+            telegram_str += _nm +' : '+ _amt +'\n\n'
+            telegram_str += '원본 : '+ _fold_nm +'\n\n'
+            telegram_str += '완료 : '+ w2ji.complete_fold(_fold_nm)
+            w2ji.send_telegram_message(  telegram_str )
+
             # 완료 메세지
             # 폴더 완료 적용    
         time.sleep(0.3)
