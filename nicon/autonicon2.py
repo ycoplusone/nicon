@@ -236,10 +236,10 @@ if __name__ == "__main__":
     driver.refresh() #브라이져 새로고침	
     
     while(True):
-        print('시작 : ',w2ji.getNow() )
+        
         _tmp = _dbconn.getNiconState()
-        if _lastupdate != _tmp:
-            print('\t','작업 수행')
+        if _lastupdate != _tmp:            
+            print('시작 : ',w2ji.getNow() )
             _lastupdate = _tmp
             __lists    = _dbconn.get_nicon_upload_list()
             for list in __lists:
@@ -264,6 +264,6 @@ if __name__ == "__main__":
                                     fnSale(fold_nm , amt, _fold_nm, files ) # 판매
                     except Exception as e:
                         print( '판매 작업중 오류',e )
-        else:
-            print('\t','nicon_state 변경 없음')
+        #else:
+            #print('\t','nicon_state 변경 없음')
         time.sleep(3)
