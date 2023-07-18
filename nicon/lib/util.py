@@ -168,7 +168,7 @@ def complete_fold(path , state = True):
     if state:
         __path += '_'+base_dttm+'(완료)'
     else :
-        __path += '_'+base_dttm+'이상이상이상(완료)'
+        __path += '_이상이상이상(완료)'
 
     os.rename( path , __path)
     return __path
