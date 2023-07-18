@@ -182,18 +182,19 @@ def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
         fnClick('//*[@id="app"]/div/div[2]/div/section/div/div/div/section/button') # 판매 등록
         time.sleep(1)    
         alert_txt = fnReadAlert() # 알림창 읽기
-        if alert_txt != '문구없음':
+        #if alert_txt != '문구없음':
+        if '쿠폰이 등록' in alert_txt :
             telegram_str = '정상 : '+alert_txt+'\n\n'
             telegram_str += _nm +' : '+ _amt +'\n\n'
             telegram_str += '원본 : '+ _fold_nm +'\n\n'
-            telegram_str += '완료 : '+ w2ji.complete_fold(_fold_nm)
+            telegram_str += '완료 : '+ w2ji.complete_fold(_fold_nm , True)
             w2ji.send_telegram_message(  telegram_str )
             w2ji.mk_image() # 스샷 생성
         else:
-            telegram_str = '이상 ---- \n\n'
+            telegram_str = '이상 : '+alert_txt+'\n\n'
             telegram_str += _nm +' : '+ _amt +'\n\n'
             telegram_str += '원본 : '+ _fold_nm +'\n\n'
-            telegram_str += '완료 : '+ w2ji.complete_fold(_fold_nm)
+            telegram_str += '완료 : '+ w2ji.complete_fold(_fold_nm , False)
             w2ji.send_telegram_message(  telegram_str )
 
         time.sleep(0.3)
