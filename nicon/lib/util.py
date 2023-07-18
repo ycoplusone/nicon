@@ -161,10 +161,14 @@ def send_telegram_message( message ):
     finally:
         pass
 
-def complete_fold(path):
+def complete_fold(path , state = True):
     '''해당 path 의 이름 변경'''
-    #base_dttm = datetime.today().strftime('%Y%m%d%H%M') 
     base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d%H%M%S')
-    __path = path+'_'+base_dttm+'(완료)'
+    __path = path
+    if state:
+        __path += '_'+base_dttm+'(완료)'
+    else :
+        __path += '_'+base_dttm+'이상이상이상(완료)'
+
     os.rename( path , __path)
     return __path
