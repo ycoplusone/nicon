@@ -107,7 +107,7 @@ def fnLoging():
     time.sleep(0.5)
     '''
 
-def fnDiv01( str = '피' ):
+def fnDiv01( str = '카' ):
     '''대분류 찾기'''
     _state = False    
     try:
@@ -138,7 +138,7 @@ def fnDiv01( str = '피' ):
         print('ERROR fnDiv01',e)
         return _state
 
-def fnDiv02( _str = '버거킹' ):
+def fnDiv02( _str = '투썸플레이스' ):
     '''중분류 찾기(카테고리 찾기)'''    
     _state = False
     try:
@@ -153,7 +153,7 @@ def fnDiv02( _str = '버거킹' ):
         return _state
 
 
-def fnDiv03( _str = '콰트로치즈와퍼주니어+콜라R(콤보)' ):
+def fnDiv03( _str = '아메리카노 L' ):
     '''하분류 찾기(상품 차지)'''
     _state = False
     global driver
@@ -164,22 +164,20 @@ def fnDiv03( _str = '콰트로치즈와퍼주니어+콜라R(콤보)' ):
         fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') #검색바 클릭
         fnCopyNpaste( _str )    
         time.sleep(0.2) # 딜레이.
-        # 상품 리스트 가져오기
-        try:
-            titles = WebDriverWait(driver, 2).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@class='horizontal-box']")))
-            #print("배열길이:", len(titles))
-            # 복수개(3개)의 앨리먼트가 추출 됨 (3개중 마지막)
-            for i in range(len(titles)):
-                xpath_str1 = '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a['+str(i)+']/div[1]/div[1]'
-                xpath_str2 = '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a['+str(i)+']/div[2]'
-                tag_name = fnText(xpath_str1)
-                if ( tag_name  == _str):
-                    print( tag_name , i )
-                    item_name  = '//*[@id="items-container"]/a['+str(i)+']'
-                    item_state = xpath_str2
 
-        except Exception as e:
-            print("제목에서 예외가 발생했습니다.", str(e))
+        # 상품 리스트 가져오기
+        titles = WebDriverWait(driver, 1).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@class='horizontal-box']")))
+        #print("배열길이:", len(titles))
+        # 복수개(3개)의 앨리먼트가 추출 됨 (3개중 마지막)
+        for i in range(len(titles)):
+            xpath_str1 = '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a['+str(i)+']/div[1]/div[1]'
+            xpath_str2 = '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a['+str(i)+']/div[2]'
+            tag_name = fnText(xpath_str1)
+            if ( tag_name  == _str):
+                print( tag_name , i )
+                item_name  = '//*[@id="items-container"]/a['+str(i)+']'
+                item_state = xpath_str2
+                break
         
         _sale_type = fnText( item_state ) #상품판매상태 확인
         print('_sale_type : ', _sale_type )
