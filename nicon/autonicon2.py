@@ -163,7 +163,7 @@ def fnDiv03( _str = '아메리카노 L' ):
     try:
         fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') #검색바 클릭
         fnCopyNpaste( _str )    
-        time.sleep(0.2) # 딜레이.
+        #time.sleep(0.2) # 딜레이.
 
         # 상품 리스트 가져오기
         titles = WebDriverWait(driver, 1).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@class='horizontal-box']")))
@@ -288,6 +288,9 @@ if __name__ == "__main__":
                                     print('판매시작')
                                     files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
                                     fnSale(fold_nm , amt, _fold_nm, files ) # 판매
+                                else:
+                                    break
+
                     except Exception as e:
                         print( '판매 작업중 오류',e )
         #else:
