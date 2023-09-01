@@ -19,11 +19,20 @@ def fnText(str):
     try:        
         time.sleep(0.3)
         _html = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, str )))
-        #print('fnTxt',_html.text)
         return _html.text
     except Exception as e:
-        #print('fnText error : ',e)
         return _rt
+
+def fnText_1(str):
+    global driver
+    _rt = ''
+    try:        
+        time.sleep(0.01)
+        _html = WebDriverWait(driver, 0.5).until(EC.element_to_be_clickable((By.XPATH, str )))
+        return _html.text
+    except Exception as e:
+        return _rt
+
 
 def fnClick(str):
     global driver
@@ -67,7 +76,7 @@ def fnLoging():
     '''로그인'''
     global driver
     __id = 'ycoplusone'
-    __ps = 'natkfkdgo1!'    
+    __ps = 'natkfkdgo2@'    
     time.sleep(0.2)
     fnClick('//*[@id="app"]/div/div[2]/div/section/section/nav/section/button')
     
@@ -163,16 +172,21 @@ def fnDiv03( _str = '아메리카노 L' ):
     try:
         fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') #검색바 클릭
         fnCopyNpaste( _str )    
-        #time.sleep(0.2) # 딜레이.
 
         # 상품 리스트 가져오기
-        titles = WebDriverWait(driver, 1).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@class='horizontal-box']")))
-        #print("배열길이:", len(titles))
+        print('시작', w2ji.getNow() ,'-'*10)
+        titles = WebDriverWait(driver, 1).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@class='horizontal-box']")))        
+        print('종료',w2ji.getNow(),'-'*10)
+        
         # 복수개(3개)의 앨리먼트가 추출 됨 (3개중 마지막)
         for i in range(len(titles)):
             xpath_str1 = '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a['+str(i)+']/div[1]/div[1]'
             xpath_str2 = '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a['+str(i)+']/div[2]'
-            tag_name = fnText(xpath_str1)
+
+            #_html = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, xpath_str1 )))
+            #tag_name = _html.text
+            tag_name = fnText_1(xpath_str1)
+            print('문자 가져오기',w2ji.getNow(),tag_name )
             if ( tag_name  == _str):
                 print( tag_name , i )
                 item_name  = '//*[@id="items-container"]/a['+str(i)+']'
