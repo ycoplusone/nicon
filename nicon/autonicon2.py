@@ -180,16 +180,15 @@ def fnDiv03( _str = '아메리카노 L' ):
         
         # 복수개(3개)의 앨리먼트가 추출 됨 (3개중 마지막)
         for i in range(len(titles)):
-            xpath_str1 = '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a['+str(i)+']/div[1]/div[1]'
-            xpath_str2 = '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a['+str(i)+']/div[2]'
+            ii = i+1
+            xpath_str1 = '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a['+str(ii)+']/div[1]/div[1]'
+            xpath_str2 = '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a['+str(ii)+']/div[2]'
 
-            #_html = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, xpath_str1 )))
-            #tag_name = _html.text
             tag_name = fnText_1(xpath_str1)
             print('문자 가져오기',w2ji.getNow(),tag_name )
             if ( tag_name  == _str):
-                print( tag_name , i )
-                item_name  = '//*[@id="items-container"]/a['+str(i)+']'
+                print( tag_name , ii )
+                item_name  = '//*[@id="items-container"]/a['+str(ii)+']'
                 item_state = xpath_str2
                 break
         
