@@ -20,7 +20,7 @@ class DbConn(object):
     def __init__(self):
         '''        
         '''
-        self.__conn = pymysql.connect(host = self.__url , user = self.__id , password = self.__ps , db= self.__db , charset= self.__charset )
+        self.__conn = pymysql.connect(host = self.__url , user = self.__id , password = self.__ps , db= self.__db , charset= self.__charset  )
 
     def get_job_list(self):        
         try :
@@ -35,25 +35,27 @@ class DbConn(object):
                 " group by category_id "
                 " order by lpad(category_id,6,0) "    
             )
-            #query = query.format( **param )
-            cur = self.__conn.cursor()            
-            cur.execute( query )            
+            
+            cur = self.__conn.cursor( )                 
+                
+            cur.execute( query  )
             __dblists = cur.fetchall()
+            
+            
             for i in __dblists:
                 m_list = []
                 s_list = []
-                print('???? > ',str(i[1],encoding='utf-8'))
-                #_strs = str( i[1].decode('utf-8') ).split('^')
-                _strs =  str(i[1],encoding='utf-8').split('^')
-                #print('get_job_list',_strs)
+                                
+                _strs =  i[1].split('^')
+                print('get_job_list',_strs)
 
                 
                 for item in _strs:
                     s_list.append( item )
                 
-                m_list.append( str(i[0],encoding='utf-8') )
+                m_list.append( i[0] )
                 m_list.append( s_list )
-                m_list.append( str(i[2],encoding='utf-8') )
+                m_list.append( i[2] )
                 _lists.append(m_list)            
             
             
@@ -207,7 +209,7 @@ class DbConn(object):
             for i in __dblists:
                 #print(i)
                 m_list = []                
-                m_list.append( i['last_date'].decode('utf-8') )
+                m_list.append( i['last_date']
 
                 _lists.append(m_list)
             return _lists 
@@ -252,10 +254,10 @@ class DbConn(object):
             for i in __dblists:
                 #print(i)
                 m_list = []                
-                m_list.append( i['category_id'].decode('utf-8') )
-                m_list.append( i['category_nm'].decode('utf-8') )
-                m_list.append( i['prod_nm'].decode('utf-8') )
-                m_list.append( i['send_type'].decode('utf-8') )
+                m_list.append( i['category_id'] )
+                m_list.append( i['category_nm'] )
+                m_list.append( i['prod_nm'] )
+                m_list.append( i['send_type'] )
                 _lists.append(m_list)
             return _lists 
         
@@ -300,11 +302,11 @@ class DbConn(object):
             __dblists =  cur.fetchall()          
             for i in __dblists:                
                 m_list = {}
-                m_list['div_nm']        = i['div_nm'].decode('utf-8')
-                m_list['category_id']   = i['category_id'].decode('utf-8')
-                m_list['category_nm']   = i['category_nm'].decode('utf-8')
-                m_list['prod_nm']       = i['prod_nm'].decode('utf-8')
-                m_list['fold_nm']       = i['fold_nm'].decode('utf-8')
+                m_list['div_nm']        = i['div_nm']
+                m_list['category_id']   = i['category_id']
+                m_list['category_nm']   = i['category_nm']
+                m_list['prod_nm']       = i['prod_nm']
+                m_list['fold_nm']       = i['fold_nm']
                 m_list['amount']        = i['amount']
                 _lists.append(m_list)
             return _lists 
@@ -343,11 +345,11 @@ class DbConn(object):
             for i in __dblists:
                 
                 m_list = {}
-                m_list['div_nm'] = i['div_nm'].decode('utf-8')
-                m_list['category_id'] = i['category_id'].decode('utf-8')
-                m_list['category_nm'] = i['category_nm'].decode('utf-8')
-                m_list['prod_nm'] = i['prod_nm'].decode('utf-8')
-                m_list['fold_nm'] = i['fold_nm'].decode('utf-8')
+                m_list['div_nm'] = i['div_nm']
+                m_list['category_id'] = i['category_id']
+                m_list['category_nm'] = i['category_nm']
+                m_list['prod_nm'] = i['prod_nm']
+                m_list['fold_nm'] = i['fold_nm']
                 _lists.append(m_list)
             return _lists 
         
