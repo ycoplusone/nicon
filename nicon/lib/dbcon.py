@@ -42,17 +42,18 @@ class DbConn(object):
             for i in __dblists:
                 m_list = []
                 s_list = []
+                print('???? > ',str(i[1],encoding='utf-8'))
                 #_strs = str( i[1].decode('utf-8') ).split('^')
-                _strs = str( i[1] , 'utf-8').split('^')
-                print('get_job_list',_strs)
+                _strs =  str(i[1],encoding='utf-8').split('^')
+                #print('get_job_list',_strs)
 
                 
                 for item in _strs:
                     s_list.append( item )
                 
-                m_list.append( str(i[0] , 'utf-8') )
+                m_list.append( str(i[0],encoding='utf-8') )
                 m_list.append( s_list )
-                m_list.append( str(i[2] , 'utf-8') )
+                m_list.append( str(i[2],encoding='utf-8') )
                 _lists.append(m_list)            
             
             
