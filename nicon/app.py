@@ -126,7 +126,7 @@ def getNicon():
         dd.update_nicon_state();
     
     except Exception as e:
-        print( 'getNicon', e )
+        print( 'function getNicon() exception => ', e )
     finally:
         pass
     
@@ -205,10 +205,14 @@ if __name__ == "__main__":
     #schedule.every(15).seconds.do( fn_test1 )
 
     _db_conn = dbcon.DbConn()
+    
+    getNicon()
+
     _rewind_sec = _db_conn.getNiconStateRewindSec()    
     
     # 상품정보 수집
     schedule.every( _rewind_sec ).seconds.do( getNicon )    
+    
     # 판매정보 수집
     #schedule.every().days.do( fn_history )
     schedule.every().day.at('00:10').do(fn_history)
