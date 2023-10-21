@@ -72,6 +72,7 @@ def getNicon():
             category_nm = ii[2] #카테리고리명
             __details = dd.get_nicon_job_detail( {'category_id':category_id } )         # 검증 세부 레스트
             url = 'https://api2.ncnc.app/con-items?forSeller=1&conCategory2Id='+category_id
+            #print('*'*100,'시작')
             #print(category_id , category_nm)
             
             
@@ -81,6 +82,7 @@ def getNicon():
             if response.status_code == 200:
                 txt = response.json()
                 lists = txt['conItems']
+                
                 
                 for list in lists:
     
@@ -96,7 +98,7 @@ def getNicon():
                             param = {'category_id':category_id ,'category_nm' : category_nm ,'id': id , 'name':name , 'amount': amount , 'refuse' : refuse , 'block': block }
                             
                             res = dd.get_prod_chg(param)
-                            #print(param)
+                            print(param)
                             #print(len(res))
                             sent_text = ''
                             sent_text += category_nm+' / '+name+'\n'
@@ -104,15 +106,16 @@ def getNicon():
                             sent_text += '매입 : '+( '매입중' if refuse == 0 else '매입보류')
                             #print(sent_text)
                             if len(res) == 0: # 신규일경우
+                                print('신규 insert')
                                 dd.insert_nicon(param)
                                 print('신규 : ',param)
                                 #asyncio.run( telegram_send(sent_text , detail[3] ) )
                                 send_telegram_message(sent_text , detail[3] )
     
                             else : #기존 상품일경우
-                                result = dd.get_nicon( param )
-    
-                                if result[0][0] == b'F':
+                                print('기존 insert')
+                                result = dd.get_nicon( param )    
+                                if result[0][0] == 'F':
                                     dd.update_nicon(param)
                                     print('변경 : ',param)                                    
                                     #asyncio.run( telegram_send(sent_text, detail[3] ) )
