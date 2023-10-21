@@ -32,7 +32,7 @@ class DbConn(object):
                 " , max( category_nm ) category_nm "
                 " from nicon_job_list "
                 " where upper(use_yn) = 'Y' "
-                " and category_id = '61' " 
+                #" and category_id = '61' " 
                 " group by category_id "
                 " order by lpad(category_id,6,0) "    
             )
