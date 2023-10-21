@@ -32,6 +32,7 @@ class DbConn(object):
                 " , max( category_nm ) category_nm "
                 " from nicon_job_list "
                 " where upper(use_yn) = 'Y' "
+                " and category_id = '61' " 
                 " group by category_id "
                 " order by lpad(category_id,6,0) "    
             )
@@ -47,7 +48,7 @@ class DbConn(object):
                 s_list = []
                                 
                 _strs =  i[1].split('^')
-                print('get_job_list',_strs)
+                print(i[0],'\t', i[2],'\t',_strs)
 
                 
                 for item in _strs:
