@@ -92,27 +92,42 @@ class MyApp(QWidget):
             self.gpbox2_2.setVisible(True)
     
     def merge_exec(self):
-        if self._div == '1':
-            print('cvs 기준') # self._target_cvs_list
-            self._target_cvs_list = []
-            # self.cvs_text
-            _temp = self.cvs_text.toPlainText()
-            _temp = _temp.split('\n')                                    
-            for i in _temp:
-                ii = i.replace(' ','')
-                self._target_cvs_list.append( ii.split(',') )
-            
-            
-            
-            for i in self._target_cvs_list:
-                self.mk_img(i[0],i[1],i[2])  
+        
+        try:        
+            _chk1 = (False if len(self.file_lb.text()) > 0 else True)
+            _chk2 = (False if self._gps_x > 0 else True)
+            _chk3 = (False if self._gps_y > 0 else True)
+            if self._div == '1':
+                _chk4 = (False if len(self.cvs_text.toPlainText()) > 0 else True)
+            else :
+                _chk4 = (False if len(self.cvs_text2.toPlainText()) > 0 else True)
+            _chk5 = (False if len( self.export_fold_lb.text() ) > 0 else True)
             
 
-            
-        else:
-            print('이미지 기준')
-            for i in self._target_img_list:
-                self.mk_img2( i )
+
+        
+            if _chk1 or _chk2 or _chk3 or _chk4 or _chk5:
+                print('adfadsf')
+                QMessageBox.about(self,'확인','안됨 이미지 합성 안됨...')
+            else :
+                if self._div == '1':
+                    print('cvs 기준') # self._target_cvs_list
+                    self._target_cvs_list = []
+                    # self.cvs_text
+                    _temp = self.cvs_text.toPlainText()
+                    _temp = _temp.split('\n')                                    
+                    for i in _temp:
+                        ii = i.replace(' ','')
+                        self._target_cvs_list.append( ii.split(',') )            
+                    for i in self._target_cvs_list:
+                        self.mk_img(i[0],i[1],i[2])              
+                else:
+                    print('이미지 기준')
+                    for i in self._target_img_list:
+                        self.mk_img2( i )
+        except Exception as e:
+            print('merge_exec chk' , e)
+        
             
     
 
@@ -236,7 +251,7 @@ class MyApp(QWidget):
         self.submit_bnt = QPushButton('6.합성',self)
         self.submit_bnt.setStyleSheet('QPushButton {	color: rgb(58, 134, 255);	background-color: white;	border: 2px solid rgb(58, 134, 255);	border-radius: 5px;}')
         self.submit_bnt.clicked.connect(self.merge_exec)  
-        self.submit_bnt.setGeometry(520,730,500,30) # x , y , w , h   
+        self.submit_bnt.setGeometry(520,710,500,50) # x , y , w , h   
         
         
 
