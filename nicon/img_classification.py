@@ -48,6 +48,8 @@ def getText( _ocr ,  _url  ):
         if _txt != '':
             if len(re.sub('[^0-9]' ,'' , _txt)) <= 5:
                 _rt.append( _txt )
+
+    # 숫자만 , 숫자원 단어는 뒷자리 제외 , 순수한글일경우 4글자만 사용
     for txt in _rt:        
         if( '기간' in  txt or '사용' in  txt or '유효' in txt ):
             break
@@ -56,11 +58,18 @@ def getText( _ocr ,  _url  ):
         elif ( '교환' in txt or '제휴' in txt or '수량' in txt):
             print('제외',txt)        
         elif ( len( re.findall( '\d+만' ,txt ) ) >=1 ):
-            _fin_txt.append( txt )
+            _str = re.findall( '\d+만' ,txt )[0]
+            _fin_txt.append( txt[0: _str.find(_str)+len(_str) ] )
         elif ( len( re.findall( '\d+원' ,txt ) ) >=1 ):
-            _fin_txt.append( txt )            
+            _str = re.findall( '\d+원' ,txt )[0]
+            _fin_txt.append( txt[0: _str.find(_str)+len(_str) ] )            
         elif len(re.sub( '[a-z0-9]','', txt )) >2:
-            _fin_txt.append(txt)
+            if ('만' in txt or '원'  in txt) :
+                _fin_txt.append(txt)
+            elif len(txt) >= 5:
+                _fin_txt.append( txt[1:-1] )           
+            else :
+                _fin_txt.append(txt)
     return _fin_txt
     
 
