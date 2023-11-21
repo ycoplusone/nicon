@@ -116,7 +116,7 @@ def fnLoging():
     time.sleep(0.5)
     '''
 
-def fnDiv01( str = '카' ):
+def fnDiv01( str = '카' ): #str = '카'
     '''대분류 찾기'''
     _state = False    
     try:
@@ -147,7 +147,7 @@ def fnDiv01( str = '카' ):
         print('ERROR fnDiv01',e)
         return _state
 
-def fnDiv02( _str = '투썸플레이스' ):
+def fnDiv02( _str = '투썸플레이스' ): # _str = '투썸플레이스'
     '''중분류 찾기(카테고리 찾기)'''    
     _state = False
     try:
@@ -161,39 +161,46 @@ def fnDiv02( _str = '투썸플레이스' ):
         print('ERROR fnDiv02',e)
         return _state
 
-
-def fnDiv03( _str = '아메리카노 L' ):
+def fnDiv03( _str = '아메리카노 L' ): # _str = '아메리카노 L'
     '''하분류 찾기(상품 차지)'''
     _state = False
     global driver
     item_name  = '//*[@id="items-container"]/a[2]'
     item_state = '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[2]/div[2]'
-    item_seq = '2'
+    item_seq = 2        
+    flag = True
+    _ttt = ''
     try:
         fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') #검색바 클릭
         fnCopyNpaste( _str )    
+        
+        while( flag ):            
+            _ttt       = "/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[{}]/div[1]/div[1]".format(item_seq)
+            item_state = "/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[{}]/div[2]".format(item_seq)
+            print( '_ttt : ',_ttt,' / flag : ',flag )
+            # 상품 리스트 가져오기
+            titles = WebDriverWait(driver, 1).until(EC.presence_of_all_elements_located((By.XPATH, _ttt )))
+            #복수개(3개)의 앨리먼트가 추출 됨 (3개중 마지막)
+            for title in titles:
+                print(' ==> ',title.tag_name ,' / ' , title.text,' / ' , title.get_attribute('xpath'))
+                print( title.text == _str )
+                if title.text == _str:
+                    flag = False
+                    break
+            item_seq += 1
+        
 
-        # 상품 리스트 가져오기
-        print('시작', w2ji.getNow() ,'-'*10)
-        titles = WebDriverWait(driver, 1).until(EC.presence_of_all_elements_located((By.XPATH, "//*[@class='horizontal-box']")))        
-        print('종료',w2ji.getNow(),'-'*10)
-        
-        # 복수개(3개)의 앨리먼트가 추출 됨 (3개중 마지막)
-        for title in titles:
-            print(title.tag_name , title.text , title.get_attribute('xpath'))
-        
         _sale_type = fnText( item_state ) #상품판매상태 확인
         print('_sale_type : ', _sale_type )
         print('item_name  : ', item_name  )
-        print('item_state : ', item_state )
-        _sale_type = ''
+        print('item_state : ', item_state )        
 
         if (_sale_type == '매입보류') or (_sale_type=='') :
             w2ji.send_telegram_message( _str+' : '+ '매입보류' )
             _state = False
         else :
-            #fnClick( '//*[@id="items-container"]/a[2]') # 두번째 아이콘 클릭
-            fnClick( item_name ) # 두번째 클릭
+            fnClick( _ttt ) # 두번째 아이콘 클릭
+            #fnClick( item_name ) # 두번째 클릭
             _state = True
         
         return _state
