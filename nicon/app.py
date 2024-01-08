@@ -72,32 +72,39 @@ def getNicon():
             category_nm = ii[2] #카테리고리명
             __details = dd.get_nicon_job_detail( {'category_id':category_id } )         # 검증 세부 레스트
             url = 'https://api2.ncnc.app/con-items?forSeller=1&conCategory2Id='+category_id
-            #print(category_id , category_nm)
-            
-            
-            
+           
             response = requests.get(url)
             
             if response.status_code == 200:
                 txt = response.json()
-                datas = txt['conItems']
-                datas = sorted( datas , key=itemgetter('name','askingPrice') , reverse=False)
-                lists = list( {data['name']:data for data in datas}.values()) # 중복제거
+                datasets = txt['conItems']
+                sets = []
+                # None 값 0 처리
+                for i in datasets:
+                    aa = { 'id':i['id']
+                        , 'name':i['name']
+                        , 'askingPrice' : (0 if i['askingPrice'] is None else i['askingPrice'])
+                        , 'isRefuse':i['isRefuse']
+                        , 'isBlock':i['isBlock']
+                        , 'conCategory2Id':i['conCategory2Id']
+                        , 'imageUrl':i['imageUrl']
+                        }
+                    sets.append( aa )
+                    
+                sets2 = sorted( sets , key=itemgetter('name','askingPrice') , reverse=False) # 정렬
+                lists = (list({set['name']: set for set in sets2}.values())) # 중복제거
                 
-                for list in lists:
-    
+                for ll in lists:    
                     for detail in __details: # 상품명 리스트      
-                        if ( detail[2] == list['name'].strip() ):                                  
-                            id = list['id']
-                            name = list['name'].strip()
-                            amount = list['askingPrice']
-                            refuse = list['isRefuse']
-                            block  = list['isBlock']
+                        if ( detail[2] == ll['name'].strip() ):                                  
+                            id      = ll['id']
+                            name    = ll['name'].strip()
+                            amount  = ll['askingPrice']
+                            refuse  = ll['isRefuse']
+                            block   = ll['isBlock']
                             param = {'category_id':category_id ,'category_nm' : category_nm ,'id': id , 'name':name , 'amount': amount , 'refuse' : refuse , 'block': block }
                             
                             res = dd.get_prod_chg(param)
-                            #print(param)
-                            #print(len(res))
                             sent_text = ''
                             sent_text += category_nm+' / '+name+'\n'
                             sent_text += "가격 : {}".format(amount)+'\n'
