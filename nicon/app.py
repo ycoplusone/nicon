@@ -9,7 +9,7 @@ from datetime import datetime
 import json
 import random
 from pytz import timezone
-    
+from operator import itemgetter    
     
 
 '''
@@ -72,7 +72,6 @@ def getNicon():
             category_nm = ii[2] #카테리고리명
             __details = dd.get_nicon_job_detail( {'category_id':category_id } )         # 검증 세부 레스트
             url = 'https://api2.ncnc.app/con-items?forSeller=1&conCategory2Id='+category_id
-            #print('*'*100,'시작')
             #print(category_id , category_nm)
             
             
@@ -82,14 +81,12 @@ def getNicon():
             if response.status_code == 200:
                 txt = response.json()
                 lists = txt['conItems']
-                
+                lists = sorted( lists , key=itemgetter('name','askingPrice') , reverse=True)
                 
                 for list in lists:
     
-                    for detail in __details: # 상품명 리스트  
-                        #print(str ,str in name , name )        
-                        if ( detail[2] == list['name'].strip() ):
-                                  
+                    for detail in __details: # 상품명 리스트      
+                        if ( detail[2] == list['name'].strip() ):                                  
                             id = list['id']
                             name = list['name'].strip()
                             amount = list['askingPrice']
@@ -98,7 +95,7 @@ def getNicon():
                             param = {'category_id':category_id ,'category_nm' : category_nm ,'id': id , 'name':name , 'amount': amount , 'refuse' : refuse , 'block': block }
                             
                             res = dd.get_prod_chg(param)
-                            print(param)
+                            #print(param)
                             #print(len(res))
                             sent_text = ''
                             sent_text += category_nm+' / '+name+'\n'
@@ -106,20 +103,20 @@ def getNicon():
                             sent_text += '매입 : '+( '매입중' if refuse == 0 else '매입보류')
                             #print(sent_text)
                             if len(res) == 0: # 신규일경우
-                                print('신규 insert')
                                 dd.insert_nicon(param)
                                 print('신규 : ',param)
                                 #asyncio.run( telegram_send(sent_text , detail[3] ) )
                                 send_telegram_message(sent_text , detail[3] )
     
                             else : #기존 상품일경우
-                                print('기존 insert')
                                 result = dd.get_nicon( param )    
-                                if result[0][0] == 'F':
+                                if result[0][0] == b'F':
                                     dd.update_nicon(param)
                                     print('변경 : ',param)                                    
                                     #asyncio.run( telegram_send(sent_text, detail[3] ) )
                                     send_telegram_message(sent_text , detail[3] )
+                            
+                            break # 맞는 상품을 한번만 찾으면 처리후 바로 다음으로 넘어간다.
                                     
             else : 
                 print(response.status_code)
