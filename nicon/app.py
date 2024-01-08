@@ -80,8 +80,9 @@ def getNicon():
             
             if response.status_code == 200:
                 txt = response.json()
-                lists = txt['conItems']
-                lists = sorted( lists , key=itemgetter('name','askingPrice') , reverse=True)
+                datas = txt['conItems']
+                datas = sorted( datas , key=itemgetter('name','askingPrice') , reverse=False)
+                lists = list( {data['name']:data for data in datas}.values()) # 중복제거
                 
                 for list in lists:
     
@@ -116,7 +117,6 @@ def getNicon():
                                     #asyncio.run( telegram_send(sent_text, detail[3] ) )
                                     send_telegram_message(sent_text , detail[3] )
                             
-                            break # 맞는 상품을 한번만 찾으면 처리후 바로 다음으로 넘어간다.
                                     
             else : 
                 print(response.status_code)
