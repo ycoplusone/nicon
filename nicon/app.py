@@ -105,8 +105,11 @@ def getNicon():
                                 send_telegram_message(sent_text , detail[3] )
     
                             else : #기존 상품일경우
-                                result = dd.get_nicon( param )    
-                                if result[0][0] == b'F':
+                                result = dd.get_nicon( param )   
+                                #print( param ) 
+                                #print( '','값',result[0][0]  )
+                                #print( '','조건',result[0][0] == 'F' )
+                                if result[0][0] == 'F':
                                     dd.update_nicon(param)
                                     print('변경 : ',param)                                    
                                     #asyncio.run( telegram_send(sent_text, detail[3] ) )
