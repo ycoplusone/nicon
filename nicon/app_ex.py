@@ -1,5 +1,5 @@
 import requests
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 from datetime import datetime
 from pytz import timezone
 import json
