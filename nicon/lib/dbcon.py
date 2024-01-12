@@ -32,7 +32,6 @@ class DbConn(object):
                 " , max( category_nm ) category_nm "
                 " from nicon_job_list "
                 " where upper(use_yn) = 'Y' "
-                #" and category_id = '61' " 
                 " group by category_id "
                 " order by lpad(category_id,6,0) "    
             )
@@ -48,7 +47,7 @@ class DbConn(object):
                 s_list = []
                                 
                 _strs =  i[1].split('^')
-                print(i[0],'\t', i[2],'\t',_strs)
+                print('get_job_list',_strs)
 
                 
                 for item in _strs:
@@ -400,3 +399,74 @@ class DbConn(object):
             print( 'upsert_nicon_sale_info', e ,'\n',query ,'\n',param )
         finally:
             pass                     
+
+    def upsert_ex_info(self , param ):
+        ''' 환율 업데이트 '''
+        try :
+            cur = self.__conn.cursor()                        
+            query = (
+                " INSERT INTO exchange_rate_other_currency (BASE_DT, CUR_ID, CUR_NM, TO_CUR_ID,INPUT_DT, RATE,U_DATE,c_date) "
+                " VALUES('{BASE_DT}', '{CUR_ID}', '{CUR_NM}', '{TO_CUR_ID}','{INPUT_DT}', '{RATE}', now(), now() ) "
+                " on DUPLICATE key update INPUT_DT='{INPUT_DT}' , RATE='{RATE}' , PRE_RATE=RATE , PRE_U_DATE=U_DATE, u_date = now() "
+            )
+            query = query.format( **param )     
+            
+            cur.execute( query )
+            self.__conn.commit()
+        except Exception as e:
+            print( 'upsert_ex_info', e ,'\n',query ,'\n',param )
+        finally:
+            pass                     
+
+    def get_ex_info(self , param): 
+              
+        try :
+            _lists = []
+            query = (
+                " select a.BASE_DT , a.CUR_ID , a.CUR_NM , a.RATE , a.INPUT_DT  , b.amt BANK_FIX_RATE "
+                " from exchange_rate_other_currency a "
+                " join exchange_shinhan_info b on (a.base_dt = b.base_dt ) "
+                " where a.BASE_DT = ( select max(base_dt) from exchange_shinhan_info ) "
+                " AND a.CUR_ID = '{CUR_ID}' "
+            )
+            query = query.format( **param )
+            #cur = self.__conn.cursor()            
+            cur = self.__conn.cursor(  pymysql.cursors.DictCursor)            
+            cur.execute( query )            
+            return cur.fetchall()         
+        except Exception as e:
+            print( 'get_ex_info => ' , e )  
+
+    def upsert_ex_info2(self , param ):
+        ''' 환율 업데이트 '''
+        try :
+            cur = self.__conn.cursor()                        
+            query = (
+                " INSERT INTO exchange_info (BASE_DT, CUR_ID , KIND , QTY, AMT, ACC, u_date, c_date)  "
+                " VALUES('{BASE_DT}', '{CUR_ID}', '{kind}', {QTY}, {AMT},{ACC}, now(), now() ) "
+                " on DUPLICATE key update QTY='{QTY}' , AMT='{AMT}' , ACC={ACC} , u_date = now() "
+            )
+            query = query.format( **param )
+            cur.execute( query )
+            self.__conn.commit()
+        except Exception as e:
+            print( 'upsert_ex_info2', e ,'\n',query ,'\n',param )
+        finally:
+            pass                     
+
+    def upsert_shini_info(self , param ):
+        ''' 신한 업데이트 '''
+        try :
+            cur = self.__conn.cursor()                        
+            query = (
+                " INSERT INTO exchange_shinhan_info (BASE_DT, AMT, u_date, c_date)  "
+                " VALUES('{BASE_DT}', {AMT}, now(), now()) "
+                " on DUPLICATE key update amt= {AMT} , u_date = now() "
+            )
+            query = query.format( **param )
+            cur.execute( query )
+            self.__conn.commit()
+        except Exception as e:
+            print( 'upsert_shini_info', e ,'\n',query ,'\n',param )
+        finally:
+            pass            

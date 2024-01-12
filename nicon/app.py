@@ -10,7 +10,9 @@ import json
 import random
 from pytz import timezone
 from operator import itemgetter    
-    
+
+import app_ex as ex
+import math    
 
 '''
 "id":1114,"name":"싱글레귤러 아이스크림","askingPrice":2950,"isRefuse":1,"isBlock":0
@@ -77,22 +79,8 @@ def getNicon():
             
             if response.status_code == 200:
                 txt = response.json()
-                datasets = txt['conItems']
-                sets = []
-                # None 값 0 처리
-                for i in datasets:
-                    aa = { 'id':i['id']
-                        , 'name':i['name']
-                        , 'askingPrice' : (0 if i['askingPrice'] is None else i['askingPrice'])
-                        , 'isRefuse':i['isRefuse']
-                        , 'isBlock':i['isBlock']
-                        , 'conCategory2Id':i['conCategory2Id']
-                        , 'imageUrl':i['imageUrl']
-                        }
-                    sets.append( aa )
-                    
-                sets2 = sorted( sets , key=itemgetter('name','askingPrice') , reverse=False) # 정렬
-                lists = (list({set['name']: set for set in sets2}.values())) # 중복제거
+                lists = txt['conItems']
+                
                 
                 for ll in lists:    
                     for detail in __details: # 상품명 리스트      
@@ -205,6 +193,22 @@ def fnRewindSec():
     schedule.every().day.at('00:10').do(fn_history)
     schedule.every(30).minutes.do( fnRewindSec )
 
+def get_ex_data():
+    '''환율 가져오기'''
+
+    start = time.time()    
+    ex.get_usd_curreny()
+    ex.visa()
+    _ex_list = ex.get_ex_list()
+    _ex_list.append( {'ex_id':'USD','ex_nm':'미국' ,'to_ex':'KRW'              ,'min':1,'max':30,'step':0.01} )
+    
+    for i in _ex_list:
+        ex.cal_rating(  i  )
+    
+    end = time.time()
+    print(f"환율 소요시간 : {end - start:.5f} sec")
+
+
 
 if __name__ == "__main__":    
     #_rewind_sec = 5
@@ -225,6 +229,11 @@ if __name__ == "__main__":
     schedule.every().day.at('00:10').do(fn_history)
     # 반복 초 변경
     schedule.every(30).minutes.do( fnRewindSec )    
+
+    # 환율 매시간만다 가져오기.
+    get_ex_data()
+    schedule.every(1).hour.do( get_ex_data )
+
     
     while True:
         schedule.run_pending()
