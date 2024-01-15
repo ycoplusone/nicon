@@ -6,6 +6,7 @@ import json
 import math
 import time
 import numpy as np
+import schedule
 
 import lib.dbcon as dbcon 
 
@@ -248,25 +249,31 @@ def cal_rating( _param ):
         #return _amt_tot   
     
     
+def get_ex_data():
+    '''환율 가져오기'''
 
+    start = time.time()    
+    get_usd_curreny()
+    visa()
+    _ex_list = get_ex_list()
+    _ex_list.append( {'ex_id':'USD','ex_nm':'미국' ,'to_ex':'KRW'              ,'min':1,'max':30,'step':0.01} )
+    
+    for i in _ex_list:
+        cal_rating(  i  )
+
+    end = time.time()
+    print(f"환율 소요시간 : {end - start:.5f} sec")
 
 
 
 
 if __name__ == "__main__":    
     print('환율 시작')
-    get_usd_curreny()
-    '''
-    visa()
+    get_ex_data()
+    schedule.every(30).minutes.do( get_ex_data )    
 
-    aa = get_ex_list()
-    aa.append( {'ex_id':'USD','ex_nm':'미국' ,'to_ex':'KRW'              ,'min':1,'max':30,'step':0.01} )
     
-    for i in aa:
-        start = time.time()
-        math.factorial(100000)
-        #print( i ,'='*50)
-        cal_rating(  i  )
-        end = time.time()
-        print(f"{end - start:.5f} sec")
-    '''
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+    
