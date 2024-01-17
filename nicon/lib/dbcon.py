@@ -398,7 +398,25 @@ class DbConn(object):
         except Exception as e:
             print( 'upsert_nicon_sale_info', e ,'\n',query ,'\n',param )
         finally:
-            pass                     
+            pass             
+
+    def get_ex_kind(self , param):               
+        try :
+            _lists = []
+            query = (
+                " SELECT CUR_ID ex_id, CUR_NM ex_nm, TO_CUR_ID to_ex, MIN_AMT min, MAX_AMT max, STEP step, correction_amt  "
+                " FROM exchange_kind "
+                " WHERE EX_USE like '{ex_use}' "
+                " order by sort , cur_id "
+            )
+            query = query.format( **param )
+            cur = self.__conn.cursor(  pymysql.cursors.DictCursor)            
+            cur.execute( query )            
+            return cur.fetchall()         
+        except Exception as e:
+            print( 'get_ex_kind => ' , e )
+
+
 
     def upsert_ex_info(self , param ):
         ''' 환율 업데이트 '''
@@ -418,8 +436,7 @@ class DbConn(object):
         finally:
             pass                     
 
-    def get_ex_info(self , param): 
-              
+    def get_ex_info(self , param):               
         try :
             _lists = []
             query = (
@@ -435,7 +452,7 @@ class DbConn(object):
             cur.execute( query )            
             return cur.fetchall()         
         except Exception as e:
-            print( 'get_ex_info => ' , e )  
+            print( 'get_ex_info => ' , e )
 
     def upsert_ex_info2(self , param ):
         ''' 환율 업데이트 '''
