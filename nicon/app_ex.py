@@ -11,73 +11,25 @@ import schedule
 import lib.dbcon as dbcon 
 
 
-def get_ex_list(): #환율코드정보
+def get_ex_list( ex_use ): #환율코드정보
     '''환율코드 리스트 정보'''
-    _ex_kinds = [    
-     #{'ex_id':'USD','ex_nm':'미국' ,'to_ex':'KRW'              ,'min':1,'max':20,'step':0.01}
-    {'ex_id':'EUR','ex_nm':'유로' ,'to_ex':'USD'               ,'min':1,'max':20,'step':0.01}
-    ,{'ex_id':'JPY','ex_nm':'일본 엔' ,'to_ex':'USD'          ,'min':500,'max':2500,'step':1}
-    ,{'ex_id':'GBP','ex_nm':'영국 파운드' ,'to_ex':'USD'      ,'min':1,'max':20,'step':0.01}
-    ,{'ex_id':'AUD','ex_nm':'호주 달러' ,'to_ex':'USD'        ,'min':3,'max':30,'step':0.01}
-    ,{'ex_id':'CAD','ex_nm':'캐나다 달러'  ,'to_ex':'USD'     ,'min':3,'max':30,'step':0.01}
-    ,{'ex_id':'CHF','ex_nm':'스위스 프랑' ,'to_ex':'USD'      ,'min':1,'max':20,'step':0.01}
-    ,{'ex_id':'CNY','ex_nm':'중국 위안 인민폐','to_ex':'USD'   ,'min':10,'max':200,'step':0.01}
-    ,{'ex_id':'AED','ex_nm':'UAE 디르함'  ,'to_ex':'USD'      ,'min':1,'max':100,'step':0.01}
-    ,{'ex_id':'ARS','ex_nm':'아르헨티나 페소' ,'to_ex':'USD'   ,'min':2500,'max':20000,'step':1}
-    ,{'ex_id':'BDT','ex_nm':'방글라데시 타카' ,'to_ex':'USD'   ,'min':250,'max':2000,'step':0.01}
-    ,{'ex_id':'BRL','ex_nm':'브라질 레알'  ,'to_ex':'USD'     ,'min':10,'max':100,'step':0.01}
-    ,{'ex_id':'CLP','ex_nm':'칠레 페소' ,'to_ex':'USD'        ,'min':2000,'max':17000,'step':1}
-    ,{'ex_id':'CZK','ex_nm':'체코 코루나'  ,'to_ex':'USD'     ,'min':50,'max':400,'step':0.01}
-    ,{'ex_id':'DKK','ex_nm':'덴마크 크로네' ,'to_ex':'USD'    ,'min':15,'max':150,'step':0.01}
-    ,{'ex_id':'EGP','ex_nm':'이집트 파운드'  ,'to_ex':'USD'   ,'min':60,'max':600,'step':0.01}
-    ,{'ex_id':'HKD','ex_nm':'홍콩 달러'  ,'to_ex':'USD'       ,'min':15,'max':150,'step':0.01}
-    ,{'ex_id':'HUF','ex_nm':'헝가리 포린트'  ,'to_ex':'USD'   ,'min':700,'max':7000,'step':1}
-    ,{'ex_id':'IDR','ex_nm':'인도네시아 루피아' ,'to_ex':'USD' ,'min':30000,'max':200000,'step':1}
-    ,{'ex_id':'INR','ex_nm':'인도 루피'  ,'to_ex':'USD'       ,'min':150,'max':1500,'step':0.01}
-    ,{'ex_id':'KRW','ex_nm':'대한민국 원'   ,'to_ex':'USD'    ,'min':5000,'max':20000,'step':1}
-    ,{'ex_id':'LKR','ex_nm':'스리랑카 루피' ,'to_ex':'USD'    ,'min':700,'max':6000,'step':1}
-    ,{'ex_id':'MOP','ex_nm':'마카오 파타카' ,'to_ex':'USD'    ,'min':15,'max':150,'step':0.01}
-    ,{'ex_id':'MXN','ex_nm':'멕시코 페소'  ,'to_ex':'USD'     ,'min':30,'max':330,'step':0.01}
-    ,{'ex_id':'MYR','ex_nm':'말레이시아 링깃'  ,'to_ex':'USD'  ,'min':10,'max':100,'step':0.01}
-    ,{'ex_id':'NGN','ex_nm':'나이지리아 나이라' ,'to_ex':'USD' ,'min':2000,'max':15000,'step':1}
-    ,{'ex_id':'NOK','ex_nm':'노르웨이 크로네' ,'to_ex':'USD'   ,'min':20,'max':200,'step':0.01}
-    ,{'ex_id':'NPR','ex_nm':'네팔 루피'     ,'to_ex':'USD'    ,'min':300,'max':2800,'step':1}
-    ,{'ex_id':'NZD','ex_nm':'뉴질랜드 달러'  ,'to_ex':'USD'    ,'min':1,'max':30,'step':0.01}
-    ,{'ex_id':'PEN','ex_nm':'페루 누에보솔'  ,'to_ex':'USD'   ,'min':5,'max':75,'step':0.01}
-    ,{'ex_id':'PHP','ex_nm':'필리핀 페소'    ,'to_ex':'USD'   ,'min':100,'max':1500,'step':0.01}
-    ,{'ex_id':'PLN','ex_nm':'폴란드어 뉴즐로티','to_ex':'USD' ,'min':7,'max':75,'step':0.01}
-    ,{'ex_id':'RON','ex_nm':'루마니아어 레이' ,'to_ex':'USD'  ,'min':10,'max':100,'step':0.01}
-    ,{'ex_id':'RUB','ex_nm':'러시아 루블'    ,'to_ex':'USD'   ,'min':200,'max':2000,'step':0.01}
-    ,{'ex_id':'SAR','ex_nm':'사우디 리얄'   ,'to_ex':'USD'    ,'min':6,'max':75,'step':0.01}
-    ,{'ex_id':'SEK','ex_nm':'스웨덴 크로나'  ,'to_ex':'USD'   ,'min':25,'max':200,'step':0.01}
-    ,{'ex_id':'SGD','ex_nm':'싱가포르 달러'  ,'to_ex':'USD'   ,'min':2,'max':25,'step':0.01}
-    ,{'ex_id':'THB','ex_nm':'태국 바트'    ,'to_ex':'USD'     ,'min':75,'max':750,'step':0.01}
-    ,{'ex_id':'TRY','ex_nm':'터키 리라'     ,'to_ex':'USD'    ,'min':75,'max':600,'step':0.01}
-    ,{'ex_id':'TWD','ex_nm':'신대만 달러'   ,'to_ex':'USD'    ,'min':60,'max':600,'step':0.01}
-    ,{'ex_id':'UAH','ex_nm':'우크라이나 흐리브냐','to_ex':'USD','min':85,'max':750,'step':0.01}
-    ,{'ex_id':'UYU','ex_nm':'우루과이 페소'  ,'to_ex':'USD'   ,'min':80,'max':750,'step':0.01}
-    ,{'ex_id':'VND','ex_nm':'베트남 동'    ,'to_ex':'USD'     ,'min':40000,'max':400000,'step':1}
-    ]
+    dd = dbcon.DbConn()    
+    _ex_kinds = dd.get_ex_kind( {'ex_use': ex_use })
     return _ex_kinds
 
 
 
 def get_usd_curreny():
-
-    # db 객체
-    dd = dbcon.DbConn()    
+    '''신한 은행 송금 환율 정보 가져오기'''    
+    dd = dbcon.DbConn()    # db 객체
     korea_timezone = timezone('Asia/Seoul')
-    # now = datetime.now(korea_timezone)
-
     dt = datetime.today()
     st = dt.astimezone(korea_timezone)
     today = st.strftime('%Y%m%d')
     data = {"dataBody":{"ricInptRootInfo":{"serviceType":"GU","serviceCode":"F3730","nextServiceCode":"","pkcs7Data":"","signCode":"","signData":"","useSign":"","useCert":"","permitMultiTransaction":"","keepTransactionSession":"","skipErrorMsg":"","mode":"","language":"ko","exe2e":"","hideProcess":"","clearTarget":"","callBack":"shbObj.fncF3730Callback","exceptionCallback":"","requestMessage":"","responseMessage":"","serviceOption":"","pcLog":"","preInqForMulti":"","makesum":"","removeIndex":"","redirectUrl":"","preInqKey":"","_multi_transfer_":"","_multi_transfer_count_":"","_multi_transfer_amt_":"","userCallback":"","menuCode":"","certtype":"","fromMulti":"","fromMultiIdx":"","isRule":"N","webUri":"/index.jsp","gubun":"","tmpField2":""},"조회구분":"","조회일자":today,"고시회차":1,"조회일자_display":"","startPoint":"","endPoint":""},"dataHeader":{"trxCd":"RSHRC0213A01","language":"ko","subChannel":"49","channelGbn":"D0"}}
     url = 'https://bank.shinhan.com/serviceEndpoint/httpDigital'
-
     try:
         res = requests.post(url, data=json.dumps(data))
-
         currency_exchanges = res.json()['dataBody']['R_RIBF3730_1']
         _aaa = {'BASE_DT': today ,'CODE': currency_exchanges[0]['통화CODE'], 'AMT': currency_exchanges[0]['전신환매도환율']}        
         dd.upsert_shini_info(_aaa)
@@ -95,9 +47,8 @@ def visa():
     _today_f    = _today.strftime('%m')+'%2F'+_today.strftime('%d')+'%2F'+_today.strftime('%Y')    
     _today_ymd  = _today.strftime('%Y%m%d')
     
-
     # 환율리스트 
-    _ex_kind     = get_ex_list()   
+    _ex_kind     = get_ex_list('Y')   
 
     # 브라우저 정보 넣기
     headers = {
@@ -113,8 +64,7 @@ def visa():
         print(url)
         
         try: 
-            res = requests.get(url , headers=headers)            
-            
+            res = requests.get(url , headers=headers)    
             if res.status_code == 200:
                 _txt = res.json()
                 _tmp = { 'BASE_DT'      : _today_ymd 
@@ -141,9 +91,10 @@ def visa():
         
 def cal_rating( _param ):
     '''환율 계산'''   
-    _min = _param['min']
-    _max = _param['max']
-    _step = _param['step']
+    _min = float( _param['min'] )
+    _max = float( _param['max'] )
+    _step = float( _param['step'] )
+    _correction_amt = float( _param['correction_amt'] )
     # db 객체
     dd = dbcon.DbConn()    
 
@@ -242,36 +193,46 @@ def cal_rating( _param ):
         _amt_tot.append( _amt_16 )
         _amt_tot.append( _amt_17 )
         
+        
+        # 보정 데이터 찾기
+        _amt_tot2 = []
         for i in _amt_tot:
+            _chk_amt = round(i['QTY'] + _correction_amt ,2)
+            for _list in _lists:
+                if _list['QTY'] == _chk_amt:
+                    _tmp = _list
+                    _tmp['kind'] = i['kind']
+                    _amt_tot2.append(  _tmp )
+        
+        
+        # 기록 하는 부분
+        for i in _amt_tot2:
             dd.upsert_ex_info2( i )
-        
-        
-        #return _amt_tot   
     
     
 def get_ex_data():
     '''환율 가져오기'''
-
     start = time.time()    
-    get_usd_curreny()
+    get_usd_curreny()       # 신한 송금 환율 정보 가져오기
     visa()
-    _ex_list = get_ex_list()
-    _ex_list.append( {'ex_id':'USD','ex_nm':'미국' ,'to_ex':'KRW'              ,'min':1,'max':30,'step':0.01} )
     
+    _ex_list = get_ex_list('%')
+        
     for i in _ex_list:
         cal_rating(  i  )
-
+    
     end = time.time()
     print(f"환율 소요시간 : {end - start:.5f} sec")
+    
 
 
 
 
 if __name__ == "__main__":    
     print('환율 시작')
-    get_ex_data()
+    
+    get_ex_data()    
     schedule.every(30).minutes.do( get_ex_data )    
-
     
     while True:
         schedule.run_pending()
