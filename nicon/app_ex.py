@@ -232,9 +232,10 @@ if __name__ == "__main__":
     print('환율 시작')
     
     get_ex_data()    
-    schedule.every(30).minutes.do( get_ex_data )    
+
+    #schedule.every(30).minutes.do( get_ex_data )    
     
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    #while True:
+    #    schedule.run_pending()
+    #    time.sleep(1)
     
