@@ -36,7 +36,7 @@ def fnText_1(str):
 
 def fnClick(str):
     global driver
-    time.sleep(0.3)
+    time.sleep(0.15)
     WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, str ))).click()
     
 
@@ -140,7 +140,7 @@ def fnDiv01( str = '카' ): #str = '카'
             _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[9]/div'        
             print(_div01)
         fnClick(_div01)
-        time.sleep(0.25)
+        time.sleep(0.15)
         _state = True
         return _state
     except Exception as e:
@@ -154,7 +154,7 @@ def fnDiv02( _str = '투썸플레이스' ): # _str = '투썸플레이스'
         fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') # 검색바 클릭
         fnCopyNpaste( _str )
         fnClick( '//*[@id="items-container"]/a[2]') #두번째 아이콘 클릭
-        time.sleep(0.25)
+        time.sleep(0.15)
         _state = True
         return _state
     except Exception as e:
@@ -233,7 +233,7 @@ def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
             telegram_str += '완료 : '+ w2ji.complete_fold(_fold_nm , False)
             w2ji.send_telegram_message(  telegram_str )
 
-        time.sleep(0.3)
+        time.sleep(0.15)
         driver.refresh() #브라이져 새로고침
     except Exception as e:
         print('fnSale',e)
@@ -274,12 +274,13 @@ if __name__ == "__main__":
         
         while(True):            
             _tmp = _dbconn.getNiconState()
-            if _lastupdate != _tmp:            
-                print('시작 : ',w2ji.getNow() )
+            #if _lastupdate != _tmp:            
+            if True:
+                
                 _lastupdate = _tmp
                 __lists    = _dbconn.get_nicon_upload_list()
-                for list in __lists:
-                    print('list : ',list)
+                print('시작 : ',w2ji.getNow() , '\t 상품 갯수 : ', len( __lists ))                
+                for list in __lists:                    
                     div01_str = list['div_nm']
                     div02_str = list['category_nm']
                     div03_str = list['prod_nm']
@@ -303,6 +304,6 @@ if __name__ == "__main__":
 
                         except Exception as e:
                             print( '판매 작업중 오류',e )
-            time.sleep(3)
+            time.sleep(2)
     except Exception as e:
         print('*'*50,'메인 에서의 오류',' == ',e)
