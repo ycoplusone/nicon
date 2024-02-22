@@ -41,13 +41,13 @@ class DbConn(object):
             cur.execute( query  )
             __dblists = cur.fetchall()
             
-            
+            print('get_job_list', len( __dblists ) )
             for i in __dblists:
                 m_list = []
                 s_list = []
                                 
                 _strs =  i[1].split('^')
-                print('get_job_list',_strs)
+                
 
                 
                 for item in _strs:
@@ -486,4 +486,38 @@ class DbConn(object):
         except Exception as e:
             print( 'upsert_shini_info', e ,'\n',query ,'\n',param )
         finally:
-            pass            
+            pass      
+
+
+    def upsert_soldout_info(self , param ):
+        '''  '''
+        try :
+            cur = self.__conn.cursor()                        
+            query = (
+                " INSERT INTO nicon_soldout_info (prod_nm, stats, reg_date)  "
+                " VALUES('{prod_nm}', '{stats}', now())  "
+                " on DUPLICATE key update stats='{stats}' ,  reg_date = now()  "
+            )
+            query = query.format( **param )
+            cur.execute( query )
+            self.__conn.commit()
+        except Exception as e:
+            print( 'upsert_soldout_info => ', e ,'\n',query ,'\n',param )
+        finally:
+            pass           
+
+    def get_soldout_info(self , param):               
+        try :
+            _lists = []
+            query = (
+                " select prod_nm , stats  "
+                " from nicon_soldout_info a "
+                " where 1=1 "                
+                " AND a.prod_nm = '{prod_nm}' "
+            )
+            query = query.format( **param )
+            cur = self.__conn.cursor(  pymysql.cursors.DictCursor)            
+            cur.execute( query )            
+            return cur.fetchall()         
+        except Exception as e:
+            print( 'get_ex_info => ' , e )
