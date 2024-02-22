@@ -74,7 +74,7 @@ def send_telegram_message2( message ):
 
         for chat in chats:
             url = 'https://api.telegram.org/bot{}/sendMessage'.format(token)
-            data = {'chat_id': chat , 'text': base_dttm+'\n'+message}
+            data = {'chat_id': chat , 'text': base_dttm+'\n'+message , 'parse_mode':'HTML' ,'disable_web_page_preview': True }
             response = requests.post(url, data=data)
             time.sleep(1)            
 
