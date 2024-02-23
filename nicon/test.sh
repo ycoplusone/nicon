@@ -1,1 +1,1 @@
-nohup python3 /nicon/nicon/app.py &
+nohup python3 ./nicon/nicon/app.py &
