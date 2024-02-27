@@ -186,9 +186,9 @@ def fnRewindSec():
 
 
 if __name__ == "__main__":    
-    getNicon() # 데이터 수집
-
-
+    fn_history() #판매정보 가져오기
+   
+ 
     
 
 
