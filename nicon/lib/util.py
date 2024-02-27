@@ -74,7 +74,6 @@ def into_rename_barcode():
                 __img = cv2.imdecode(__n, cv2.IMREAD_COLOR)
                 __barcode = decode(__img)      
                 __rename_file_nm=dirname+'\\'+'{0}_{1}{2}'.format(__barcode,uniq,__exc)
-                #__rename_file_nm = dirname+'\\'+__barcode+'_'+str(uniq)+__exc
                 os.rename( ii , __rename_file_nm )
                 uniq +=1
 
@@ -124,7 +123,8 @@ def init_fold( _dbconn ):
                     dd.insert_nicon_barcode(param)                    
                     shutil.move(file_names[0] , default_fold_nm )
                     del file_names[0]
-                    del file_nm[0]        
+                    del file_nm[0]    
+                        
                 cnt = cnt+ 1
     except Exception as e:
         print('init_fold : ',e)
