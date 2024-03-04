@@ -66,8 +66,7 @@ class DbConn(object):
 
     
     def get_prod_chg(self , param):        
-        try :
-            
+        try :            
             query = (
                 " select "
                 " category_id , id , name , amount , refuse  , block , c_date " 
@@ -398,7 +397,69 @@ class DbConn(object):
         except Exception as e:
             print( 'upsert_nicon_sale_info', e ,'\n',query ,'\n',param )
         finally:
-            pass             
+            pass            
+
+    def insert_nicon_client_log(self ):
+        '''insert_nicon_client_log'''
+        try :
+            cur = self.__conn.cursor()                        
+            query = (
+            " insert nicon_client_log(reg_date , send_time) values( now() , now() )  "
+            )
+            #query = query.format( **param )                      
+            cur.execute( query )
+            self.__conn.commit()
+        except Exception as e:
+            print( 'insert_nicon_client_log', e )
+        finally:
+            pass     
+
+    def update_nicon_client_log(self ,param ):
+        '''update_nicon_client_log '''
+        try :
+            cur = self.__conn.cursor()                        
+
+            query_del = (
+                " delete from nicon_client_log where reg_date <= DATE_ADD(now(), INTERVAL -7 day) "
+                )            
+            query = (
+                " update nicon_client_log "
+                " set send_yn = 'Y' , send_time = now() "
+                " where seq = {seq} "
+            )
+            cur.execute( query_del )
+            self.__conn.commit()            
+
+            query = query.format( **param )                      
+            cur.execute( query )
+            self.__conn.commit()          
+            
+        except Exception as e:
+            print( 'update_nicon_client_log error', e )
+        finally:
+            pass    
+
+
+    def get_nicon_client_log( self ):
+        try :
+            _lists = []
+            query = (
+                " SELECT  "
+                " seq , reg_date , send_yn "
+                " , case when TIMESTAMPDIFF(SECOND, reg_date, now() )>=300 then 'Y' else 'N' end diff_time "
+                " , case when TIMESTAMPDIFF(SECOND, send_time, now()) >=3600 then 'Y' else 'N' end send_time "
+                " from nicon_client_log  "
+                " order by reg_date desc "
+                " limit 1 "
+            )
+            #query = query.format( **param )
+            cur = self.__conn.cursor(  pymysql.cursors.DictCursor)            
+            cur.execute( query )            
+            return cur.fetchall()         
+        except Exception as e:
+            print( 'get_nicon_client_log => ' , e )
+
+
 
     def get_ex_kind(self , param):               
         try :
