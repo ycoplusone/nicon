@@ -75,8 +75,8 @@ def fnReadAlert():
 def fnLoging():
     '''로그인'''
     global driver
-    __id = 'ycoplusone'
-    __ps = 'natkfkdgo2@'    
+    __id = 'skfmtltm1052'
+    __ps = 'Natktkfkd84!'    
     time.sleep(0.2)
     fnClick('//*[@id="app"]/div/div[2]/div/section/section/nav/section/button')
     
@@ -275,11 +275,11 @@ if __name__ == "__main__":
         while(True):            
             _tmp = _dbconn.getNiconState()
             #if _lastupdate != _tmp:            
-            if True:
-                
+            if True:                
                 _lastupdate = _tmp
                 __lists    = _dbconn.get_nicon_upload_list()
                 print('시작 : ',w2ji.getNow() , '\t 상품 갯수 : ', len( __lists ))                
+                _dbconn.insert_nicon_client_log() #로그 등록
                 for list in __lists:                    
                     div01_str = list['div_nm']
                     div02_str = list['category_nm']
