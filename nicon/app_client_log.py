@@ -54,9 +54,4 @@ def main():
 
 
 if __name__ == "__main__":    
-    
-    
-    while(True):
-        print('시작 : ',w2ji.getNow() )
-        main() # 데이터 체크
-        time.sleep(2)
+    main()
