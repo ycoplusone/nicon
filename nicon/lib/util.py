@@ -74,6 +74,7 @@ def into_rename_barcode():
                 __img = cv2.imdecode(__n, cv2.IMREAD_COLOR)
                 __barcode = decode(__img)      
                 __rename_file_nm=dirname+'\\'+'{0}_{1}{2}'.format(__barcode,uniq,__exc)
+                #__rename_file_nm = dirname+'\\'+__barcode+'_'+str(uniq)+__exc
                 os.rename( ii , __rename_file_nm )
                 uniq +=1
 
@@ -101,11 +102,11 @@ def init_fold( _dbconn ):
                 default_fold_nm = base_dttm+(repr(cnt).zfill(2))
                 prod_fold       = base_dttm+(repr(cnt).zfill(2))
                 v_range = 0
-                # 10개씩 볼더 복사 
-                if len(file_names) >= 10:
-                    default_fold_nm = dirname+'\\'+default_fold_nm+'_10' 
-                    prod_fold       = prod_fold+'_10' 
-                    v_range = 10       
+                # 15개씩 볼더 복사 
+                if len(file_names) >= 15:
+                    default_fold_nm = dirname+'\\'+default_fold_nm+'_15' 
+                    prod_fold       = prod_fold+'_15' 
+                    v_range = 15       
                 else :
                     default_fold_nm = dirname+'\\'+default_fold_nm+'_'+repr( len(file_names) ).zfill(2)
                     prod_fold       = prod_fold+'_'+repr( len(file_names) ).zfill(2)
@@ -123,8 +124,7 @@ def init_fold( _dbconn ):
                     dd.insert_nicon_barcode(param)                    
                     shutil.move(file_names[0] , default_fold_nm )
                     del file_names[0]
-                    del file_nm[0]    
-                        
+                    del file_nm[0]        
                 cnt = cnt+ 1
     except Exception as e:
         print('init_fold : ',e)
