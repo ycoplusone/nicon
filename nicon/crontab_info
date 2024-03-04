@@ -1,0 +1,23 @@
+# 10초마다 실행
+* * * * * ./nicon/nicon/t_app.sh
+* * * * * sleep 10; ./nicon/nicon/t_app.sh
+* * * * * sleep 20; ./nicon/nicon/t_app.sh
+* * * * * sleep 30; ./nicon/nicon/t_app.sh
+* * * * * sleep 40; ./nicon/nicon/t_app.sh
+* * * * * sleep 50; ./nicon/nicon/t_app.sh
+
+# 10시 1분 미국시간 기준-> 한국기준 10시 10분
+10 1 * * * ./nicon/nicon/t_history.sh
+
+# 0시 1분 미국시간 기준
+1 0 * * * ./nicon/nicon/t_app_ex.sh
+# 0시 30분 미국시간 기준
+30 0 * * * ./nicon/nicon/t_app_ex.sh
+# 1시 1분 미국시간 기준
+1 1 * * * ./nicon/nicon/t_app_ex.sh
+# 1시 30분 미국시간 기준
+30 1 * * * ./nicon/nicon/t_app_ex.sh
+
+
+# 1시 30분 미국시간 기준
+*/1 * * * * ./nicon/nicon/t_client_log.sh
