@@ -23,20 +23,6 @@ def fnCopyNpaste( driver , _str ):
     pyperclip.copy( _str )
     ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
 
-def fnReadAlert( driver):
-    _rt = '문구없음'
-    try:        
-        WebDriverWait(driver, 3).until(
-            EC.alert_is_present()
-            , '문구없음'
-        )
-        alert = Alert(driver)
-        _rt = alert.text        
-        return _rt
-    except Exception as e:
-        print('fnReadAlert',e)
-        return _rt
-
 def mk_image(tel , name):
     '''캡쳐 만들기'''
     try:
@@ -95,22 +81,18 @@ if __name__ == "__main__":
 
             # 전체 동의 클릭
             fnClick( br , '//*[@id="btn_enter"]' )
-
-            result = br.switch_to.alert()
-            result.accept()
+            time.sleep(1)
+            try:
+                alert_present = WebDriverWait(br, 5).until(EC.alert_is_present())
+                if alert_present :
+                    result = br.switch_to.alert
+                    result.dismiss()
+            except Exception as e:
+                print( 'alert error', e )
                         
-            time.sleep(2)
+            time.sleep(1)
             mk_image(i[0],i[1]) # 스샷 생성
             time.sleep(1)
-            #br.close
-            #br.refresh()
-            #br.get(br.current_url)
-            
             
         except Exception as e:
             print( 'ex 발생', e  )
-            time.sleep(2)
-            mk_image(i[0],i[1]) # 스샷 생성
-            time.sleep(1)
-        
-    
