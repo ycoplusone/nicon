@@ -57,18 +57,29 @@ def fnEnter():
 
 def fnReadAlert():
     _rt = '문구없음'
+    '''       
     try:
         global driver
-        WebDriverWait(driver, 3).until(
-            EC.alert_is_present()
-            , '문구없음'
-        )
-        alert = Alert(driver)
-        _rt = alert.text        
-        return _rt
+        WebDriverWait(driver, 3).until(EC.alert_is_present(), '문구없음')
+        alert = Alert(driver)        
+        _rt = alert.text     
     except Exception as e:
         print('fnReadAlert',e)
+        return _rt   
+    '''
+    
+    try:
+        global driver
+        alert_present = WebDriverWait(driver, 3).until(EC.alert_is_present())
+        if alert_present :
+            result = driver.switch_to.alert
+            _rt = result.text                
+            return _rt
+    except Exception as e:
+        print( 'alert error', e )
         return _rt
+    
+    
 
 
 
