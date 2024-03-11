@@ -316,6 +316,7 @@ if __name__ == "__main__":
                             print( '판매 작업중 오류',e )
             time.sleep(2)
         except Exception as e:
+            w2ji.send_telegram_message(  'nicon restart ' )
             driver = fnInit() #초기화    
             time.sleep(1)
             fnLoging() #매개변수 없음
