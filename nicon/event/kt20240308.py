@@ -1,4 +1,5 @@
 import csv
+import os
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -25,16 +26,23 @@ def fnCopyNpaste( driver , _str ):
 
 def mk_image(tel , name):
     '''캡쳐 만들기'''
-    try:
-        
+    try:        
         img = ImageGrab.grab()
         imgCrop = img.crop( (0,0,1024,768))
         base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d')
-        str = base_dttm+'_'+tel+'('+name+')'
-        file_name = 'c:\\ncnc\\ktevent\\{}{}'.format( str ,'.png')
+        str = tel+'('+name+')'
+        file_name = 'c:\\ncnc\\ktevent\\{}\\{}{}'.format(base_dttm, str ,'.png')
         imgCrop.save(file_name)
     except Exception as e:
         print('mk_image : ',e)
+
+def mk_fold():
+    try:        
+        base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d')
+        _path = 'c:\\ncnc\\ktevent\\{}'.format(base_dttm)
+        os.mkdir( _path )
+    except Exception as e:
+        print( e )
 
 
 
@@ -44,7 +52,7 @@ def fnInit():
     options.add_argument('--window-size=1024x768')    
     options.add_argument('incognito') # incognito 시크릿 모드입니다.
 
-    _rt = webdriver.Chrome('chromedriver.exe' , options=options) # http://chromedriver.chromium.org/ 다운로드 크롬 버젼 확인해야함.
+    _rt = webdriver.Chrome('C:\\nicon\\chromedriver.exe' , options=options) # http://chromedriver.chromium.org/ 다운로드 크롬 버젼 확인해야함.
     _rt.get('https://pack.kt.com/event/2024Roulette/m/entry.asp')
     _rt.implicitly_wait(5)  
     time.sleep(1)  
@@ -54,25 +62,28 @@ def fnInit():
 def readfile():
     '''파일 읽기'''
     _rt = []
-    f = open('C:\\Users\\DLIVE\\eclipse-workspace\\nicon\\event\\data\\test.cvs', 'r', encoding='utf-8')
+    f = open('C:\\nicon\\event\\data\\test.cvs', 'r', encoding='utf-8')
     rdr = csv.reader(f)
     for line in rdr:
         _rt.append( line )
     f.close()    
     return _rt
 
-if __name__ == "__main__":    
-    _list = readfile() 
-    br = fnInit() # 브라우저 로딩
-    for i in _list:        
-        
-        try:
-            br.refresh()
-            # 이름 등록
-            fnClick( br , '//*[@id="pUserName"]' )
-            fnCopyNpaste( br , i[1])
 
+    
+
+def main( _list ):
+    ''''''
+    br = fnInit() # 브라우저 로딩
+    for i in _list:                
+        try:
+            br.refresh()            
             # 이름 등록
+            fnClick( br , '//*[@id="pUserName"]' )             
+            fnCopyNpaste( br , i[1])
+            
+
+            # 이름 등록            
             fnClick( br , '//*[@id="Phone"]' )
             fnCopyNpaste( br , i[0])
 
@@ -86,13 +97,38 @@ if __name__ == "__main__":
                 alert_present = WebDriverWait(br, 5).until(EC.alert_is_present())
                 if alert_present :
                     result = br.switch_to.alert
-                    result.dismiss()
+                    result.accept()
             except Exception as e:
                 print( 'alert error', e )
+
+            try:
+                alert_present = WebDriverWait(br, 5).until(EC.alert_is_present())
+                if alert_present :
+                    result = br.switch_to.alert
+                    result.accept()
+                    
+                    #경품 클릭
+                    fnClick( br , '//*[@id="btn-start"]' )
+                    time.sleep(4)
+                    mk_image(i[0],i[1]) # 스샷 생성
+                    time.sleep(1)
+                    br.get('https://pack.kt.com/event/2024Roulette/m/entry.asp')
+                    
+            except Exception as e:
+                br = fnInit() # 브라우저 로딩
+                time.sleep(3)        
+
+                
+
                         
-            time.sleep(1)
-            mk_image(i[0],i[1]) # 스샷 생성
-            time.sleep(1)
+            
             
         except Exception as e:
             print( 'ex 발생', e  )
+
+if __name__ == "__main__":    
+    _list = readfile() 
+   
+    main( _list )
+    
+
