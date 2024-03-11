@@ -78,8 +78,6 @@ def fnReadAlert():
     except Exception as e:
         print( 'alert error', e )
         return _rt
-    
-    
 
 
 
@@ -262,28 +260,29 @@ def fnInit():
 
 if __name__ == "__main__":   
     ''''''
-    try:
-        _lastupdate = '' # 업데이트 시간 저장
-        _dbconn = dbcon.DbConn() #db연결    
+    
+    _lastupdate = '' # 업데이트 시간 저장
+    _dbconn = dbcon.DbConn() #db연결    
 
-        print('기본폴더 생성','-'*10)
-        w2ji.base_fold_create(_dbconn) #기초폴더 생성
-        
-        w2ji.into_rename_barcode() #파일명 바코드 명으로 변경작업 바코드 생성 못하면   None으로 치환된다.
+    print('기본폴더 생성','-'*10)
+    w2ji.base_fold_create(_dbconn) #기초폴더 생성
+    
+    w2ji.into_rename_barcode() #파일명 바코드 명으로 변경작업 바코드 생성 못하면   None으로 치환된다.
 
-        w2ji.init_fold(_dbconn) #폴더내 파일 정리.
-        
-        driver = fnInit() #초기화    
-        time.sleep(1)
-        fnLoging() #매개변수 없음
+    w2ji.init_fold(_dbconn) #폴더내 파일 정리.
+    
+    driver = fnInit() #초기화    
+    time.sleep(1)
+    fnLoging() #매개변수 없음
 
-        fnDiv01( )  # 대분류 첫글짜 매개변수
-        fnDiv02( )   # 중분류명 매개변수
-        fnDiv03( )   # 상품명 매개변수	
-        fnClick( '//*[@id="warning-agree"]/label/div' ) # 동의 체크
-        driver.refresh() #브라이져 새로고침	
-        
-        while(True):            
+    fnDiv01( )  # 대분류 첫글짜 매개변수
+    fnDiv02( )   # 중분류명 매개변수
+    fnDiv03( )   # 상품명 매개변수	
+    fnClick( '//*[@id="warning-agree"]/label/div' ) # 동의 체크
+    driver.refresh() #브라이져 새로고침	
+    
+    while(True): 
+        try:           
             _tmp = _dbconn.getNiconState()
             #if _lastupdate != _tmp:            
             if True:                
@@ -316,5 +315,14 @@ if __name__ == "__main__":
                         except Exception as e:
                             print( '판매 작업중 오류',e )
             time.sleep(2)
-    except Exception as e:
-        print('*'*50,'메인 에서의 오류',' == ',e)
+        except Exception as e:
+            driver = fnInit() #초기화    
+            time.sleep(1)
+            fnLoging() #매개변수 없음
+
+            fnDiv01( )  # 대분류 첫글짜 매개변수
+            fnDiv02( )   # 중분류명 매개변수
+            fnDiv03( )   # 상품명 매개변수	
+            fnClick( '//*[@id="warning-agree"]/label/div' ) # 동의 체크
+            driver.refresh() #브라이져 새로고침	                
+
