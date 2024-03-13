@@ -126,8 +126,9 @@ def main( _list ):
                     br.get('https://pack.kt.com/event/2024Roulette/m/entry.asp')
                     
             except Exception as e:
+                print(i[0],' / ',i[1])
                 br = fnInit() # 브라우저 로딩
-                time.sleep(3)                    
+                time.sleep(1)                    
             
         except Exception as e:
             print( 'ex 발생', e  )
@@ -200,5 +201,5 @@ if __name__ == "__main__":
     #path = 'C:\\nicon\\event\\data'
     path = 'C:\\Users\\DLIVE\\eclipse-workspace\\nicon\\event\\data'
     _list = readfile( path )    
-    #main( _list )
-    event_chk(_list,path)
+    main( _list )
+    event_chk( _list , path )
