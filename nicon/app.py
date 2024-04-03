@@ -75,7 +75,8 @@ def getNicon():
                 lists = txt['conItems']
                 _seq = 0
                 for ll in lists:    
-                    for detail in __details: # 상품명 리스트      
+                    for detail in __details: # 상품명 리스트   
+                        _seq += 1   
                         if ( detail[2] == ll['name'].strip() ):                                  
                             id      = ll['id']
                             name    = ll['name'].strip()
@@ -83,7 +84,7 @@ def getNicon():
                             refuse  = ll['isRefuse']
                             block   = ll['isBlock']
                             param = {'category_id':category_id ,'category_nm' : category_nm ,'id': id , 'name':name , 'amount': amount , 'refuse' : refuse , 'block': block , 'seq':_seq }
-                            _seq += 1
+                            
                             
                             res = dd.get_prod_chg(param)
                             sent_text = ''
