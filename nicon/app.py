@@ -68,14 +68,12 @@ def getNicon():
             category_nm = ii[2] #카테리고리명
             __details = dd.get_nicon_job_detail( {'category_id':category_id } )         # 검증 세부 레스트
             url = 'https://api2.ncnc.app/con-items?forSeller=1&conCategory2Id='+category_id
-           
             response = requests.get(url)
             
             if response.status_code == 200:
                 txt = response.json()
                 lists = txt['conItems']
-                
-                
+                _seq = 0
                 for ll in lists:    
                     for detail in __details: # 상품명 리스트      
                         if ( detail[2] == ll['name'].strip() ):                                  
@@ -84,7 +82,8 @@ def getNicon():
                             amount  = ll['askingPrice']
                             refuse  = ll['isRefuse']
                             block   = ll['isBlock']
-                            param = {'category_id':category_id ,'category_nm' : category_nm ,'id': id , 'name':name , 'amount': amount , 'refuse' : refuse , 'block': block }
+                            param = {'category_id':category_id ,'category_nm' : category_nm ,'id': id , 'name':name , 'amount': amount , 'refuse' : refuse , 'block': block , 'seq':_seq }
+                            _seq += 1
                             
                             res = dd.get_prod_chg(param)
                             sent_text = ''
@@ -95,7 +94,6 @@ def getNicon():
                             if len(res) == 0: # 신규일경우
                                 dd.insert_nicon(param)
                                 print('신규 : ',param)
-                                #asyncio.run( telegram_send(sent_text , detail[3] ) )
                                 send_telegram_message(sent_text , detail[3] )
     
                             else : #기존 상품일경우

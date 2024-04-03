@@ -113,8 +113,8 @@ class DbConn(object):
                 " and id = '{id}' "
                 )
             query = (
-            " INSERT INTO nicon_info (category_id,id, name, amount, refuse, block, c_date)  "
-            " VALUES('{category_id}', '{id}', '{name}', {amount}, '{refuse}', '{block}', now()) "
+            " INSERT INTO nicon_info (category_id,id, name, amount, refuse, block, c_date , seq)  "
+            " VALUES('{category_id}', '{id}', '{name}', {amount}, '{refuse}', '{block}', now() , '{seq}') "
             )
 
             query_del = query_del.format( **param )
@@ -139,7 +139,7 @@ class DbConn(object):
                         
             query = (
             " update nicon_info  "
-            " set name = '{name}' , amount ={amount} , refuse = '{refuse}' , block = '{block}' , c_date = now() "
+            " set name = '{name}' , amount ={amount} , refuse = '{refuse}' , block = '{block}' , c_date = now() , seq = '{seq}' "
             " where id = '{id}' "
             " and category_id = '{category_id}' "
             )            
