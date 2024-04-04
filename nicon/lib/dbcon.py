@@ -277,6 +277,8 @@ class DbConn(object):
                 " , a.prod_nm  "
                 " , concat(c.category_nm , '_' , a.prod_nm2 ) fold_nm "
                 " , b.amount "
+                " , b.cat_seq "
+                " , b.prod_seq "               
                 " from ( "
                 " 	SELECT " 
                 " 	category_id  , prod_nm   "
@@ -287,15 +289,15 @@ class DbConn(object):
                 " 	group by category_id  , prod_nm "
                 " ) a "
                 " join ( "
-                " 	select "
-                " 	category_id  , name prod_nm , amount   "
-                " 	from nicon_info ni  "
-                " 	where refuse = 0 "
+                "	select "
+                "	a.category_id  , a.name prod_nm , a.amount , b.cat_seq , a.seq prod_seq    "
+                "	from nicon_info a "
+                "	left outer join nicon_category_info b on ( a.category_id = b.category_id  ) "
+                "	where a.refuse = 0 "
                 " ) b on (a.category_id = b.category_id and a.prod_nm = b.prod_nm)   "
                 " join nicon_category_info c on ( a.category_id = c.category_id  ) "
                 " order by  case when a.category_id  in (137, 180) then 0 else 99 end ,  3,6 desc "
             )
-            #query = query.format( **param )
             cur = self.__conn.cursor(  pymysql.cursors.DictCursor)            
             cur.execute( query )            
             __dblists =  cur.fetchall()          
@@ -307,6 +309,8 @@ class DbConn(object):
                 m_list['prod_nm']       = i['prod_nm']
                 m_list['fold_nm']       = i['fold_nm']
                 m_list['amount']        = i['amount']
+                m_list['cat_seq']       = i['cat_seq']
+                m_list['prod_seq']      = i['prod_seq']
                 _lists.append(m_list)
             return _lists 
           
@@ -351,9 +355,6 @@ class DbConn(object):
                 m_list['fold_nm'] = i['fold_nm']
                 _lists.append(m_list)
             return _lists 
-        
-        
-          
         except Exception as e:
             print( 'get_nicon error' , e )    
 
@@ -391,7 +392,6 @@ class DbConn(object):
             " , currentStatus	 = '{currentStatus}' "
             )
             query = query.format( **param )     
-            #print(query)                 
             cur.execute( query )
             self.__conn.commit()
         except Exception as e:
@@ -459,6 +459,23 @@ class DbConn(object):
         except Exception as e:
             print( 'get_nicon_client_log => ' , e )
 
+
+    def upsert_nicon_catgory_info(self , param ):
+        '''get_nicon'''
+        try :
+            cur = self.__conn.cursor()                        
+            query = (
+                " INSERT INTO nicon_category_info ( div_nm   , category_id   , category_nm   , cat_seq , c_date)  "
+                "                            VALUES( '{div_nm}' , '{category_id}' , '{category_nm}' , '{cat_seq}' , now()  ) "
+                " on DUPLICATE key update cat_seq = '{cat_seq}' ,  category_nm = '{category_nm}' , u_date = now()           "
+            )
+            query = query.format( **param )     
+            cur.execute( query )
+            self.__conn.commit()
+        except Exception as e:
+            print( 'upsert_nicon_sale_info', e ,'\n',query ,'\n',param )
+        finally:
+            pass 
 
 
     def get_ex_kind(self , param):               
