@@ -73,9 +73,31 @@ def fn_history():
                     param['category_nm']  = _conCategory2['name']  
                     print( param )          
                     dd.upsert_nicon_sale_info(param)
+
+def fn_category_id():
+    _dbconn = dbcon.DbConn() #db연결    
+    conCategory1Id = [{'code' : '62' , 'name':'편의점,마트' }, {'code' : '60' , 'name':'빵,아이스크림' }, {'code' : '61' , 'name':'피자,햄버거,치킨' }, {'code' : '65' , 'name':'문화,게임,영화' }, {'code' : '129' , 'name':'외식,분식' }, {'code' : '69' , 'name':'백화점,주유,뷰티' },{'code' : '67' , 'name':'카페' }]
+    for id in conCategory1Id:
+        category_id = id['code']
+        div_nm = id['name']
+
+        url = 'https://api2.ncnc.app/con-category2s?forSeller=1&conCategory1Id='+category_id
+        response = requests.get(url)
+        if response.status_code == 200:
+            txt = response.json()
+            lists = txt['conCategory2s']
+            _seq = 0
+            for list in lists:    
+                _seq += 1
+                _id = list['id']
+                _nm = list['name']            
+                param = {'div_nm' : div_nm , 'category_id':_id  , 'category_nm':_nm  , 'cat_seq' : _seq }
+                print(param)
+                _dbconn.upsert_nicon_catgory_info(param)    
     
 if __name__ == "__main__":    
     fn_history() #판매정보 가져오기
+    fn_category_id() #카테고리 정보 수집.
    
  
     
