@@ -129,27 +129,37 @@ def fnDiv01( str = '카' ): #str = '카'
     '''대분류 찾기'''
     _state = False    
     try:
-        fnClick( '//*[@id="app"]/div/div[2]/div/section/div/section/section[1]/div/button')    
+        #fnClick( '//*[@id="app"]/div/div[2]/div/section/div/section/section[1]/div/button')    
+        fn_exe_script('$("#app > div > div.right-container > div > section > div > section > section.flex.flex-column.bb-ccc > div > button").click()');
+        time.sleep(0.1)
         _div01 = ''
         if str == '카':
-            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[2]/div'
+            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[2]/div'
+            _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(3) > div").click();'
         elif str == '편':
-            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[3]/div'
+            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[3]/div'
+            _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(4) > div").click();'
         elif str == '빵':
-            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[4]/div'
+            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[4]/div'
+            _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(5) > div").click();'
         elif str == '피':
-            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[5]/div'
+            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[5]/div'
+            _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(6) > div").click();'
         elif str == '문':
-            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[6]/div'
+            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[6]/div'
+            _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(7) > div").click();'
         elif str == '외':
-            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[7]/div'
+            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[7]/div'
+            _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(8) > div").click();'
         elif str == '백':
-            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[8]/div'
+            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[8]/div'
+            _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(9) > div").click();'
         elif str == '휴':
-            _div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[9]/div'        
-            print(_div01)
-        fnClick(_div01)
-        time.sleep(0.15)
+            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[9]/div'        
+            _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(10) > div").click();'
+        #fnClick(_div01)
+        fn_exe_script(_div01)
+        time.sleep(0.10)
         _state = True
         return _state
     except Exception as e:
@@ -169,21 +179,6 @@ def fnDiv02( _str = '투썸플레이스' ): # _str = '투썸플레이스'
     except Exception as e:
         print('ERROR fnDiv02',e)
         return _state
-
-def fnDiv02_1( _str = '2' ): # _str = '2' 투썸플레이스이다.
-    '''중분류 찾기(카테고리 찾기)'''    
-    _state = False
-    try:
-        seq = int(_str)+1
-        tag = '$("#items-container > a:nth-child({}) > div > img").click();'.format(seq)    
-        fn_exe_script( tag )
-        time.sleep(0.15)
-        _state = True
-        return _state
-    except Exception as e:
-        print('ERROR fnDiv02',e)
-        return _state
-
 
 def fnDiv03( _str = '아메리카노 L' ): # _str = '아메리카노 L'
     '''하분류 찾기(상품 차지)'''
@@ -230,9 +225,24 @@ def fnDiv03( _str = '아메리카노 L' ): # _str = '아메리카노 L'
         print('ERROR fnDiv03',e)
         return _state
 
+def fnDiv02_1( _str = '2' ): # _str = '2' 투썸플레이스이다.
+    '''중분류 찾기(카테고리 찾기)'''    
+    _state = False
+    try:
+        seq = int(_str)+1
+        tag = '$("#items-container > a:nth-child({}) > div > img").click();'.format(seq)    
+        fn_exe_script( tag )
+        time.sleep(0.15)
+        _state = True
+        return _state
+    except Exception as e:
+        print('ERROR fnDiv02',e)
+        return _state
+
 def fnDiv03_1( _str = '11' ): # _str = 11 '아메리카노 L'
     '''하분류 찾기(상품 차지)'''
     _state = False
+    _sale_type = ''
     global driver
     try:
         seq = int(_str)+1
@@ -264,10 +274,15 @@ def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
     '''판매 '''
     global driver
     try:
+        upload = driver.find_element(By.CLASS_NAME,'input-file')
         for file in _files:
-            driver.find_element(By.CSS_SELECTOR , "input[type='file']").send_keys(file) #파일 등록
+            #driver.find_element(By.CSS_SELECTOR , "input[type='file']").send_keys(file) #파일 등록
+            upload.send_keys(file) #파일등록
     
-        fnClick('//*[@id="app"]/div/div[2]/div/section/div/div/div/section/button') # 판매 등록
+        #fnClick('//*[@id="app"]/div/div[2]/div/section/div/div/div/section/button') # 판매 등록
+        tag = '$("#app > div > div.right-container > div > section > div > div > div > section > button").click();'     # 링크 테그
+        fn_exe_script(tag)
+        
         time.sleep(0.2)    
         alert_txt = fnReadAlert() # 알림창 읽기
         #if alert_txt != '문구없음':
@@ -324,6 +339,16 @@ if __name__ == "__main__":
     #fnDiv03( )   # 상품명 매개변수	
     fnDiv03_1( )   # 상품명 매개변수	
     fnClick( '//*[@id="warning-agree"]/label/div' ) # 동의 체크
+    
+    '''
+    fold_nm = 'CU_1만원권'
+    _fold_nm = 'C:\\ncnc\\CU_1만원권\\abc'
+    amt = '123'
+    files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
+    fnSale(fold_nm , amt, _fold_nm, files ) # 판매
+    '''
+
+
     driver.refresh() #브라이져 새로고침	
     # 끝 시간 기록
     end_time = datetime.datetime.now() 
@@ -331,7 +356,6 @@ if __name__ == "__main__":
     elapsed_time = end_time - start_time
     # 결과 출력
     print("작업이 소요된 시간:", elapsed_time)               
-    
     
     while(True): 
         try:           
