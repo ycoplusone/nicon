@@ -111,20 +111,6 @@ def fnLoging():
     driver.get('https://ncnc.app/sell/wait-confirmed')  
     time.sleep(0.5)
 
-    #로그인 클릭
-    '''
-    fnClick( '//*[@id="app"]/div/div[2]/div/div/div/button[4]/div') 
-    fnClick( '//*[@id="username"]')    
-    fnCopyNpaste( __id )   
-
-    fnClick( '//*[@id="password"]')    
-    fnCopyNpaste( __ps )    
-
-    fnClick( '//*[@id="app"]/div/div[2]/div/div/div/button')        
-    fnClick( '//*[@id="app"]/div/nav/a[2]')
-    time.sleep(0.5)
-    '''
-
 def fnDiv01( str = '카' ): #str = '카'
     '''대분류 찾기'''
     _state = False    
@@ -159,70 +145,11 @@ def fnDiv01( str = '카' ): #str = '카'
             _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(10) > div").click();'
         #fnClick(_div01)
         fn_exe_script(_div01)
-        time.sleep(0.10)
+        time.sleep(0.20)
         _state = True
         return _state
     except Exception as e:
         print('ERROR fnDiv01',e)
-        return _state
-
-def fnDiv02( _str = '투썸플레이스' ): # _str = '투썸플레이스'
-    '''중분류 찾기(카테고리 찾기)'''    
-    _state = False
-    try:
-        fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') # 검색바 클릭
-        fnCopyNpaste( _str )
-        fnClick( '//*[@id="items-container"]/a[2]') #두번째 아이콘 클릭
-        time.sleep(0.15)
-        _state = True
-        return _state
-    except Exception as e:
-        print('ERROR fnDiv02',e)
-        return _state
-
-def fnDiv03( _str = '아메리카노 L' ): # _str = '아메리카노 L'
-    '''하분류 찾기(상품 차지)'''
-    _state = False
-    global driver
-    item_name  = '//*[@id="items-container"]/a[2]'
-    item_state = '/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[2]/div[2]'
-    item_seq = 2        
-    flag = True
-    _ttt = ''
-    try:
-        fnClick( '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/div[2]/input') #검색바 클릭
-        fnCopyNpaste( _str )    
-        
-        while( flag ):            
-            _ttt       = "/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[{}]/div[1]/div[1]".format(item_seq)
-            item_state = "/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[{}]/div[2]".format(item_seq)
-            print( '_ttt : ',_ttt,' / flag : ',flag )
-            # 상품 리스트 가져오기
-            titles = WebDriverWait(driver, 1).until(EC.presence_of_all_elements_located((By.XPATH, _ttt )))
-            #복수개(3개)의 앨리먼트가 추출 됨 (3개중 마지막)
-            for title in titles:
-                print(' ==> ',title.tag_name ,' / ' , title.text,' / ' , title.get_attribute('xpath'))
-                print( title.text == _str )
-                if title.text == _str:
-                    flag = False
-                    break
-            item_seq += 1
-        
-
-        _sale_type = fnText( item_state ) #상품판매상태 확인
-        print('_sale_type : ', _sale_type )
-        print('item_name  : ', item_name  )
-        print('item_state : ', item_state )        
-
-        if (_sale_type == '매입보류') or (_sale_type=='') :
-            w2ji.send_telegram_message( _str+' : '+ '매입보류' )
-            _state = False
-        else :
-            fnClick( _ttt ) # 두번째 아이콘 클릭
-            _state = True        
-        return _state
-    except Exception as e:
-        print('ERROR fnDiv03',e)
         return _state
 
 def fnDiv02_1( _str = '2' ): # _str = '2' 투썸플레이스이다.
@@ -232,7 +159,7 @@ def fnDiv02_1( _str = '2' ): # _str = '2' 투썸플레이스이다.
         seq = int(_str)+1
         tag = '$("#items-container > a:nth-child({}) > div > img").click();'.format(seq)    
         fn_exe_script( tag )
-        time.sleep(0.15)
+        time.sleep(0.2)
         _state = True
         return _state
     except Exception as e:
@@ -243,6 +170,8 @@ def fnDiv03_1( _str = '11' ): # _str = 11 '아메리카노 L'
     '''하분류 찾기(상품 차지)'''
     _state = False
     _sale_type = ''
+    _prod_nm = ''
+    _send_txt = ''
     global driver
     try:
         seq = int(_str)+1
@@ -252,21 +181,28 @@ def fnDiv03_1( _str = '11' ): # _str = 11 '아메리카노 L'
         if _txt[-2:] == '보류':
             _sale_type = '매입보류'
         else :
-            _sale_type = '판매중'          
+            _sale_type = '판매중'   
+        
+        _prod_nm = _txt.split('예상')[0]
+        
+        _send_txt = '{} : {}'.format( _prod_nm , _sale_type)
         
         print('*'*50)
-        print('_sale_type : ', _sale_type )
+        print('_sale_type : ', _send_txt )
 
         if (_sale_type == '매입보류') or (_sale_type=='') :
-            w2ji.send_telegram_message( _str+' : '+ '매입보류' )
+            w2ji.send_telegram_message( _send_txt )
             _state = False
         else :
-            #fnClick( _ttt ) # 두번째 아이콘 클릭
+
             fn_exe_script( tag1 )
-            _state = True        
+            _state = True     
+
+        time.sleep(0.2)   
         return _state
     except Exception as e:
         print('ERROR fnDiv03_1',e)
+        time.sleep(0.2)
         return _state    
     
 
@@ -334,13 +270,11 @@ if __name__ == "__main__":
     fnLoging() #매개변수 없음
     start_time = datetime.datetime.now()
     fnDiv01( )  # 대분류 첫글짜 매개변수
-    #fnDiv02( )   # 중분류명 매개변수
     fnDiv02_1( )   # 중분류명 매개변수
-    #fnDiv03( )   # 상품명 매개변수	
     fnDiv03_1( )   # 상품명 매개변수	
     fnClick( '//*[@id="warning-agree"]/label/div' ) # 동의 체크
     
-    '''
+    ''' # 상품까지의 테스트 코드
     fold_nm = 'CU_1만원권'
     _fold_nm = 'C:\\ncnc\\CU_1만원권\\abc'
     amt = '123'
@@ -383,13 +317,10 @@ if __name__ == "__main__":
                         try:
                             _bool_01 = fnDiv01( div01_str )   # 대분류 첫글짜 매개변수
                             if _bool_01:
-                                #_bool_02 = fnDiv02( div02_str )   # 중분류명 매개변수
                                 _bool_02 = fnDiv02_1( div02_str_1 )   # 중분류명 매개변수
                                 if _bool_02:
-                                    #_bool_03 = fnDiv03( div03_str )   # 상품명 매개변수
                                     _bool_03 = fnDiv03_1( div03_str_1 )   # 상품명 매개변수
                                     if _bool_03:
-                                        print('판매시작')
                                         files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
                                         fnSale(fold_nm , amt, _fold_nm, files ) # 판매
                                     else:
