@@ -282,7 +282,7 @@ def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
         #fnClick('//*[@id="app"]/div/div[2]/div/section/div/div/div/section/button') # 판매 등록
         tag = '$("#app > div > div.right-container > div > section > div > div > div > section > button").click();'     # 링크 테그
         fn_exe_script(tag)
-        
+
         time.sleep(0.2)    
         alert_txt = fnReadAlert() # 알림창 읽기
         #if alert_txt != '문구없음':
@@ -379,6 +379,7 @@ if __name__ == "__main__":
                     prod_fold_list = w2ji.getfolelist( fold_nm )
                     for _fold_nm in prod_fold_list:
                         driver.refresh() #브라이져 새로고침
+                        time.sleep(0.1)
                         try:
                             _bool_01 = fnDiv01( div01_str )   # 대분류 첫글짜 매개변수
                             if _bool_01:
@@ -396,7 +397,7 @@ if __name__ == "__main__":
 
                         except Exception as e:
                             print( '판매 작업중 오류',e )
-            time.sleep(2)
+            time.sleep(0.5)
         except Exception as e:
             w2ji.send_telegram_message(  'nicon restart ' )
             time.sleep(10)
