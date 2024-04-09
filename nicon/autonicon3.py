@@ -58,7 +58,10 @@ def fn_exe_script( script ):
 
     _rt = ''
     try:
-        _rt = driver.execute_script( script )
+        _rt = driver.execute_script( script )        
+        while not driver.execute_script(_ret_script):
+            pass
+
     except Exception as e:
         print('fn_exe_script : ',e)
     
@@ -171,7 +174,6 @@ def fnDiv03_1( _str = '11' ): # _str = 11 '아메리카노 L'
         return _state
     except Exception as e:
         print('ERROR fnDiv03_1',e)
-        time.sleep(0.2)
         return _state    
     
 
