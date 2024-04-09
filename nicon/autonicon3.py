@@ -4,35 +4,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.alert import Alert
 import pyperclip #복사
 import time
 
 import lib.util as w2ji
 import lib.dbcon as dbcon
-import pyautogui
 import datetime
 
-
-def fnText(str):
-    global driver
-    _rt = ''
-    try:        
-        time.sleep(0.3)
-        _html = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, str )))
-        return _html.text
-    except Exception as e:
-        return _rt
-
-def fnText_1(str):
-    global driver
-    _rt = ''
-    try:        
-        time.sleep(0.01)
-        _html = WebDriverWait(driver, 0.5).until(EC.element_to_be_clickable((By.XPATH, str )))
-        return _html.text
-    except Exception as e:
-        return _rt
 
 
 def fnClick(str):
@@ -47,15 +25,6 @@ def fnCopyNpaste( _str ):
     pyperclip.copy( _str )
     ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
     
-
-def fnEnter():
-    '''엔터입력'''   
-    try:      
-        global driver
-        ActionChains(driver).send_keys(Keys.ENTER)
-    except Exception as e:
-        print('fnEnter error : ',e)  
-
 def fnReadAlert():
     _rt = '문구없음'
     try:
@@ -198,8 +167,7 @@ def fnDiv03_1( _str = '11' ): # _str = 11 '아메리카노 L'
         else :
             fn_exe_script( tag1 )
             _state = True     
-
-        time.sleep(0.2)   
+  
         return _state
     except Exception as e:
         print('ERROR fnDiv03_1',e)
