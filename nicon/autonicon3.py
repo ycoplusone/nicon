@@ -60,7 +60,7 @@ def fnReadAlert():
     _rt = '문구없음'
     try:
         global driver
-        alert_present = WebDriverWait(driver, 3).until(EC.alert_is_present())
+        alert_present = WebDriverWait(driver, 2).until(EC.alert_is_present())
         if alert_present :
             result = driver.switch_to.alert
             _rt = result.text                
@@ -72,6 +72,21 @@ def fnReadAlert():
 def fn_exe_script( script ):
     '''스크립트 실행'''
     global driver
+    time.sleep(0.1)
+    start_time = datetime.datetime.now()
+    _ret_script = "return document.readyState === 'complete';"
+    while not driver.execute_script(_ret_script):
+        pass
+    
+    end_time = datetime.datetime.now()     
+    # 소요 시간 계산
+    elapsed_time = end_time - start_time
+    # 결과 출력
+    print('*'*50)
+    print('fn_exe_script : ', script , '\t : \t', elapsed_time  , ' : ', elapsed_time.total_seconds() * 3 )   
+    print('*'*50)
+    time.sleep( elapsed_time.total_seconds() *3 )
+
     _rt = ''
     try:
         _rt = driver.execute_script( script )
@@ -115,37 +130,25 @@ def fnDiv01( str = '카' ): #str = '카'
     '''대분류 찾기'''
     _state = False    
     try:
-        #fnClick( '//*[@id="app"]/div/div[2]/div/section/div/section/section[1]/div/button')    
-        fn_exe_script('$("#app > div > div.right-container > div > section > div > section > section.flex.flex-column.bb-ccc > div > button").click()');
-        time.sleep(0.1)
+        fn_exe_script('$("#app > div > div.right-container > div > section > div > section > section.flex.flex-column.bb-ccc > div > button").click()');        
         _div01 = ''
         if str == '카':
-            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[2]/div'
             _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(3) > div").click();'
         elif str == '편':
-            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[3]/div'
             _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(4) > div").click();'
         elif str == '빵':
-            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[4]/div'
             _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(5) > div").click();'
         elif str == '피':
-            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[5]/div'
             _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(6) > div").click();'
         elif str == '문':
-            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[6]/div'
             _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(7) > div").click();'
         elif str == '외':
-            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[7]/div'
             _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(8) > div").click();'
         elif str == '백':
-            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[8]/div'
             _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(9) > div").click();'
         elif str == '휴':
-            #_div01 = '//*[@id="app"]/div/div[2]/div/section/div/div/div/section/a[9]/div'        
             _div01 = '$("#app > div > div.right-container > div > section > div > div > div > section > a:nth-child(10) > div").click();'
-        #fnClick(_div01)
         fn_exe_script(_div01)
-        time.sleep(0.20)
         _state = True
         return _state
     except Exception as e:
@@ -159,7 +162,6 @@ def fnDiv02_1( _str = '2' ): # _str = '2' 투썸플레이스이다.
         seq = int(_str)+1
         tag = '$("#items-container > a:nth-child({}) > div > img").click();'.format(seq)    
         fn_exe_script( tag )
-        time.sleep(0.2)
         _state = True
         return _state
     except Exception as e:
@@ -194,7 +196,6 @@ def fnDiv03_1( _str = '11' ): # _str = 11 '아메리카노 L'
             w2ji.send_telegram_message( _send_txt )
             _state = False
         else :
-
             fn_exe_script( tag1 )
             _state = True     
 
@@ -212,16 +213,13 @@ def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
     try:
         upload = driver.find_element(By.CLASS_NAME,'input-file')
         for file in _files:
-            #driver.find_element(By.CSS_SELECTOR , "input[type='file']").send_keys(file) #파일 등록
             upload.send_keys(file) #파일등록
     
-        #fnClick('//*[@id="app"]/div/div[2]/div/section/div/div/div/section/button') # 판매 등록
         tag = '$("#app > div > div.right-container > div > section > div > div > div > section > button").click();'     # 링크 테그
         fn_exe_script(tag)
 
-        time.sleep(0.2)    
         alert_txt = fnReadAlert() # 알림창 읽기
-        #if alert_txt != '문구없음':
+
         if '쿠폰이 등록' in alert_txt :
             telegram_str = '정상 : '+alert_txt+'\n\n'
             telegram_str += _nm +' : '+ _amt +'\n\n'
@@ -244,11 +242,25 @@ def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
 def fnInit():
     '''크룸 초기화'''
     options = webdriver.ChromeOptions()
-    #options.add_argument('headless')
-    options.add_argument('window-size=1024x768')    
+    options.add_argument('window-size=1024x768')   
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-dev-shm-usage") 
+    '''
+    options.add_argument('--headless')    
+    options.add_argument('--disable-images')
+    options.add_experimental_option("prefs", {'profile.managed_default_content_settings.images': 2})
+    options.add_argument('--blink-settings=imagesEnabled=false')        
+    options.add_argument('--ignore-ssl-errors=yes')
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--log-level=3')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--incognito')    
+    '''
     _rt = webdriver.Chrome('chromedriver.exe' , options=options) # http://chromedriver.chromium.org/ 다운로드 크롬 버젼 확인해야함.
     _rt.get('https://ncnc.app/sell/wait-confirmed')
-    _rt.implicitly_wait(5)  
+    _rt.implicitly_wait(2)  
     time.sleep(1)  
     return _rt
 
