@@ -1,377 +1,170 @@
-
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 import time
 import csv
 
-chrome_options = Options()
-chrome_options.add_argument('headless')
-chrome_options.add_argument('window-size=512x1080')
-driver = webdriver.Chrome( options= chrome_options )
+import cv2
+import numpy as np
+from PIL import Image
+import pytesseract
+from io import BytesIO
+import os
+import re
+import shutil
+import pandas as pd
 
-def main( url , file_nm ):
-    '''
+
+class urlsprint():
     chrome_options = Options()
     chrome_options.add_argument('headless')
     chrome_options.add_argument('window-size=512x1080')
     driver = webdriver.Chrome( options= chrome_options )
-    '''
-    try:
-        driver.get( url )
-        # 스크린샷 전에 시간 두기(로딩이 느릴수도 있으니)
-        time.sleep(2)
-        # 창 최대화
-        driver.maximize_window()
-        # 스크린샷 찍기
-        driver.save_screenshot("C:\\ncnc_class\\sim\\"+file_nm+".png")
-        # 종료 (모든 탭 종료)
-        #driver.quit()
-        print("### capture complete")
-    except Exception as e:
-        print('### error msg :: ', e)
-        driver.quit()
+    base_path = 'C:\\ncnc_class\\data20240515\\'
+    input_path = 'C:\\ncnc_class\\data20240515\\data.csv'
+    output_path = 'C:\\ncnc_class\\data20240515\\img\\'
+    result_path = 'C:\\ncnc_class\\data20240515\\result.csv'
+
+    # 생성된 이미지 텍스트 분석하기.
+    def getFiles(self):
+        '''이미지 정보 가져오기'''
+        try:
+            rootlist = os.listdir( self.output_path )
+            _files = [X for X in rootlist if os.path.isfile(self.output_path+'\\'+X)]    
+            return _files
+        except Exception as e:
+            print( 'getFiles' , e )    
+    
+    def getTest(self,_file):
+        try:
+            _url = ( self.output_path+_file)
+            _url2 = ( self.base_path+'temp.jpg' )
+            #print(_url)
+            img2 = cv2.imread( _url , cv2.IMREAD_COLOR )        
+            img3 = img2[375 : 484 , 174 : 460 ]
+            #img3.save(self.base_path+'temp.jpg')
+            cv2.imwrite( _url2 , img3 )
+                        
+            img_arry = np.fromfile( _url2 , np.uint8 )
+            img = cv2.imdecode( img_arry , cv2.IMREAD_GRAYSCALE )
+            #cv2.imshow( 'aaa',img )
+            #cv2.waitKey()
+            #cv2.destroyAllWindows()
+            
+
+            #  opencv api를 이용한 정규화
+            img_norm2 = cv2.normalize( img , None , 0 , 255 , cv2.NORM_MINMAX )
+            img_norm2 = cv2.medianBlur(img_norm2 ,1 )
+            #cv2.imshow( 'aaa',img_norm2 )
+            #cv2.waitKey()
+            #cv2.destroyAllWindows()
+            
+            config = ('-l kor') #config = ('-l kor+eng --oem 3 --psm 3')
+            _t = pytesseract.image_to_string( img_norm2 , config=config)        
+            #print('_t',_t)
+            _t = _t.lower()
+            _t = _t.replace(' ','') # 공백제거
+            _t = re.sub( '[^A-Za-z0-9가-힣\s]', "", _t) #한글
+            _temp_arr = _t.split('\n')        
+            
+            _fin_txt = []
+            for i in range(0,len(_temp_arr)):                
+                _fin_txt.append( _temp_arr[i] )                            
+        
+            #print(_file ,'\t' , _fin_txt   )
+            return _fin_txt[0] 
+        except Exception as e:
+            print( 'getText_tesseract' , e ) 
 
 
-'''
-def list():
-	_list = {
-'http://ticket.linkoo.co.kr/ticket/use/?num=ABRIGXSKAF'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=AFGZLYNSPU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=AFLLHXIOKC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=AFTICOTHHC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ALULDZVLXU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=AMAIKARKEW'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ATYAVGCTQS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=AUQVTAWWAL'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=AVIOFQWGPU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=AVXZOJLNGP'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=AZOSDUWKJZ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=AZSFUWVWMG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BAKVZSYTMU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BBYWALRCBU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BDUPDPBDUZ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BFLQLFKQGO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BFXYTJBXUY'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BJQXPITKEB'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BJTTLJUAWM'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BJWETMUEGI'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BMGQBSMRUW'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BRWIXXAJAP'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BRXGUHNOWG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BSIZWNIUCU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BSKKNANZWA'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=BTFXNROOII'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CCLRMUJTHI'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CCLSAZKYMV'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CDBDDTMIFU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CEFIAUOYUO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CFWMQVAGAJ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CGFOMRKGHL'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CIJMOAXPMN'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CIQLMTZBYM'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CJACZCITGS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CJJGPHWXZQ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CKBQNLNOBU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CLHIDZCPXA'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CNMOYRPIDE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CQJBEUOYSV'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CQTEBDSAQV'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CSNMCSZOZO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CSWYWKOYOO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CWTNWDVDIL'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=CXAAKZRUMF'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=DDMTSWEQUX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=DGRHFPQPAS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=DHNBMZZGQG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=DLLCQMCWRU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=DMPDDUDHDS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=DPHIFIGCXE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=DPSADRLBFG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=DQFVZDGGRA'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=DTWCUZJAGO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=DUMJJUVYZU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=DZNFEXUJBG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=DZQDDOCFDO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=EMVKBKREAS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=EOOJAFAIIE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=EQBFPCMLAH'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ERICMUESET'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ETRBHCFSGZ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=EURIIDLGAH'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=EYXVJGVWQH'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=FESFYZIGLK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=FHMHAPULTT'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=FKOPRQSJBM'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=FKOTWUJVNV'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=FKUSBKTOMK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=FMTDNPTFCS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=FOKBJKLZSK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=FQZUJHLXVM'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=FUHYZOUWYY'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=FUWBZIVRCY'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=FYAIJEULZM'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=FYRJWTYZZW'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=FZPEDQITJH'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=GJNEXSBKQF'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=GJOGFJXWRE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=GLKIIWSJYK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=GMHNGHZSWX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=GPDNVXLWXA'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=GPMJRDLQHG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=GPUZSQENQY'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=GSHUUTGVLY'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=GTJVCMGDUM'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=GUQQDWVVFK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=HCNSEVYAJY'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=HKZOUNBFJM'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=HMGWWNDYCL'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=HPZPDCQOTL'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=HRMDWWPSPR'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=HRROZPUXRX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=HVQOWPOBFE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=IBESMFIEOO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ICHZRYVMIX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=IMSUJRTPOO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=INEVFUXXTO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=INQMCITAXC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=IPVYKTWLXF'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=IRRLKOJJCM'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ITGCWHFGGS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=IYADDACQVK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=IYSHWLRJVF'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=JLMCTEIWBD'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=JMAKDEEOQX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=JMSLSRXSOM'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=JOVCIKIMAP'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=JPMYJEUKPX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=JPTXXFQWJS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=JQFNUSUVFN'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=JQQOGIZRJR'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=JSAKBKPMGA'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=JTCTXBYYIE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=JVKQAJONXJ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=KAJPPKONLW'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=KDDYMBLMXQ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=KEZTCXEQVI'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=KFOOTLVAQY'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=KGBXYCZXHN'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=KLDFSILEZN'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=KLYMGUKBUB'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=LBEVCMPUES'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=LBIMWFZOIB'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=LHEJGLATTR'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=LHUDYGFZXL'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=LLIMLNWJOR'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=LPBSVYSNAE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=LPPITTUPNX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=LQODSWMOLK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=LWUOVVCDVD'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=LYAAPPNAJF'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=LZARFVDPRY'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=MBCSEGBBSR'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=MBVZSBRYOX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=MCQKHASHWG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=MDOXGIOYPJ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=MJEUXBXBIK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=MNCRDWPCIU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=MNKNFYNVZV'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=MTOOVNITLC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=MTYXKBPDPV'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NBWTXBYPVK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NFKYZFZODD'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NJJXOHLRVC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NLGPIMUOXH'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NNNUJFQQJY'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NNNXLHQKHV'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NNQFHREEQI'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NQIJJAEBUC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NRAEYKTIVG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NTTCMPCZPS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NUDWNKGBAE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NVGUNHZKZX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NVVKAQDZCO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=NYIDSNJWBN'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OCRSRUPMES'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OFBYDMULGE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OGEAPJBVNP'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OHIYVHKFTY'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OIMWMVFEFE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OJBBQGZQED'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OJUHGBRFYK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OLISNCNKNK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OLMHWNTZGD'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OLRWGQFGYO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OMUEVLJAMN'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OQNDEAZFSO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OSUTKWCJBX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OTIBJIYVON'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OUVYENSHJO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OUWYRQWTHR'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OUXFQDQEBO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OVDJLQOKVF'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OVSXOUAIHX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OWOXDFJQDW'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OXAOZAMOBD'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=OXKUDIXZCS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=PGLCLOONVO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=PGVCNCHOUO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=PHGYHLDTSU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=PJAVEOUKWC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=PMDFYDXHQZ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=PMEZQZFXVZ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=PMHQGGXZDY'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=PNDHVAEFFT'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=POASHIKKCK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=PRAUACIRGE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=PRFFBOKAWR'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=PXCICJBQEZ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=PZMMTCGHDW'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=QCZNHOYIRG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=QKSJTFEZKH'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=QLEPVTKJZZ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=QOEMRHMXRO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=QTFLBRVYIU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=QWDMCFGGKW'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=QWFHMCYHKN'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=QWORDXYSPG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=RHFGOVVAPT'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=RJXPSIDEAK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=RMEVNKAWXL'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=RNPQOSVBAX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ROKTLJGDPA'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ROOWNPALWV'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ROXPLVIYGZ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=RTEOLGKUER'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=RTKKWOCQVW'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=RTYHZVRJFS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=RUMFAVZRRG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=RUXGSGDDHN'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=RVUIJQYCMB'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=SCCQAJUXJQ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=SEWVKIUTTC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=SKAGUVBAQO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=SLLNHVAJQF'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=SLPVZRXERO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=SLVRBIRFGH'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=SMEMUFVYDH'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=SRQLFVGTEC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=SRVTHAMJSB'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=STYJOYSZFP'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=SWVQKGPYIX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=SXHFRAIVNA'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=SXKTPSRMHQ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=SZHMIEQPRP'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TAKFGDMBML'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TBDSRHHRHU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TCBCNAKECE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TCFZTEYQIQ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=THJZLCGPZC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TJPSQLQBRJ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TKDDRAUNGD'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TLDYUKIEFZ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TLOXCFFXHQ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TNILPGXDJG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TPLZAGPLYD'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TRUEWKODMS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TSCAYHXTFQ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TTSHCWBWLR'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TUEMFXIUCH'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TWRMWQJUQG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=TXCLHKSJLC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=UAAHLLTPVO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=UDYGLQKCJW'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=UEXEHCOTXP'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=UHBPIPAKZG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=UJTBHCXRFI'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=UKAOCBFUVD'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=UKMQITMWNG'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=UNTKSXMCWU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=UYIMZRGXQA'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=VAFPUSCARA'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=VEMYYFXHDY'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=VGKLRDBIAE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=VHLHSEFUKQ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=VJDZJNFUKO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=VJSRIFJMWB'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=VJTWZCSRDV'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=VLTOOJETOH'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=VOSPWXBSMK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=VQMTASMXBN'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=VSKKLNIXLM'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=VVNIRPIVNX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=WGIMGMRDRB'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=WIKPWRYCYQ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=WKNAVKYINM'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=WMTYATVOWA'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=WNCJYFNHHC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=WSYCXLMVQW'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=WTWLESHVLC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=WYNLDFZYWD'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=WZTWGZBBHU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=XAYNLOBXMN'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=XIZZIVEDJP'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=XNVPOUKVYI'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=XOHXPTFLSR'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=XPCHADQCAQ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=XQREEJQLDK'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=XQXTMAINKO'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=XROVCWFKGJ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=XSZMBUPYHA'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=XTHNDPYUZL'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=XUIQNEILJW'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=XVEOWNJJNP'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=YECUTEWBRE'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=YENYXBRWUT'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=YEOFICIOFF'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=YFSMTJHOGY'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=YLATNHWPQF'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=YNNMYKBCWT'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=YPOIBPMABT'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=YPXDWVWSCC'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=YRCOYWUFGZ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=YSQBXCBTQT'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=YUXYDRYIJS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=YVSPXWGTPH'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=YZKEZGNXDU'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ZCJMQJCBFV'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ZDZTGKPNGV'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ZGPLZDRQPB'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ZLXKJWZVZT'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ZQENQMSDXP'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ZUPRACYBFP'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ZUTILFIGQX'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ZUVMSZHABH'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ZVWJFFECOM'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ZXELKFYUGJ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ZXZBZBZSBS'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ZYKASKTJDW'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=ZZEYCRMPBB'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=JBRUGKTKXI'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=GRPVWKEUWT'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=KEIVXMARUZ'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=AUCOGRXGLA'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=RNYYBRAPKB'
-,'http://ticket.linkoo.co.kr/ticket/use/?num=GPVRBPJWLG'
-    }
-	return _list
-'''
-def readfile(path):
-    '''파일 읽기'''
-    _rt = []
-    f = open(path+'\\마켓컬리베라.cvs', 'r', encoding='utf-8')
-    rdr = csv.reader(f)
-    for line in rdr:
-        _rt.append( line )
-    f.close()    
-    return _rt    
+    def getImgText(self) :
+        '''이미지 텍스트'''
+        files = self.getFiles()
+        
+        __result = []
+        for i in files:            
+            file = (i.split('.')[0])
+            tt = self.getTest(i)
+            print( [file , tt] )
+            __result.append( [file , tt] )
+        
+        f = open(self.base_path+'result.csv', 'w' , newline='', encoding='utf-8')
+        writer = csv.writer(f)
+        writer.writerows(__result)
+        f.close()
+    
 
-cnt = 0
-path = 'C:\\nicon\\data'
-list = readfile(path)
+    # 결과 부분 merge하여 결과를 출력한다.
+    def fin_read(self):
+        i_txt = self.readfile(self.input_path) 
+        r_txt = self.readfile(self.result_path)
+        _fin_result = [] 
+        for i in i_txt:
+            name = i[0]
+            url = i[1]
+            key1 = url.split('num=')[1]    
+            #print(name , url , key1)
+            for j in r_txt:
+                key2 = j[0]
+                state = j[1]
+                if key1 == key2:
+                    _fin_result.append( [ name , url , state ] )
+                    break
+        
+        _fin_result.sort(key=lambda x:(x[2], x[0]), reverse=False)
 
-for i in list:    
-    url = i[0]
-    file_nm = url.split('num=')[1]
-    print( url , file_nm )   
-    main( url , file_nm )
-    cnt += 1
+        #for i in _fin_result:
+        #    print(  i )
+
+        f = open(self.base_path+'zz_result.csv', 'w' , newline='', encoding='utf-8')
+        writer = csv.writer(f)
+        writer.writerows(_fin_result)
+        f.close()
+
+
+    # 이미지 생성 부분
+    def main(self, url , file_nm ):
+        try:
+            self.driver.get( url )
+            # 스크린샷 전에 시간 두기(로딩이 느릴수도 있으니)
+            time.sleep(2)
+            # 창 최대화
+            self.driver.maximize_window()
+            # 스크린샷 찍기
+            self.driver.save_screenshot(self.output_path+file_nm+".png")
+            # 종료 (모든 탭 종료)
+            #driver.quit()
+            print("### capture complete \t", file_nm)
+        except Exception as e:
+            print('### error msg :: ', e)
+            self.driver.quit()
+
+    def readfile(self , path):
+        '''파일 읽기'''
+        _rt = []
+        f = open(path , 'r', encoding='utf-8')
+        rdr = csv.reader(f)
+        for line in rdr:
+            _rt.append( line )
+        f.close()    
+        return _rt    
+
+    def exec(self):
+        '''활성화 부분'''        
+        list = self.readfile(self.input_path)
+        for i in list:
+            name = i[0]
+            url = i[1]
+            file_nm = url.split('num=')[1]    
+            #print(name , url , file_nm)
+            self.main( url , file_nm )
+
+
+if __name__ == '__main__':
+    # 프로그램. 실행 부분.
+    ob = urlsprint()
+    ob.exec() #이미지 생성하기
+    ob.getImgText() #이미지 텍스트 분석
+    ob.fin_read() # 결과 결합
+    
+    
+    
