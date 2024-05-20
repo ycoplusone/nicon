@@ -35,6 +35,7 @@ class Work(QThread):
     def run(self):
         chrome_options = Options()
         chrome_options.add_argument('window-size=512x1080')        
+        chrome_options.add_argument('--incognito')
         self.__driver = webdriver.Chrome( options= chrome_options )    
         time.sleep(2)    
         for j in self.__csv_data:
@@ -2873,6 +2874,7 @@ class mk_macro( QWidget ):
         '''브라우저 초기화'''
         chrome_options = Options()
         chrome_options.add_argument('window-size=512x1080')
+        chrome_options.add_argument('--incognito')
         self.__driver = webdriver.Chrome( options= chrome_options )
 
 
