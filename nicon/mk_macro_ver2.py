@@ -107,10 +107,10 @@ class Work(QThread):
     def run(self):
         '''매크로 테스트'''
         for j in self.__csv_data:
-            self.fnclick( self.__url_xy , self.__url_xy_wait ) #클릭
-            self.fnUrl( self.__url_path , self.__url_path_wait ) #url 처리                    
-            _j = j
             if self.__power == True:
+                self.fnclick( self.__url_xy , self.__url_xy_wait ) #클릭
+                self.fnUrl( self.__url_path , self.__url_path_wait ) #url 처리                    
+                _j = j            
                 for i in self.__div:                    
                     xy          = self.fnArrayGet( self.__click_xy , i )            
                     evn         = self.fnArrayGet( self.__click_evn , i )
