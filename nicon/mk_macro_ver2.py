@@ -53,11 +53,6 @@ class Work(QThread):
         self.__key1_wait         = key1_wait        # 키보드1 대기 
         self.__csv_data          = csv_data         # 데이터 파일
 
-        '''
-        print('기존', self.__div)
-        d2 = sorted(self.__div)
-        print('정렬',d2)
-        '''
     def fndbclick(self , xy , wait_time):
         '''더블클릭'''
         print( xy ,xy.x , xy.y  , wait_time)
@@ -90,14 +85,13 @@ class Work(QThread):
             pyautogui.press(n)
 
     
-    def fnkey(self , str):
+    def fnkey(self , str , cnt):
         '''키 입력'''
-        print(str)
-        pyautogui.press( str , presses = 1 , interval=0.2)
+        pyautogui.press( str , presses = cnt , interval=0.2)
 
     def fnArrayGet(self , arr , pos):
         '''배열 검색후 리턴'''      
-        #print(pos , arr.get(pos) )
+
         if arr.get(pos) != None:
             ''''''
             return arr.get(pos)
@@ -162,10 +156,9 @@ class Work(QThread):
                         time.sleep( float(xy_wait) ) #대기
                     elif (self.__div.get(i) == '키보드-0') and ( self.__power == True ):
                         print('키보드-0','*'*20)            
-                        self.fnclick( xy , 0.1 ) #클릭
+                        self.fnclick( xy , 0.1 ) #클릭                        
+                        self.fnkey( key0 , int(key0_wait) )                        
                         time.sleep( float(xy_wait) ) #대기
-                        self.fnkey( key0 )
-                        time.sleep( float(key0_wait) )
         
         if self.__power == True:
             pyautogui.alert('완료 되었습니다.')
@@ -184,6 +177,7 @@ class Work(QThread):
 class MyApp(QWidget):
     __lb_style = 'border-radius: 5px;border: 1px solid gray;'
     __lb_style2 = 'border-radius: 5px;border: 1px solid red;'
+    #__gridlayout = 'padding: 0px;'
 
     __x = 1024
     __work = Work()
@@ -214,7 +208,7 @@ class MyApp(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.setGeometry(self.__x, 30, 712, 1024)
+        self.setGeometry(self.__x, 30, 712, 900)
         self.show()
     
     def fnLoad(self):        
@@ -222,7 +216,7 @@ class MyApp(QWidget):
         super().__init__()
         self.__x += 100
         self.initUI()      
-        self.setGeometry(self.__x, 30, 712, 1024)
+        self.setGeometry(self.__x, 30, 712, 900)
         self.show()
           
 
@@ -235,18 +229,17 @@ class MyApp(QWidget):
         self.setLayout(grid)
         self.setWindowTitle('매크로 version 2')
 
-
     def keyPressEvent(self, e):
         '''f 키를 클릭하면 좌표 값 __click_xy에 넣는다'''
         if e.key() == Qt.Key_Escape:
             '''esc 하면 정리'''
             self.__work.stop()
-
-
         if e.key() == Qt.Key_F:
             xy = pyautogui.position()
             if (self.__pos == 999) and (self.__sub_pos == -1) :
                 self.__url_xy = xy
+                
+
             elif (self.__pos != -1) and (self.__sub_pos == -1) :                
                 self.__click_xy[self.__pos] = xy
             
@@ -263,7 +256,7 @@ class MyApp(QWidget):
     def head( self ):
         groupbox = QGroupBox('')       
         grid = QGridLayout()
-        grid.setSpacing(1)
+        grid.setSpacing(0)
         
         # URL 지정
         url_lb = QLabel('1. URL')         
@@ -271,12 +264,13 @@ class MyApp(QWidget):
         url_xy = QLabel('( x : {0} , y : {1} )'.format( 0 , 0 ) )
         url_xy.setStyleSheet( self.__lb_style  )
         if len(self.__url_xy) != 0:
-            url_xy.setText( '( x : {0} , y : {1} )'.format(self.__url_xy.x , self.__url_xy.y) )
+            url_xy.setText( '(x:{0} , y:{1})'.format(self.__url_xy.x , self.__url_xy.y) )
         
 
-        def fn_geo():
+        def fn_geo( ):
             '''좌표할당 행번호 지정'''
             self.__pos = 999
+
 
         url_xy_btn = QPushButton('좌표지정')
         url_xy_btn.clicked.connect( fn_geo )
@@ -292,7 +286,7 @@ class MyApp(QWidget):
             '''각 절의 완료 처리'''
             self.__url_path = url_qe.text()
             if len(self.__url_xy) != 0:
-                url_xy.setText( '( x : {0} , y : {1} )'.format(self.__url_xy.x , self.__url_xy.y) )
+                url_xy.setText( '(x:{0} , y:{1})'.format(self.__url_xy.x , self.__url_xy.y) )
 
         url_btn = QPushButton('적용')
         url_btn.clicked.connect( fn_cmp )  
@@ -334,7 +328,7 @@ class MyApp(QWidget):
 
     def body(self):
         groupbox = QGroupBox('')        
-
+        groupbox.setStyleSheet(self.__gridlayout)
         vbox = QVBoxLayout()
         vbox.setSpacing(0)
 
@@ -362,9 +356,7 @@ class MyApp(QWidget):
 
         vbox.addStretch(1)        
         groupbox.setLayout(vbox)
-
-        return groupbox
-            
+        return groupbox            
     
     def exec_obj(self , pos ):
         '''반복객체 
@@ -430,8 +422,7 @@ class MyApp(QWidget):
                 # 랜던값이 있다면 넣고 시작한다.
                 self.__temp_rand = self.__click_rand.get(pos)
 
-        groupbox = QGroupBox('')
-        
+        groupbox = QGroupBox('')        
         hbox = QHBoxLayout()
         hbox.setSpacing(0)        
 
@@ -449,6 +440,7 @@ class MyApp(QWidget):
         # 클릭후 이벤트 ( 클릭-0 : 클릭횟수 , 클릭-1 : 복사붙여넣기 컬럼위치 , 클릭-2 : 타이핑 컬럼위치 , 클릭-3 : 랜덤클릭 , 키보드-1  )
         col = QComboBox()
         col.addItems(['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20'])        
+        col.setCurrentText('1')
         col.setVisible( False )
         col.setFixedWidth(70)
         hbox.addWidget( col )     
@@ -473,14 +465,6 @@ class MyApp(QWidget):
         ran_btn3.setVisible( False )
         hbox.addWidget( ran_btn3 )      
 
-        # 클릭 의 대기시간
-        geo_xy_wait = QLineEdit()     
-        geo_xy_wait.setStyleSheet( self.__lb_style )
-        geo_xy_wait.setText('1.0')      
-        geo_xy_wait.setFixedWidth(50)
-        geo_xy_wait.setVisible( False )
-        hbox.addWidget( geo_xy_wait )          
-        
         key0 = QComboBox()
         key0.addItems(['pagedown','pageup','up','down','left','right','enter'])        
         key0.setVisible( False )
@@ -489,15 +473,23 @@ class MyApp(QWidget):
         # 클릭 의 대기시간
         key0_wait = QLineEdit()     
         key0_wait.setStyleSheet( self.__lb_style2 )
-        key0_wait.setText('0.5')      
+        key0_wait.setText('1')      
         key0_wait.setFixedWidth(50)
         key0_wait.setVisible( False )
         hbox.addWidget( key0_wait )
 
+        # 클릭 의 대기시간
+        geo_xy_wait = QLineEdit()     
+        geo_xy_wait.setStyleSheet( self.__lb_style )
+        geo_xy_wait.setText('1.0')      
+        geo_xy_wait.setFixedWidth(50)
+        geo_xy_wait.setVisible( False )
+        hbox.addWidget( geo_xy_wait )                  
+
         def fn_cmp():
             '''각 절의 완료 처리'''
             self.__div[pos] = div.currentText()
-            print(self.__div)            
+            #print(self.__div)            
             
             if self.__click_xy.get(pos) != None:
                 geo_btn.setText( '(x:{0},y:{1})'.format(self.__click_xy[pos].x , self.__click_xy[pos].y) )                           
@@ -527,7 +519,7 @@ class MyApp(QWidget):
         cmp_btn = QPushButton('적용')
         cmp_btn.setFixedWidth(100)
         cmp_btn.clicked.connect( fn_cmp )   
-        cmp_btn.setVisible( False )               
+        cmp_btn.setVisible( False )                       
         hbox.addWidget( cmp_btn )
         
         
@@ -542,7 +534,7 @@ class MyApp(QWidget):
             key0.setCurrentText( self.__key0[pos] )     # 키입력 이벤트 처리
             key0_wait.setText( self.__key0_wait[pos] )      # 키입력후 대기 시간
             fn_div( self.__div[pos] )   # 활성화부분    
-            print('로드시 : ',pos , self.__click_rand.get(pos) )
+            #print('로드시 : ',pos , self.__click_rand.get(pos) )
             if self.__click_rand.get(pos) != None:
                 #랜덤 버튼 정의 값 저장
                 if self.__click_rand[pos].get(0) != None:                    
@@ -564,6 +556,7 @@ class MyApp(QWidget):
     def foot(self):
         groupbox = QGroupBox('')
         grid = QGridLayout()
+        grid.setSpacing(0)
 
         def fn_save():
             '''파일저장.'''
@@ -621,8 +614,8 @@ class MyApp(QWidget):
             self.__key1             = _load_data[0]['key1']             # 키보드1 복합키 두개 - hot key 하기
             self.__key1_wait        = _load_data[0]['key1_wait']        # 키보드1 대기                    
             
-            print( 'self.__click_rand',self.__click_rand )
-            print( 'self.__click_rand.get(0)',self.__click_rand.get(0) )
+            #print( 'self.__click_rand',self.__click_rand )
+            #print( 'self.__click_rand.get(0)',self.__click_rand.get(0) )
             self.fnLoad()
 
         load_btn = QPushButton('Load')
