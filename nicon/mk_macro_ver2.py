@@ -118,26 +118,26 @@ class Work(QThread):
                     if (self.__div.get(i) == '끝') :
                         print('끝','*'*20)
                         break
-                    elif (self.__div.get(i) == '클릭-0') and ( self.__power == True ):
-                        print('클릭-0','*'*20)
+                    elif (self.__div.get(i) == '클릭') and ( self.__power == True ):
+                        print('클릭','*'*20)
                         print(evn , type(evn))                
                         for j in range(0, int(evn)): #반복 실행한다.
                             self.fnclick( xy , 0.5 ) #클릭
                         time.sleep( float(xy_wait) ) #대기
-                    elif (self.__div.get(i) == '클릭-1') and ( self.__power == True ):
-                        print('클릭-1','*'*20)
+                    elif (self.__div.get(i) == '붙여넣기') and ( self.__power == True ):
+                        print('붙여넣기','*'*20)
                         self.fnclick( xy , 0.5 ) #클릭
                         n = int(evn)                    
                         self.fnpaste( _j[n] ) # 붙여넣기
                         time.sleep( float(xy_wait) ) #대기
-                    elif (self.__div.get(i) == '클릭-2') and ( self.__power == True ):
-                        print('클릭-2','*'*20)
+                    elif (self.__div.get(i) == '글씨쓰기') and ( self.__power == True ):
+                        print('글씨쓰기','*'*20)
                         self.fnclick( xy , 0.5 ) #클릭
                         n = int(evn)                    
                         self.fnwrite( _j[n] ) #타이핑
                         time.sleep( float(xy_wait) ) #대기
-                    elif (self.__div.get(i) == '클릭-3') and ( self.__power == True ):
-                        print('클릭-3','*'*20)
+                    elif (self.__div.get(i) == '선택하기') and ( self.__power == True ):
+                        print('선택하기','*'*20)
                         self.fnclick( xy , 0.5 ) #클릭
                         r = random.randrange(0,3)
                         r0 = rand.get(0)
@@ -154,8 +154,21 @@ class Work(QThread):
                         elif r == 3:
                             self.fnclick( r3 , 0.5 ) #클릭   
                         time.sleep( float(xy_wait) ) #대기
-                    elif (self.__div.get(i) == '키보드-0') and ( self.__power == True ):
-                        print('키보드-0','*'*20)            
+                    elif (self.__div.get(i) == '중복선택') and ( self.__power == True ):
+                        print('중복선택','*'*20)
+                        self.fnclick( xy , 0.5 ) #클릭   
+                        r0 = rand.get(0)
+                        r1 = rand.get(1)
+                        r2 = rand.get(2)
+                        r3 = rand.get(3)                                            
+                        self.fnclick( r0 , 0.5 ) #클릭                           
+                        self.fnclick( r1 , 0.5 ) #클릭   
+                        self.fnclick( r2 , 0.5 ) #클릭                           
+                        self.fnclick( r3 , 0.5 ) #클릭   
+                        time.sleep( float(xy_wait) ) #대기 
+
+                    elif (self.__div.get(i) == '방향전환') and ( self.__power == True ):
+                        print('방향전환','*'*20)            
                         self.fnclick( xy , 0.1 ) #클릭                        
                         self.fnkey( key0 , int(key0_wait) )                        
                         time.sleep( float(xy_wait) ) #대기
@@ -378,7 +391,7 @@ class MyApp(QWidget):
                 ran_btn3.setVisible( False )
                 key0.setVisible( False )
                 key0_wait.setVisible( False )
-            elif (str == '클릭-0') or (str == '클릭-1') or (str == '클릭-2'):
+            elif (str == '클릭') or (str == '붙여넣기') or (str == '글씨쓰기'):
                 geo_btn.setVisible( True )
                 col.setVisible(True)
                 ran_btn0.setVisible( False )
@@ -389,7 +402,7 @@ class MyApp(QWidget):
                 key0_wait.setVisible( False )
                 geo_xy_wait.setVisible( True )
                 cmp_btn.setVisible( True )
-            elif str == '클릭-3':
+            elif (str == '선택하기') or ( str == '중복선택' ):
                 geo_btn.setVisible( True )
                 col.setVisible(False)
                 geo_xy_wait.setVisible( True )                
@@ -400,7 +413,7 @@ class MyApp(QWidget):
                 key0.setVisible( False )
                 key0_wait.setVisible( False )
                 cmp_btn.setVisible( True )
-            elif str =='키보드-0':
+            elif str =='방향전환':
                 geo_btn.setVisible( True )
                 col.setVisible(False)                              
                 ran_btn0.setVisible( False )
@@ -430,7 +443,7 @@ class MyApp(QWidget):
         hbox.setSpacing(0)        
 
         div = QComboBox()
-        div.addItems(['끝','클릭-0','클릭-1','클릭-2','클릭-3','키보드-0','무시' ])      # ,'키보드-1' 추후 수정
+        div.addItems(['끝','클릭','붙여넣기','글씨쓰기','선택하기','중복선택','방향전환','무시' ])      # ,'키보드-1' 추후 수정
         div.activated[str].connect( fn_div )   
         hbox.addWidget( div )
 
@@ -617,6 +630,13 @@ class MyApp(QWidget):
             self.__key1             = _load_data[0]['key1']             # 키보드1 복합키 두개 - hot key 하기
             self.__key1_wait        = _load_data[0]['key1_wait']        # 키보드1 대기                    
             
+            # 기존 자료 마이그레이션. 
+            for i in self.__div:
+                str = self.__div.get(i)
+                str = str.replace('클릭-0','클릭').replace('클릭-1','붙여넣기').replace('클릭-2','글씨쓰기').replace('클릭-3','선택하기').replace('클릭-4','중복선택').replace('키보드-0','방향전환')
+                self.__div[i] = str
+
+
             #print( 'self.__click_rand',self.__click_rand )
             #print( 'self.__click_rand.get(0)',self.__click_rand.get(0) )
             self.fnLoad()
