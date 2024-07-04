@@ -251,16 +251,19 @@ class MyApp(QWidget):
         grid.addWidget(self.body(), 2, 0)
         #grid.addWidget(self.body2(), 2, 0)
         '''        
-                
+        
+
+
+
         self.pane = QWidget()
         self.view = QScrollArea()
         self.view.setWidget(self.pane)
         self.view.setWidgetResizable(True)
         layout = QVBoxLayout(self)
-        layout.addWidget(self.view)
-        layout = QVBoxLayout(self.pane)
         layout.addWidget( self.head() )
         layout.addWidget( self.foot() )
+        layout.addWidget(self.view)
+        layout = QVBoxLayout(self.pane)        
         layout.addWidget( self.body() )
         
  
