@@ -159,6 +159,8 @@ class Work(QThread):
                         self.fnclick( xy , 0.1 ) #클릭                        
                         self.fnkey( key0 , int(key0_wait) )                        
                         time.sleep( float(xy_wait) ) #대기
+                    elif (self.__div.get(i) == '무시') and ( self.__power == True ):
+                        print('무시','*'*20)            
         
         if self.__power == True:
             pyautogui.alert('완료 되었습니다.')
@@ -179,8 +181,9 @@ class MyApp(QWidget):
     __lb_style2 = 'border-radius: 5px;border: 1px solid red;'
     #__gridlayout = 'padding: 0px;'
 
-    __x = 1024
-    __work = Work()
+    __x         = 1024
+    __work      = Work()
+    __max_obj   = 151
 
     
     __url_xy            = () # url 클릭 좌표
@@ -188,9 +191,14 @@ class MyApp(QWidget):
     __url_path          = '' #url 주소
     __url_path_wait     = 2 # 2초 기본 대기 url 주소 입력후 대기시간
     __cvs_path          = '' # cvs 파일 위치
-    __div               = {0:'끝',1:'끝',2:'끝',3:'끝',4:'끝',5:'끝',6:'끝',7:'끝',8:'끝',9:'끝',10:'끝',11:'끝',12:'끝',13:'끝',14:'끝',15:'끝',16:'끝',17:'끝',18:'끝',19:'끝',20:'끝',21:'끝',22:'끝',23:'끝',24:'끝'} #선택값    
+    __div               = {} #선택값        
     __click_xy          = {} #클릭    
-    __click_evn         = {0:'0',1:'0',2:'0',3:'0',4:'0',5:'0',6:'0',7:'0',8:'0',9:'0',10:'0',11:'0',12:'0',13:'0',14:'0',15:'0',16:'0',17:'0',18:'0',19:'0',20:'0',21:'0',22:'0',23:'0',24:'0'} #클릭   복사 컬럼 위치 선택후 붙여넣기
+    __click_evn         = {} #클릭   복사 컬럼 위치 선택후 붙여넣기
+
+    for i in range(0,__max_obj):
+        __div[i]        = '끝'
+        __click_evn[i]  = '1'
+
     __click_rand        = {} #랜덤클릭
     __click_xy_wait     = {} #클릭 실행후 대기시간    
     __key0              = {} # 키보드0 단일키 하나
@@ -208,7 +216,8 @@ class MyApp(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.setGeometry(self.__x, 30, 712, 900)
+        self.setMinimumHeight(800)
+        self.setGeometry(self.__x, 30, 712, 800)
         self.show()
     
     def fnLoad(self):        
@@ -216,17 +225,32 @@ class MyApp(QWidget):
         super().__init__()
         self.__x += 100
         self.initUI()      
-        self.setGeometry(self.__x, 30, 712, 900)
+        self.setMinimumHeight(800)
+        self.setGeometry(self.__x, 30, 712, 800)
         self.show()
           
 
     def initUI(self):
+        '''
         grid = QGridLayout()
         grid.addWidget(self.head(), 0, 0)
-        grid.addWidget(self.body(), 1, 0)
-        grid.addWidget(self.foot(), 2, 0)
-
-        self.setLayout(grid)
+        grid.addWidget(self.foot(), 1, 0)
+        grid.addWidget(self.body(), 2, 0)
+        #grid.addWidget(self.body2(), 2, 0)
+        '''        
+                
+        self.pane = QWidget()
+        self.view = QScrollArea()
+        self.view.setWidget(self.pane)
+        self.view.setWidgetResizable(True)
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.view)
+        layout = QVBoxLayout(self.pane)
+        layout.addWidget( self.head() )
+        layout.addWidget( self.foot() )
+        layout.addWidget( self.body() )
+        
+ 
         self.setWindowTitle('매크로 version 2')
 
     def keyPressEvent(self, e):
@@ -322,41 +346,20 @@ class MyApp(QWidget):
         grid.addWidget(file_lb  , 1 , 0)
         grid.addWidget(csv_lb   , 1 , 1 , 1 , 3)
         grid.addWidget(filebtn  , 1 , 4)     
+        groupbox.setFixedHeight(70)
         groupbox.setLayout( grid )  
         return groupbox
 
 
-    def body(self):
+    def body(self):               
         groupbox = QGroupBox('')        
-        groupbox.setStyleSheet(self.__gridlayout)
         vbox = QVBoxLayout()
-        vbox.setSpacing(0)
-
-        vbox.addWidget(self.exec_obj(0))
-        vbox.addWidget(self.exec_obj(1))
-        vbox.addWidget(self.exec_obj(2))
-        vbox.addWidget(self.exec_obj(3))
-        vbox.addWidget(self.exec_obj(4))
-        vbox.addWidget(self.exec_obj(5))
-        vbox.addWidget(self.exec_obj(6))
-        vbox.addWidget(self.exec_obj(7))
-        vbox.addWidget(self.exec_obj(8))
-        vbox.addWidget(self.exec_obj(9))
-        vbox.addWidget(self.exec_obj(10))
-        vbox.addWidget(self.exec_obj(11))
-        vbox.addWidget(self.exec_obj(12))
-        vbox.addWidget(self.exec_obj(13))
-        vbox.addWidget(self.exec_obj(14))
-        vbox.addWidget(self.exec_obj(15))
-        vbox.addWidget(self.exec_obj(16))
-        vbox.addWidget(self.exec_obj(17))
-        vbox.addWidget(self.exec_obj(18))
-        vbox.addWidget(self.exec_obj(19))
-        vbox.addWidget(self.exec_obj(20))
-
-        vbox.addStretch(1)        
+        vbox.setSpacing(0)        
+        for i in range( 0, self.__max_obj  ): # 0~20까지
+            vbox.addWidget(self.exec_obj(i))
         groupbox.setLayout(vbox)
-        return groupbox            
+        return groupbox
+    
     
     def exec_obj(self , pos ):
         '''반복객체 
@@ -364,7 +367,7 @@ class MyApp(QWidget):
         '''
         def fn_div( str ):
             '''행동 클릭 이벤트'''
-            if str == '끝':                
+            if (str == '끝') or (str == '무시'):                
                 geo_btn.setVisible( False )
                 col.setVisible( False )
                 geo_xy_wait.setVisible( False )
@@ -427,7 +430,7 @@ class MyApp(QWidget):
         hbox.setSpacing(0)        
 
         div = QComboBox()
-        div.addItems(['끝','클릭-0','클릭-1','클릭-2','클릭-3','키보드-0' ])      # ,'키보드-1' 추후 수정
+        div.addItems(['끝','클릭-0','클릭-1','클릭-2','클릭-3','키보드-0','무시' ])      # ,'키보드-1' 추후 수정
         div.activated[str].connect( fn_div )   
         hbox.addWidget( div )
 
@@ -522,10 +525,11 @@ class MyApp(QWidget):
         cmp_btn.setVisible( False )                       
         hbox.addWidget( cmp_btn )
         
-        
-        # 로드시 선택 적용.
-        if self.__click_xy.get(pos) != None:
+        if self.__div.get(pos) != None:            
             div.setCurrentText( self.__div[pos] ) # 행동 선택
+
+        # 로드시 선택 적용.
+        if self.__click_xy.get(pos) != None:            
             if self.__click_xy.get(pos) != None:
                 geo_btn.setText( '(x:{0},y:{1})'.format(self.__click_xy[pos].x , self.__click_xy[pos].y) )   #좌표값.
 
@@ -546,7 +550,6 @@ class MyApp(QWidget):
                 if self.__click_rand[pos].get(3) != None:                    
                     ran_btn3.setText( '(x:{0},y:{1})'.format(self.__click_rand[pos][3].x , self.__click_rand[pos][3].y) )
         
-
         hbox.addStretch()
 
         groupbox.setLayout(hbox)
@@ -692,8 +695,9 @@ class MyApp(QWidget):
         for i in file_list:
             load_cb.addItem(i)
         grid.addWidget( load_cb , 1 , 4,1,2 )
-
+        groupbox.setFixedHeight(70)
         groupbox.setLayout(grid)
+        
         return groupbox
 
     def readfile(self , path):
