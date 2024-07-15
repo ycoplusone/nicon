@@ -12,17 +12,18 @@ import os
 import re
 import shutil
 import pandas as pd
-
+import pyzbar.pyzbar as pyzbar  # pip install pyzbar
 
 class urlsprint():
     chrome_options = Options()
     chrome_options.add_argument('headless')
     chrome_options.add_argument('window-size=512x1080')
     driver = webdriver.Chrome( options= chrome_options )
-    base_path = 'C:\\ncnc_class\\data20240515\\'
-    input_path = 'C:\\ncnc_class\\data20240515\\data.csv'
+    base_path   = 'C:\\ncnc_class\\data20240515\\'
+    input_path  = 'C:\\ncnc_class\\data20240515\\data.csv'
     output_path = 'C:\\ncnc_class\\data20240515\\img\\'
     result_path = 'C:\\ncnc_class\\data20240515\\result.csv'
+    bar_result_path = 'C:\\ncnc_class\\data20240515\\result_barcode.csv'
 
     # 생성된 이미지 텍스트 분석하기.
     def getFiles(self):
@@ -97,20 +98,33 @@ class urlsprint():
     def fin_read(self):
         i_txt = self.readfile(self.input_path) 
         r_txt = self.readfile(self.result_path)
+        bar_txt = self.readfile(self.bar_result_path)
         _fin_result = [] 
         for i in i_txt:
             name = i[0]
             url = i[1]
             key1 = url.split('num=')[1]    
-            #print(name , url , key1)
+            _state = ''
+            _barcode = ''
+
             for j in r_txt:
                 key2 = j[0]
                 state = j[1]
                 if key1 == key2:
-                    _fin_result.append( [ name , url , state ] )
+                    #_fin_result.append( [ name , url , state ] )
+                    _state = state
                     break
+            
+            for k in bar_txt:
+                key3 = k[0]
+                bar = k[1]
+                if key1 == key3:
+                    _barcode = bar
+                    break
+            
+            _fin_result.append( [ name , url ,  _barcode, _state ] )
         
-        _fin_result.sort(key=lambda x:(x[2], x[0]), reverse=False)
+        _fin_result.sort(key=lambda x:(x[3], x[0]), reverse=False)
 
         #for i in _fin_result:
         #    print(  i )
@@ -158,13 +172,59 @@ class urlsprint():
             #print(name , url , file_nm)
             self.main( url , file_nm )
 
+    def decode(self,im):
+        '''Find barcodes and QR codes
+        바코드 탐지하는 엔진 (바코드 및 QR코드 탐지)
+        ''' 
+        _str = None
+        try:
+            decodedObjects = pyzbar.decode(im)        
+            for obj in decodedObjects:
+                _str = obj.data.decode('utf-8')        
+        except Exception as e:
+            print(e)
+            return None
+        return _str
+
+    def into_rename_barcode(self):
+        '''파일명 바코드로 변환'''
+        try:
+            ''''''
+            __result = []
+            str = 'C:\\ncnc_class\\data20240515\\img'  
+            rootlist = os.listdir(str)
+            
+
+            listdir = os.listdir(str)
+            path_files =  [ os.path.join(str, x)  for x in listdir ]        
+            file_names =  [ X for X in path_files if os.path.isfile(X)]
+            
+            for ii in file_names:                
+                nm = (ii.split('.')[0]).split('\\')[-1]
+                __n = np.fromfile(ii, np.uint8)
+                __img = cv2.imdecode(__n, cv2.IMREAD_COLOR)
+                __barcode = self.decode(__img)      
+                print( [nm , __barcode] )
+                __result.append( [nm , __barcode] )
+
+            
+            f = open(self.base_path+'result_barcode.csv', 'w' , newline='', encoding='utf-8')
+            writer = csv.writer(f)
+            writer.writerows(__result)
+            f.close()            
+
+        except Exception as e :
+            print('into_rename_barcode : ',e)       
+
 
 if __name__ == '__main__':
     # 프로그램. 실행 부분.
     ob = urlsprint()
     ob.exec() #이미지 생성하기
     ob.getImgText() #이미지 텍스트 분석
+    ob.into_rename_barcode() #바코드 추출
     ob.fin_read() # 결과 결합
+    
     
     
     
