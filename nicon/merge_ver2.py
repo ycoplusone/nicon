@@ -56,28 +56,30 @@ class MyApp(QWidget):
         폴더를 선택후 해당 폴더의 이미지 하나를 배경에 넣는다.
         '''
         __path =QFileDialog.getExistingDirectory(self)  # QFileDialog.getOpenFileName(self)       
-        self.__fold_path = __path 
-        self.fold_lb.setText( self.__fold_path )
-        self.__file_list = os.listdir( self.__fold_path )                
-        
-        _aa = QPixmap( self.__fold_path+'\\'+self.__file_list[0] )
-        _w = _aa.width() #500
-        _h = _aa.height() #750
-        _re_size_w = _w / 500
-        _re_size_h = _h / 750        
-        self._resize_rate = max(_re_size_w , _re_size_h)
-        _re_w = int(_w / self._resize_rate)
-        _re_h = int(_h / self._resize_rate)
-        print( _w , _h , _re_size_w , _re_size_h ,  self._resize_rate , _re_w  , _re_h)
-        self.lb.setPixmap( QPixmap( _aa ).scaled( _re_w ,  _re_h ) )          
+        if __path != '':
+            self.__fold_path = __path 
+            self.fold_lb.setText( self.__fold_path )
+            self.__file_list = os.listdir( self.__fold_path )                
+            
+            _aa = QPixmap( self.__fold_path+'\\'+self.__file_list[0] )
+            _w = _aa.width() #500
+            _h = _aa.height() #750
+            _re_size_w = _w / 500
+            _re_size_h = _h / 750        
+            self._resize_rate = max(_re_size_w , _re_size_h)
+            _re_w = int(_w / self._resize_rate)
+            _re_h = int(_h / self._resize_rate)
+            print( _w , _h , _re_size_w , _re_size_h ,  self._resize_rate , _re_w  , _re_h)
+            self.lb.setPixmap( QPixmap( _aa ).scaled( _re_w ,  _re_h ) )          
         
 
 
     def fileopen(self):
         try:        
             fname = QFileDialog.getOpenFileName(self)
-            _nm = fname[0]
-            self.file_lb.setText( _nm )
+            if fname != '':
+                _nm = fname[0]
+                self.file_lb.setText( _nm )
             
         except Exception as e:
             print('def fileopen',e)   
@@ -95,7 +97,8 @@ class MyApp(QWidget):
     def getFold(self):
         try:
             fname = QFileDialog.getExistingDirectory(self,'폴더선택','')
-            self.export_fold_lb.setText( fname )
+            if fname != '':
+                self.export_fold_lb.setText( fname )
         except Exception as e:
             print('def getFold',e) 
 
