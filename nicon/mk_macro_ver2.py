@@ -10,6 +10,10 @@ import csv
 import pickle
 import time
 import random
+from datetime import datetime
+from pytz import timezone
+from PIL import ImageGrab , Image
+
 
 
 class Work(QThread):
@@ -55,19 +59,19 @@ class Work(QThread):
 
     def fndbclick(self , xy , wait_time):
         '''더블클릭'''
-        print( xy ,xy.x , xy.y  , wait_time)
+        #print( xy ,xy.x , xy.y  , wait_time)
         pyautogui.doubleClick(x= xy.x  , y= xy.y)        
         time.sleep( wait_time )         
 
     def fnclick(self , xy , wait_time):
         '''클릭 함수 (좌표 , 대기시간)'''
-        print( xy ,xy.x , xy.y  , wait_time)
+        #print( xy ,xy.x , xy.y  , wait_time)
         pyautogui.click(x= xy.x  , y= xy.y)        
         time.sleep( wait_time ) 
     
     def fnUrl(self, url , wait_time):
         '''url 처리 복사 붙여넣기'''
-        print( url , wait_time )
+        #print( url , wait_time )
         pyautogui.hotkey('del')   
         pyperclip.copy( url )
         pyautogui.hotkey('ctrl', 'v')   
@@ -105,7 +109,10 @@ class Work(QThread):
                 self.fnclick( self.__url_xy , self.__url_xy_wait ) #클릭
                 self.fnUrl( self.__url_path , self.__url_path_wait ) #url 처리                    
                 _j = j            
-                for i in self.__div:                    
+                print('*'*100)                                
+                print('처리 데이터 : ',j)
+                print('*'*100)                            
+                for i in self.__div:                         
                     xy          = self.fnArrayGet( self.__click_xy , i )            
                     evn         = self.fnArrayGet( self.__click_evn , i )
                     rand        = self.fnArrayGet( self.__click_rand , i )
@@ -113,31 +120,38 @@ class Work(QThread):
                     key0        = self.fnArrayGet( self.__key0 , i )
                     key0_wait   = self.fnArrayGet( self.__key0_wait , i )
                     key1        = self.fnArrayGet( self.__key1 , i )
-                    key1_wait   = self.fnArrayGet( self.__key1_wait , i )                
-                    print('evn',evn , type(evn))
+                    key1_wait   = self.fnArrayGet( self.__key1_wait , i )      
+                    print('\t 행번호 : ', i ,' , 작업구분 : ', self.__div.get(i) )                        
                     if (self.__div.get(i) == '끝') :
-                        print('끝','*'*20)
+                        # 스샷찍은후 종료
+                        try:
+                            base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M%S')
+                            base_dt = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d')
+                            file_nm  = j[0]+'_'+base_dttm
+                            img = ImageGrab.grab()
+                            imgCrop = img.crop()
+                            file_name = 'c:\\ncnc_class\\screenshot\\{}\\{}{}'.format( base_dt,file_nm ,'.png')
+                            imgCrop.save(file_name)
+                        except Exception as e:
+                            print('mk_image : ',e)                        
                         break
+
                     elif (self.__div.get(i) == '클릭') and ( self.__power == True ):
-                        print('클릭','*'*20)
-                        print(evn , type(evn))                
+                        #print(evn , type(evn))                
                         for j in range(0, int(evn)): #반복 실행한다.
                             self.fnclick( xy , 0.5 ) #클릭
                         time.sleep( float(xy_wait) ) #대기
                     elif (self.__div.get(i) == '붙여넣기') and ( self.__power == True ):
-                        print('붙여넣기','*'*20)
                         self.fnclick( xy , 0.5 ) #클릭
                         n = int(evn)                    
                         self.fnpaste( _j[n] ) # 붙여넣기
                         time.sleep( float(xy_wait) ) #대기
                     elif (self.__div.get(i) == '글씨쓰기') and ( self.__power == True ):
-                        print('글씨쓰기','*'*20)
                         self.fnclick( xy , 0.5 ) #클릭
                         n = int(evn)                    
                         self.fnwrite( _j[n] ) #타이핑
                         time.sleep( float(xy_wait) ) #대기
                     elif (self.__div.get(i) == '선택하기') and ( self.__power == True ):
-                        print('선택하기','*'*20)
                         self.fnclick( xy , 0.5 ) #클릭
                         r = random.randrange(0,3)
                         r0 = rand.get(0)
@@ -155,7 +169,6 @@ class Work(QThread):
                             self.fnclick( r3 , 0.5 ) #클릭   
                         time.sleep( float(xy_wait) ) #대기
                     elif (self.__div.get(i) == '중복선택') and ( self.__power == True ):
-                        print('중복선택','*'*20)
                         self.fnclick( xy , 0.5 ) #클릭   
                         r0 = rand.get(0)
                         r1 = rand.get(1)
@@ -168,7 +181,6 @@ class Work(QThread):
                         time.sleep( float(xy_wait) ) #대기 
 
                     elif (self.__div.get(i) == '방향전환') and ( self.__power == True ):
-                        print('방향전환','*'*20)            
                         self.fnclick( xy , 0.1 ) #클릭                        
                         self.fnkey( key0 , int(key0_wait) )                        
                         time.sleep( float(xy_wait) ) #대기
@@ -244,16 +256,6 @@ class MyApp(QWidget):
           
 
     def initUI(self):
-        '''
-        grid = QGridLayout()
-        grid.addWidget(self.head(), 0, 0)
-        grid.addWidget(self.foot(), 1, 0)
-        grid.addWidget(self.body(), 2, 0)
-        #grid.addWidget(self.body2(), 2, 0)
-        '''        
-        
-
-
 
         self.pane = QWidget()
         self.view = QScrollArea()
@@ -265,8 +267,6 @@ class MyApp(QWidget):
         layout.addWidget(self.view)
         layout = QVBoxLayout(self.pane)        
         layout.addWidget( self.body() )
-        
- 
         self.setWindowTitle('매크로 version 2')
 
     def keyPressEvent(self, e):
@@ -443,7 +443,10 @@ class MyApp(QWidget):
 
         groupbox = QGroupBox('')        
         hbox = QHBoxLayout()
-        hbox.setSpacing(0)        
+        hbox.setSpacing(0)     
+
+        row_seq = QLabel( str(pos)+' : '   ) 
+        hbox.addWidget( row_seq )
 
         div = QComboBox()
         div.addItems(['끝','클릭','붙여넣기','글씨쓰기','선택하기','중복선택','방향전환','무시' ])      # ,'키보드-1' 추후 수정
