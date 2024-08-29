@@ -127,6 +127,10 @@ class Work(QThread):
                         try:
                             base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M%S')
                             base_dt = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d')
+                            try:
+                                os.mkdir('c:\\ncnc_class\\screenshot\\{}'.format(base_dt))
+                            except Exception as e:
+                                '''폴더 생성 있으면 넘어간다.'''
                             file_nm  = j[0]+'_'+base_dttm
                             img = ImageGrab.grab()
                             imgCrop = img.crop()
@@ -134,6 +138,7 @@ class Work(QThread):
                             imgCrop.save(file_name)
                         except Exception as e:
                             print('mk_image : ',e)                        
+
                         break
 
                     elif (self.__div.get(i) == '클릭') and ( self.__power == True ):
@@ -185,7 +190,7 @@ class Work(QThread):
                         self.fnkey( key0 , int(key0_wait) )                        
                         time.sleep( float(xy_wait) ) #대기
                     elif (self.__div.get(i) == '무시') and ( self.__power == True ):
-                        print('무시','*'*20)            
+                        '''행동 없음.'''
         
         if self.__power == True:
             pyautogui.alert('완료 되었습니다.')
