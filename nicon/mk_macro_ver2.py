@@ -125,16 +125,16 @@ class Work(QThread):
                     if (self.__div.get(i) == '끝') :
                         # 스샷찍은후 종료
                         try:
-                            base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M%S')
-                            base_dt = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d')
+                            base_dttm   = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M%S')
+                            base_dt     = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d')
                             try:
                                 os.mkdir('c:\\ncnc_class\\screenshot\\{}'.format(base_dt))
                             except Exception as e:
                                 '''폴더 생성 있으면 넘어간다.'''
-                            file_nm  = j[0]+'_'+base_dttm
-                            img = ImageGrab.grab()
-                            imgCrop = img.crop()
-                            file_name = 'c:\\ncnc_class\\screenshot\\{}\\{}{}'.format( base_dt,file_nm ,'.png')
+                            file_nm     = base_dttm+'_'+str(j[0])
+                            img         = ImageGrab.grab()
+                            imgCrop     = img.crop()
+                            file_name   = 'c:\\ncnc_class\\screenshot\\{}\\{}{}'.format( base_dt,file_nm ,'.png')
                             imgCrop.save(file_name)
                         except Exception as e:
                             print('mk_image : ',e)                        
@@ -163,7 +163,7 @@ class Work(QThread):
                         r1 = rand.get(1)
                         r2 = rand.get(2)
                         r3 = rand.get(3)
-                        print( r , r0 , r1 , r2 , r3 )
+                        # print( r , r0 , r1 , r2 , r3 )
                         if r == 0:
                             self.fnclick( r0 , 0.5 ) #클릭   
                         elif r == 1:
