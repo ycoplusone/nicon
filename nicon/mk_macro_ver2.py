@@ -110,7 +110,7 @@ class Work(QThread):
                 self.fnUrl( self.__url_path , self.__url_path_wait ) #url 처리                    
                 _j = j            
                 print('*'*100)                                
-                print('처리 데이터 : ',j)
+                print('처리 데이터 : ', _j)
                 print('*'*100)                            
                 for i in self.__div:                         
                     xy          = self.fnArrayGet( self.__click_xy , i )            
@@ -131,11 +131,12 @@ class Work(QThread):
                                 os.mkdir('c:\\ncnc_class\\screenshot\\{}'.format(base_dt))
                             except Exception as e:
                                 '''폴더 생성 있으면 넘어간다.'''
-                            file_nm     = base_dttm+'_'+str(j[0])
+                            file_nm     = base_dttm+'_'+str(_j[0])
                             img         = ImageGrab.grab()
                             imgCrop     = img.crop()
                             file_name   = 'c:\\ncnc_class\\screenshot\\{}\\{}{}'.format( base_dt,file_nm ,'.png')
                             imgCrop.save(file_name)
+                            print('\t 저장' , file_nm )
                         except Exception as e:
                             print('mk_image : ',e)                        
 
