@@ -136,7 +136,7 @@ class Work(QThread):
                             imgCrop     = img.crop()
                             file_name   = 'c:\\ncnc_class\\screenshot\\{}\\{}{}'.format( base_dt,file_nm ,'.png')
                             imgCrop.save(file_name)
-                            print('\t 저장' , file_nm )
+                            print('\t 파일명 : ' , file_nm )
                         except Exception as e:
                             print('mk_image : ',e)                        
 
