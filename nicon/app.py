@@ -24,7 +24,7 @@ https://api.telegram.org/bot6173895901:AAH54vZaLnXXZq9hngplJNeEJIDEzH2azbc/sendM
 '''
 def send_telegram_message( message ,send_type ):
     token = '6173895901:AAH54vZaLnXXZq9hngplJNeEJIDEzH2azbc' 
-    chats = ['-1001932446119','-1001839221120','-1001906908142']    
+    chats = ['-1001932446119','-1001839221120','-1001906908142','-1002078550724','-1002107720688']    
     '''
     -1001813504824 : 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
 
