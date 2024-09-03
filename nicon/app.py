@@ -26,11 +26,14 @@ def send_telegram_message( message ,send_type ):
     token = '6173895901:AAH54vZaLnXXZq9hngplJNeEJIDEzH2azbc' 
     chats = ['-1001932446119','-1001839221120','-1001906908142']    
     '''
-    -1001932446119 : 니콘내콘 알림
-    -1001839221120 : 더모아방
-    -1001906908142 : themore
-    
     -1001813504824 : 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
+
+    -1001932446119  : 니콘내콘 알림
+    -1001839221120  : 더모아방
+    -1001906908142  : themore
+    -1002078550724  : 주땡 - e내콘
+    -1002107720688  : 유치원 - e내콘    
+    
     '''
     base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
         
