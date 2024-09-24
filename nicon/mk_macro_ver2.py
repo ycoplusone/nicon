@@ -214,7 +214,7 @@ class MyApp(QWidget):
 
     __x         = 1024
     __work      = Work()
-    __max_obj   = 151
+    __max_obj   = 251
 
     
     __url_xy            = () # url 클릭 좌표
@@ -467,7 +467,7 @@ class MyApp(QWidget):
 
         # 클릭후 이벤트 ( 클릭-0 : 클릭횟수 , 클릭-1 : 복사붙여넣기 컬럼위치 , 클릭-2 : 타이핑 컬럼위치 , 클릭-3 : 랜덤클릭 , 키보드-1  )
         col = QComboBox()
-        col.addItems(['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20'])        
+        col.addItems(['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37','38','39'])                
         col.setCurrentText('1')
         col.setVisible( False )
         col.setFixedWidth(70)
@@ -494,7 +494,7 @@ class MyApp(QWidget):
         hbox.addWidget( ran_btn3 )      
 
         key0 = QComboBox()
-        key0.addItems(['pagedown','pageup','up','down','left','right','enter'])        
+        key0.addItems(['pagedown','pageup','up','down','left','right','enter', 'del', 'delete','backspace','space'])        
         key0.setVisible( False )
         hbox.addWidget( key0 )    
 
