@@ -207,11 +207,11 @@ class Work(QThread):
                             base_dttm   = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M%S')
                             base_dt     = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d')
                             try:
-                                os.mkdir('c:\\ncnc_class\\capture\\{}'.format(base_dt))
+                                os.mkdir('c:\\ncnc_class\\capture')
                             except Exception as e:
                                 '''폴더 생성 있으면 넘어간다.''' 
                             file_nm     = base_dttm+'_'+str(_j[0])
-                            file_name   = r"c:\\ncnc_class\\capture\\{}\\{}{}".format( base_dt,file_nm ,'.png') 
+                            file_name   = r"c:\\ncnc_class\\capture\\{}{}".format( file_nm ,'.png') 
                             pyautogui.screenshot( file_name , region=(r11.x , r11.y , capture_width, capture_height))    
                             time.sleep( float(xy_wait) ) #대기
 
