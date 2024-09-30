@@ -34,6 +34,8 @@ class Work(QThread):
     __key1_wait         = {} # 키보드1 대기
 
     __csv_data          = [] # 데이터 파일 배열
+    __seq_start         = 0        # 시작구간
+    __seq_end           = 999      # 종료구간
 
     __power = False
 
@@ -41,7 +43,7 @@ class Work(QThread):
         super().__init__()
         self.__power = True     # run 매소드 루프 플래그
 
-    def fn_param(self , url_xy,url_xy_wait,url_path,url_path_wait,cvs_path,div,click_xy,click_evn,click_rand,click_xy_wait,key0,key0_wait,key1,key1_wait,csv_data ):
+    def fn_param(self , url_xy,url_xy_wait,url_path,url_path_wait,cvs_path,div,click_xy,click_evn,click_rand,click_xy_wait,key0,key0_wait,key1,key1_wait,csv_data , seq_start , seq_end ):
         self.__url_xy            = url_xy           # url 클릭 좌표
         self.__url_xy_wait       = url_xy_wait      # 0.5 초 기본 대기 url 클릭후 대기
         self.__url_path          = url_path         #url 주소
@@ -57,6 +59,8 @@ class Work(QThread):
         self.__key1              = key1             # 키보드1 복합키 두개 - hot key 하기
         self.__key1_wait         = key1_wait        # 키보드1 대기 
         self.__csv_data          = csv_data         # 데이터 파일
+        self.__seq_start         = seq_start        # 시작구간
+        self.__seq_end           = seq_end          # 종료구간
 
     def fndbclick(self , xy , wait_time):
         '''더블클릭'''
@@ -108,112 +112,116 @@ class Work(QThread):
         try:
             for j in self.__csv_data:
                 if self.__power == True:
-                    self.fnclick( self.__url_xy , self.__url_xy_wait ) #클릭
-                    self.fnUrl( self.__url_path , self.__url_path_wait ) #url 처리                    
+                    if self.__seq_start == 0:
+                        '''url 클릭은 시작구간이 0일경우에만 수행.'''
+                        self.fnclick( self.__url_xy , self.__url_xy_wait ) #클릭
+                        self.fnUrl( self.__url_path , self.__url_path_wait ) #url 처리                    
+
                     _j = j            
                     print('*'*100)                                
                     print('처리 데이터 : ', _j)
                     print('*'*100)                            
-                    for i in self.__div:                         
-                        xy          = self.fnArrayGet( self.__click_xy , i )            
-                        evn         = self.fnArrayGet( self.__click_evn , i )
-                        rand        = self.fnArrayGet( self.__click_rand , i )
-                        xy_wait     = self.fnArrayGet( self.__click_xy_wait , i )
-                        key0        = self.fnArrayGet( self.__key0 , i )
-                        key0_wait   = self.fnArrayGet( self.__key0_wait , i )
-                        key1        = self.fnArrayGet( self.__key1 , i )
-                        key1_wait   = self.fnArrayGet( self.__key1_wait , i )      
-                        print('\t 행번호 : ', i ,' , 작업구분 : ', self.__div.get(i) )                        
-                        if (self.__div.get(i) == '끝') :
-                            # 스샷찍은후 종료
-                            try:
+                    for i in self.__div:     
+                        if i in range( self.__seq_start , self.__seq_end ) :
+                            xy          = self.fnArrayGet( self.__click_xy , i )            
+                            evn         = self.fnArrayGet( self.__click_evn , i )
+                            rand        = self.fnArrayGet( self.__click_rand , i )
+                            xy_wait     = self.fnArrayGet( self.__click_xy_wait , i )
+                            key0        = self.fnArrayGet( self.__key0 , i )
+                            key0_wait   = self.fnArrayGet( self.__key0_wait , i )
+                            key1        = self.fnArrayGet( self.__key1 , i )
+                            key1_wait   = self.fnArrayGet( self.__key1_wait , i )      
+                            print('\t 행번호 : ', i ,' , 작업구분 : ', self.__div.get(i) )                        
+                            if (self.__div.get(i) == '끝') :
+                                # 스샷찍은후 종료
+                                try:
+                                    base_dttm   = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M%S')
+                                    base_dt     = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d')
+                                    try:
+                                        os.mkdir('c:\\ncnc_class\\screenshot\\{}'.format(base_dt))
+                                    except Exception as e:
+                                        '''폴더 생성 있으면 넘어간다.'''
+                                    file_nm     = base_dttm+'_'+str(_j[0])
+                                    img         = ImageGrab.grab()
+                                    imgCrop     = img.crop()
+                                    file_name   = 'c:\\ncnc_class\\screenshot\\{}\\{}{}'.format( base_dt,file_nm ,'.png')
+                                    imgCrop.save(file_name)
+                                    print('\t 파일명 : ' , file_nm )
+                                except Exception as e:
+                                    print('mk_image : ',e) 
+
+                                break
+
+                            elif (self.__div.get(i) == '클릭') and ( self.__power == True ):
+                                #print(evn , type(evn))                
+                                for j in range(0, int(evn)): #반복 실행한다.
+                                    self.fnclick( xy , 0.5 ) #클릭
+                                time.sleep( float(xy_wait) ) #대기
+                            elif (self.__div.get(i) == '붙여넣기') and ( self.__power == True ):
+                                self.fnclick( xy , 0.5 ) #클릭
+                                n = int(evn)                    
+                                self.fnpaste( _j[n] ) # 붙여넣기
+                                time.sleep( float(xy_wait) ) #대기
+                            elif (self.__div.get(i) == '글씨쓰기') and ( self.__power == True ):
+                                self.fnclick( xy , 0.5 ) #클릭
+                                n = int(evn)                    
+                                self.fnwrite( _j[n] ) #타이핑
+                                time.sleep( float(xy_wait) ) #대기
+                            elif (self.__div.get(i) == '선택하기') and ( self.__power == True ):
+                                self.fnclick( xy , 0.5 ) #클릭
+                                r = random.randrange(0,3)
+                                r0 = rand.get(0)
+                                r1 = rand.get(1)
+                                r2 = rand.get(2)
+                                r3 = rand.get(3)
+                                # print( r , r0 , r1 , r2 , r3 )
+                                if r == 0:
+                                    self.fnclick( r0 , 0.5 ) #클릭   
+                                elif r == 1:
+                                    self.fnclick( r1 , 0.5 ) #클릭   
+                                elif r == 2:
+                                    self.fnclick( r2 , 0.5 ) #클릭   
+                                elif r == 3:
+                                    self.fnclick( r3 , 0.5 ) #클릭   
+                                time.sleep( float(xy_wait) ) #대기
+                            elif (self.__div.get(i) == '중복선택') and ( self.__power == True ):
+                                self.fnclick( xy , 0.5 ) #클릭   
+                                r0 = rand.get(0)
+                                r1 = rand.get(1)
+                                r2 = rand.get(2)
+                                r3 = rand.get(3)                                            
+                                self.fnclick( r0 , 0.5 ) #클릭                           
+                                self.fnclick( r1 , 0.5 ) #클릭   
+                                self.fnclick( r2 , 0.5 ) #클릭                           
+                                self.fnclick( r3 , 0.5 ) #클릭   
+                                time.sleep( float(xy_wait) ) #대기 
+
+                            elif (self.__div.get(i) == '방향전환') and ( self.__power == True ):
+                                self.fnclick( xy , 0.1 ) #클릭                        
+                                self.fnkey( key0 , int(key0_wait) )                        
+                                time.sleep( float(xy_wait) ) #대기
+                            elif (self.__div.get(i) == '무시') and ( self.__power == True ):
+                                '''행동 없음.'''
+                            elif (self.__div.get(i) == '캡쳐') and ( self.__power == True ):
+                                '''캡쳐'''
+                                #print('캡쳐'*10)
+                                r11 = rand.get(11)
+                                r12 = rand.get(12)
+                                capture_width   = r12.x - r11.x
+                                capture_height  = r12.y - r11.y
+                                #print(r11 , r12)
+                                #print(r11.x , r12.y , capture_width , capture_height)
+
                                 base_dttm   = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M%S')
                                 base_dt     = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d')
                                 try:
-                                    os.mkdir('c:\\ncnc_class\\screenshot\\{}'.format(base_dt))
+                                    os.mkdir('c:\\ncnc_class\\capture')
                                 except Exception as e:
-                                    '''폴더 생성 있으면 넘어간다.'''
+                                    '''폴더 생성 있으면 넘어간다.''' 
                                 file_nm     = base_dttm+'_'+str(_j[0])
-                                img         = ImageGrab.grab()
-                                imgCrop     = img.crop()
-                                file_name   = 'c:\\ncnc_class\\screenshot\\{}\\{}{}'.format( base_dt,file_nm ,'.png')
-                                imgCrop.save(file_name)
-                                print('\t 파일명 : ' , file_nm )
-                            except Exception as e:
-                                print('mk_image : ',e) 
-
-                            break
-
-                        elif (self.__div.get(i) == '클릭') and ( self.__power == True ):
-                            #print(evn , type(evn))                
-                            for j in range(0, int(evn)): #반복 실행한다.
-                                self.fnclick( xy , 0.5 ) #클릭
-                            time.sleep( float(xy_wait) ) #대기
-                        elif (self.__div.get(i) == '붙여넣기') and ( self.__power == True ):
-                            self.fnclick( xy , 0.5 ) #클릭
-                            n = int(evn)                    
-                            self.fnpaste( _j[n] ) # 붙여넣기
-                            time.sleep( float(xy_wait) ) #대기
-                        elif (self.__div.get(i) == '글씨쓰기') and ( self.__power == True ):
-                            self.fnclick( xy , 0.5 ) #클릭
-                            n = int(evn)                    
-                            self.fnwrite( _j[n] ) #타이핑
-                            time.sleep( float(xy_wait) ) #대기
-                        elif (self.__div.get(i) == '선택하기') and ( self.__power == True ):
-                            self.fnclick( xy , 0.5 ) #클릭
-                            r = random.randrange(0,3)
-                            r0 = rand.get(0)
-                            r1 = rand.get(1)
-                            r2 = rand.get(2)
-                            r3 = rand.get(3)
-                            # print( r , r0 , r1 , r2 , r3 )
-                            if r == 0:
-                                self.fnclick( r0 , 0.5 ) #클릭   
-                            elif r == 1:
-                                self.fnclick( r1 , 0.5 ) #클릭   
-                            elif r == 2:
-                                self.fnclick( r2 , 0.5 ) #클릭   
-                            elif r == 3:
-                                self.fnclick( r3 , 0.5 ) #클릭   
-                            time.sleep( float(xy_wait) ) #대기
-                        elif (self.__div.get(i) == '중복선택') and ( self.__power == True ):
-                            self.fnclick( xy , 0.5 ) #클릭   
-                            r0 = rand.get(0)
-                            r1 = rand.get(1)
-                            r2 = rand.get(2)
-                            r3 = rand.get(3)                                            
-                            self.fnclick( r0 , 0.5 ) #클릭                           
-                            self.fnclick( r1 , 0.5 ) #클릭   
-                            self.fnclick( r2 , 0.5 ) #클릭                           
-                            self.fnclick( r3 , 0.5 ) #클릭   
-                            time.sleep( float(xy_wait) ) #대기 
-
-                        elif (self.__div.get(i) == '방향전환') and ( self.__power == True ):
-                            self.fnclick( xy , 0.1 ) #클릭                        
-                            self.fnkey( key0 , int(key0_wait) )                        
-                            time.sleep( float(xy_wait) ) #대기
-                        elif (self.__div.get(i) == '무시') and ( self.__power == True ):
-                            '''행동 없음.'''
-                        elif (self.__div.get(i) == '캡쳐') and ( self.__power == True ):
-                            '''캡쳐'''
-                            #print('캡쳐'*10)
-                            r11 = rand.get(11)
-                            r12 = rand.get(12)
-                            capture_width   = r12.x - r11.x
-                            capture_height  = r12.y - r11.y
-                            #print(r11 , r12)
-                            #print(r11.x , r12.y , capture_width , capture_height)
-
-                            base_dttm   = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M%S')
-                            base_dt     = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d')
-                            try:
-                                os.mkdir('c:\\ncnc_class\\capture')
-                            except Exception as e:
-                                '''폴더 생성 있으면 넘어간다.''' 
-                            file_nm     = base_dttm+'_'+str(_j[0])
-                            file_name   = r"c:\\ncnc_class\\capture\\{}{}".format( file_nm ,'.png') 
-                            pyautogui.screenshot( file_name , region=(r11.x , r11.y , capture_width, capture_height))    
-                            time.sleep( float(xy_wait) ) #대기
+                                file_name   = r"c:\\ncnc_class\\capture\\{}{}".format( file_nm ,'.png') 
+                                pyautogui.screenshot( file_name , region=(r11.x , r11.y , capture_width, capture_height))    
+                                time.sleep( float(xy_wait) ) #대기
 
         except Exception as e:
             print('*'*50)
@@ -266,6 +274,9 @@ class MyApp(QWidget):
     __key1              = {} # 키보드1 복합키 두개 - hot key 하기
     __key1_wait         = {} # 키보드1 대기
 
+    __seq_start         = 0 #시작구간
+    __seq_end           = 0 #종료구간
+
     # 임시 시작
     __pos               = -1 # 임시 배열번호 
     __sub_pos           = -1 # 임시 배열번호 랜덤 좌표를 위한   
@@ -299,6 +310,7 @@ class MyApp(QWidget):
         layout = QVBoxLayout(self)
         layout.addWidget( self.head() )
         layout.addWidget( self.foot() )
+        layout.addWidget( self.repeat() )
         layout.addWidget(self.view)
         layout = QVBoxLayout(self.pane)        
         layout.addWidget( self.body() )
@@ -369,9 +381,9 @@ class MyApp(QWidget):
         url_btn = QPushButton('적용')
         url_btn.clicked.connect( fn_cmp )  
 
-        grid.addWidget(url_lb  , 0 , 0)
+        grid.addWidget( url_lb  , 0 , 0)
         grid.addWidget( url_xy  , 0 , 1)
-        grid.addWidget(url_xy_btn  , 0 , 2)  
+        grid.addWidget( url_xy_btn  , 0 , 2)  
 
         grid.addWidget(url_qe  , 0 , 3)
         grid.addWidget(url_btn , 0 , 4)        
@@ -400,8 +412,10 @@ class MyApp(QWidget):
         grid.addWidget(file_lb  , 1 , 0)
         grid.addWidget(csv_lb   , 1 , 1 , 1 , 3)
         grid.addWidget(filebtn  , 1 , 4)     
+
         groupbox.setFixedHeight(70)
         groupbox.setLayout( grid )  
+
         return groupbox
 
 
@@ -666,6 +680,51 @@ class MyApp(QWidget):
         groupbox.setLayout(hbox)
         return groupbox
    
+    def repeat(self):
+        '''시작구간 종료구간 설정'''
+        groupbox = QGroupBox('')
+        grid = QGridLayout()
+        grid.setSpacing(0)        
+
+        def repeatEvent():
+            '''키이벤트'''
+            s = start_qe.text()
+            e = end_qe.text()
+            if s == '':
+                start_qe.setText( '0' )
+                self.__seq_start = 0
+            else :
+                start_qe.setText( str(int(s)) )    
+                self.__seq_start = int(s)
+
+            if e == '':
+                end_qe.setText( '0' )
+                self.__seq_end = 0
+            else :
+                end_qe.setText( str(int(e)) )                    
+                self.__seq_end = int(e)            
+
+        # 시작구간 , 끝구간 지정.
+        start_lb    = QLabel('시작구간 : ')
+        start_qe    = QLineEdit('0')
+        start_qe.setStyleSheet( self.__lb_style )
+        start_qe.setValidator(QIntValidator(0,999999,self))    # 100..999사이의 정수        
+        start_qe.textChanged.connect( repeatEvent )
+        end_lb      = QLabel('종료구간 : ')
+        end_qe      = QLineEdit(  str(self.__max_obj)  )
+        end_qe.setStyleSheet( self.__lb_style )
+        end_qe.setValidator(QIntValidator(0,999999,self))    # 100..999사이의 정수   
+        #end_qe.returnPressed.connect( repeatEvent )
+        end_qe.textChanged.connect( repeatEvent )
+
+        grid.addWidget( start_lb  , 0 , 0)
+        grid.addWidget( start_qe  , 0 , 1)        
+        grid.addWidget( end_lb  , 0 , 2)
+        grid.addWidget( end_qe  , 0 , 3)  
+        groupbox.setFixedHeight(40)
+        groupbox.setLayout(grid)        
+        return groupbox        
+
 
     def foot(self):
         groupbox = QGroupBox('')
@@ -704,7 +763,8 @@ class MyApp(QWidget):
         save_btn = QPushButton('Save')
         save_btn.clicked.connect(    fn_save   )  
         grid.addWidget( save_btn , 0 , 0 ,1,1)
-    
+
+   
         def fn_load():
             ''' 피클 데이터 로드'''
             self.__file_nm = load_cb.currentText()  
@@ -765,6 +825,8 @@ class MyApp(QWidget):
                 , self.__key1
                 , self.__key1_wait
                 , csv_data
+                , self.__seq_start # 시작구간
+                , self.__seq_end # 종료구간
             )
             self.__work.start()
         
@@ -814,6 +876,7 @@ class MyApp(QWidget):
         for i in file_list:
             load_cb.addItem(i)
         grid.addWidget( load_cb , 1 , 4,1,2 )
+        
         groupbox.setFixedHeight(70)
         groupbox.setLayout(grid)
         
@@ -828,6 +891,7 @@ class MyApp(QWidget):
             _rt.append( line )
         f.close()    
         return _rt      
+    
 
 
 if __name__ == '__main__':
