@@ -123,6 +123,7 @@ class Work(QThread):
                     print('*'*100)                            
                     for i in self.__div:     
                         if i in range( self.__seq_start , self.__seq_end ) :
+                            ''' 설정한 구간 에서만 수행하도록 '''
                             xy          = self.fnArrayGet( self.__click_xy , i )            
                             evn         = self.fnArrayGet( self.__click_evn , i )
                             rand        = self.fnArrayGet( self.__click_rand , i )
@@ -275,7 +276,7 @@ class MyApp(QWidget):
     __key1_wait         = {} # 키보드1 대기
 
     __seq_start         = 0 #시작구간
-    __seq_end           = 0 #종료구간
+    __seq_end           = 999 #종료구간
 
     # 임시 시작
     __pos               = -1 # 임시 배열번호 
