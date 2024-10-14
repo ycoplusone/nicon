@@ -44,7 +44,7 @@ class Work(QThread):
         super().__init__()
         self.__power = True     # run 매소드 루프 플래그
 
-    def fn_param(self , url_xy,url_xy_wait,url_path,url_path_wait,cvs_path,div,click_xy,click_evn,click_rand,click_xy_wait,key0,key0_wait,key1,key1_wait,csv_data , seq_start , seq_end ):
+    def fn_param(self , url_xy,url_xy_wait,url_path,url_path_wait,cvs_path,div,click_xy,click_evn,click_rand,click_xy_wait,key0,key0_wait,key1,key1_wait,csv_data , seq_start , seq_end , rep):
         self.__url_xy            = url_xy           # url 클릭 좌표
         self.__url_xy_wait       = url_xy_wait      # 0.5 초 기본 대기 url 클릭후 대기
         self.__url_path          = url_path         #url 주소
@@ -62,6 +62,7 @@ class Work(QThread):
         self.__csv_data          = csv_data         # 데이터 파일
         self.__seq_start         = seq_start        # 시작구간
         self.__seq_end           = seq_end          # 종료구간
+        self.__rep               = rep              # 구간반복
 
     def fndbclick(self , xy , wait_time):
         '''더블클릭'''
@@ -82,7 +83,7 @@ class Work(QThread):
         pyperclip.copy( url )
         pyautogui.hotkey('ctrl', 'v')   
         pyautogui.hotkey('enter')         
-        time.sleep( wait_time )         
+        time.sleep( (wait_time+4) )         
     
     def fnpaste(self , str ):
         '''복사 붙여넣기'''        
@@ -108,6 +109,103 @@ class Work(QThread):
         else :
             return None        
     
+    def fnMain(self , step_name : str , i : int , _j  ):
+        '''메인 프로세스
+        step_name   : 각 단계의 명령어
+        i           : 순서 번호
+        _j          : 첨부 데이터
+        '''
+        xy          = self.fnArrayGet( self.__click_xy      , i )
+        evn         = self.fnArrayGet( self.__click_evn     , i )
+        rand        = self.fnArrayGet( self.__click_rand    , i )
+        xy_wait     = self.fnArrayGet( self.__click_xy_wait , i )
+        key0        = self.fnArrayGet( self.__key0          , i )
+        key0_wait   = self.fnArrayGet( self.__key0_wait     , i )
+        key1        = self.fnArrayGet( self.__key1          , i )
+        key1_wait   = self.fnArrayGet( self.__key1_wait     , i )
+        
+        print('\t 행번호 : ', i ,' , 작업구분 : ', step_name )    
+        if ( step_name == '클릭') and ( self.__power == True ):
+            for j in range(0, int(evn)): #반복 실행한다.
+                self.fnclick( xy , 0.5 ) #클릭
+            time.sleep( float(xy_wait) ) #대기
+
+        elif ( step_name == '붙여넣기') and ( self.__power == True ):
+            self.fnclick( xy , 0.5 ) #클릭
+            n = int(evn)                    
+            self.fnpaste( _j[n] ) # 붙여넣기
+            time.sleep( float(xy_wait) ) #대기
+
+        elif ( step_name == '글씨쓰기') and ( self.__power == True ):
+            self.fnclick( xy , 0.5 ) #클릭
+            n = int(evn)                    
+            self.fnwrite( _j[n] ) #타이핑
+            time.sleep( float(xy_wait) ) #대기
+        elif ( step_name == '선택하기') and ( self.__power == True ):
+            self.fnclick( xy , 0.5 ) #클릭
+            r = random.randrange(0,3)
+            r0 = rand.get(0)
+            r1 = rand.get(1)
+            r2 = rand.get(2)
+            r3 = rand.get(3)
+            if r == 0:
+                self.fnclick( r0 , 0.5 ) #클릭   
+            elif r == 1:
+                self.fnclick( r1 , 0.5 ) #클릭   
+            elif r == 2:
+                self.fnclick( r2 , 0.5 ) #클릭   
+            elif r == 3:
+                self.fnclick( r3 , 0.5 ) #클릭   
+            time.sleep( float(xy_wait) ) #대기
+        elif ( step_name == '중복선택') and ( self.__power == True ):
+            self.fnclick( xy , 0.5 ) #클릭   
+            r0 = rand.get(0)
+            r1 = rand.get(1)
+            r2 = rand.get(2)
+            r3 = rand.get(3)                                            
+            self.fnclick( r0 , 0.5 ) #클릭                           
+            self.fnclick( r1 , 0.5 ) #클릭   
+            self.fnclick( r2 , 0.5 ) #클릭                           
+            self.fnclick( r3 , 0.5 ) #클릭   
+            time.sleep( float(xy_wait) ) #대기 
+
+        elif ( step_name == '방향전환') and ( self.__power == True ):
+            self.fnclick( xy , 0.1 ) #클릭                        
+            self.fnkey( key0 , int(key0_wait) )                        
+            time.sleep( float(xy_wait) ) #대기
+
+        elif ( step_name == '무시') and ( self.__power == True ):
+            '''행동 없음.'''
+
+        elif ( step_name == '캡쳐') and ( self.__power == True ):
+            '''캡쳐'''
+            r11 = rand.get(11)
+            r12 = rand.get(12)
+            capture_width   = r12.x - r11.x
+            capture_height  = r12.y - r11.y
+
+            base_dttm   = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M%S')
+            base_dt     = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d')
+            try:
+                os.mkdir('c:\\ncnc_class\\capture')
+            except Exception as e:
+                '''폴더 생성 있으면 넘어간다.''' 
+            file_nm     = base_dttm+'_'+str(_j[0])
+            file_name   = r"c:\\ncnc_class\\capture\\{}{}".format( file_nm ,'.png') 
+            pyautogui.screenshot( file_name , region=(r11.x , r11.y , capture_width, capture_height))    
+            time.sleep( float(xy_wait) ) #대기   
+        
+        elif( step_name =='D&D') and ( self.__power == True ) :
+            '''드래드 & 드랍'''
+            d1 = rand.get(15)
+            d2 = rand.get(16)     
+            pyautogui.moveTo( d1 )          # 마우스 이동     
+            #pyautogui.drag(     d1.x , d1.y   , duration= 0.25)
+            pyautogui.dragTo(   d2.x , d2.y   , duration= 0.3)
+            time.sleep( float(xy_wait) )    #대기   
+
+
+    
     def run(self):
         '''매크로 시작'''
         try:
@@ -124,105 +222,26 @@ class Work(QThread):
                     print('*'*100)                            
                     for i in self.__div:     
                         if i in range( self.__seq_start , self.__seq_end ) :
-                            xy          = self.fnArrayGet( self.__click_xy , i )            
-                            evn         = self.fnArrayGet( self.__click_evn , i )
-                            rand        = self.fnArrayGet( self.__click_rand , i )
-                            xy_wait     = self.fnArrayGet( self.__click_xy_wait , i )
-                            key0        = self.fnArrayGet( self.__key0 , i )
-                            key0_wait   = self.fnArrayGet( self.__key0_wait , i )
-                            key1        = self.fnArrayGet( self.__key1 , i )
-                            key1_wait   = self.fnArrayGet( self.__key1_wait , i )      
-                            print('\t 행번호 : ', i ,' , 작업구분 : ', self.__div.get(i) )                        
+                            ''' 설정한 구간 에서만 수행하도록 '''
+                            #print('\t 행번호 : ', i ,' , 작업구분 : ', self.__div.get(i) )
                             if (self.__div.get(i) == '끝') :
-                                # 스샷찍은후 종료
-                                try:
-                                    base_dttm   = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M%S')
-                                    base_dt     = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d')
-                                    try:
-                                        os.mkdir('c:\\ncnc_class\\screenshot\\{}'.format(base_dt))
-                                    except Exception as e:
-                                        '''폴더 생성 있으면 넘어간다.'''
-                                    file_nm     = base_dttm+'_'+str(_j[0])
-                                    img         = ImageGrab.grab()
-                                    imgCrop     = img.crop()
-                                    file_name   = 'c:\\ncnc_class\\screenshot\\{}\\{}{}'.format( base_dt,file_nm ,'.png')
-                                    imgCrop.save(file_name)
-                                    print('\t 파일명 : ' , file_nm )
-                                except Exception as e:
-                                    print('mk_image : ',e) 
-
+                                # 끝이닷.
                                 break
-
-                            elif (self.__div.get(i) == '클릭') and ( self.__power == True ):
-                                #print(evn , type(evn))                
-                                for j in range(0, int(evn)): #반복 실행한다.
-                                    self.fnclick( xy , 0.5 ) #클릭
-                                time.sleep( float(xy_wait) ) #대기
-                            elif (self.__div.get(i) == '붙여넣기') and ( self.__power == True ):
-                                self.fnclick( xy , 0.5 ) #클릭
-                                n = int(evn)                    
-                                self.fnpaste( _j[n] ) # 붙여넣기
-                                time.sleep( float(xy_wait) ) #대기
-                            elif (self.__div.get(i) == '글씨쓰기') and ( self.__power == True ):
-                                self.fnclick( xy , 0.5 ) #클릭
-                                n = int(evn)                    
-                                self.fnwrite( _j[n] ) #타이핑
-                                time.sleep( float(xy_wait) ) #대기
-                            elif (self.__div.get(i) == '선택하기') and ( self.__power == True ):
-                                self.fnclick( xy , 0.5 ) #클릭
-                                r = random.randrange(0,3)
-                                r0 = rand.get(0)
-                                r1 = rand.get(1)
-                                r2 = rand.get(2)
-                                r3 = rand.get(3)
-                                # print( r , r0 , r1 , r2 , r3 )
-                                if r == 0:
-                                    self.fnclick( r0 , 0.5 ) #클릭   
-                                elif r == 1:
-                                    self.fnclick( r1 , 0.5 ) #클릭   
-                                elif r == 2:
-                                    self.fnclick( r2 , 0.5 ) #클릭   
-                                elif r == 3:
-                                    self.fnclick( r3 , 0.5 ) #클릭   
-                                time.sleep( float(xy_wait) ) #대기
-                            elif (self.__div.get(i) == '중복선택') and ( self.__power == True ):
-                                self.fnclick( xy , 0.5 ) #클릭   
-                                r0 = rand.get(0)
-                                r1 = rand.get(1)
-                                r2 = rand.get(2)
-                                r3 = rand.get(3)                                            
-                                self.fnclick( r0 , 0.5 ) #클릭                           
-                                self.fnclick( r1 , 0.5 ) #클릭   
-                                self.fnclick( r2 , 0.5 ) #클릭                           
-                                self.fnclick( r3 , 0.5 ) #클릭   
-                                time.sleep( float(xy_wait) ) #대기 
-
-                            elif (self.__div.get(i) == '방향전환') and ( self.__power == True ):
-                                self.fnclick( xy , 0.1 ) #클릭                        
-                                self.fnkey( key0 , int(key0_wait) )                        
-                                time.sleep( float(xy_wait) ) #대기
-                            elif (self.__div.get(i) == '무시') and ( self.__power == True ):
-                                '''행동 없음.'''
-                            elif (self.__div.get(i) == '캡쳐') and ( self.__power == True ):
-                                '''캡쳐'''
-                                #print('캡쳐'*10)
-                                r11 = rand.get(11)
-                                r12 = rand.get(12)
-                                capture_width   = r12.x - r11.x
-                                capture_height  = r12.y - r11.y
-                                #print(r11 , r12)
-                                #print(r11.x , r12.y , capture_width , capture_height)
-
-                                base_dttm   = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M%S')
-                                base_dt     = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d')
-                                try:
-                                    os.mkdir('c:\\ncnc_class\\capture')
-                                except Exception as e:
-                                    '''폴더 생성 있으면 넘어간다.''' 
-                                file_nm     = base_dttm+'_'+str(_j[0])
-                                file_name   = r"c:\\ncnc_class\\capture\\{}{}".format( file_nm ,'.png') 
-                                pyautogui.screenshot( file_name , region=(r11.x , r11.y , capture_width, capture_height))    
-                                time.sleep( float(xy_wait) ) #대기
+                            elif ( self.__div.get(i) == '구간반복' ):
+                                rep         = self.fnArrayGet( self.__rep           , i )  
+                                print('구간반복',rep)                              
+                                rep0       = int( rep[0] )
+                                rep1       = int( rep[1] ) + 1
+                                rep2       = int( rep[2] )
+                                print(i,'구간반복 - 시작','='*15)
+                                for n in range(0 , rep2 ):                                    
+                                    for m in range(rep0 , rep1):                                        
+                                        self.fnMain( self.__div.get(m) , m , _j )                            
+                                
+                                print(i,'구간반복 - 종료','='*15)
+                                        
+                            elif (self.__div.get(i) in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','방향전환','무시','캡쳐','D&D'] ) :
+                                self.fnMain( self.__div.get(i) , i , _j )                            
 
         except Exception as e:
             print('*'*50)
@@ -274,6 +293,7 @@ class MyApp(QWidget):
     __key0_wait         = {} # 키보드0 대기
     __key1              = {} # 키보드1 복합키 두개 - hot key 하기
     __key1_wait         = {} # 키보드1 대기
+    __rep               = {} # 구간반복 배열
 
     __seq_start         = 0 #시작구간
     __seq_end           = 9999 #종료구간
@@ -449,6 +469,14 @@ class MyApp(QWidget):
                 key0_wait.setVisible( False )
                 cap_bnt0.setVisible( False )
                 cap_bnt1.setVisible( False )
+                rep_st_lb.setVisible( False ) #구간반복
+                rep_st_qe.setVisible( False ) #구간반복
+                rep_ed_lb.setVisible( False ) #구간반복
+                rep_ed_qe.setVisible( False ) #구간반복
+                rep_cnt_lb.setVisible( False ) #구간반복
+                rep_cnt_qe.setVisible( False ) #구간반복                                                   
+                dnd_bnt0.setVisible( False ) # 드래그 & 드랍
+                dnd_bnt1.setVisible( False ) # 드래그 & 드랍                                              
             elif (str == '클릭') or (str == '붙여넣기') or (str == '글씨쓰기'):
                 geo_btn.setVisible( True )
                 col.setVisible(True)
@@ -462,6 +490,14 @@ class MyApp(QWidget):
                 cmp_btn.setVisible( True )
                 cap_bnt0.setVisible( False )
                 cap_bnt1.setVisible( False )
+                rep_st_lb.setVisible( False ) #구간반복
+                rep_st_qe.setVisible( False ) #구간반복
+                rep_ed_lb.setVisible( False ) #구간반복
+                rep_ed_qe.setVisible( False ) #구간반복
+                rep_cnt_lb.setVisible( False ) #구간반복
+                rep_cnt_qe.setVisible( False ) #구간반복                                                   
+                dnd_bnt0.setVisible( False ) # 드래그 & 드랍
+                dnd_bnt1.setVisible( False ) # 드래그 & 드랍                                              
             elif (str == '선택하기') or ( str == '중복선택' ):
                 geo_btn.setVisible( True )
                 col.setVisible(False)
@@ -475,6 +511,14 @@ class MyApp(QWidget):
                 cmp_btn.setVisible( True )
                 cap_bnt0.setVisible( False )
                 cap_bnt1.setVisible( False )
+                rep_st_lb.setVisible( False ) #구간반복
+                rep_st_qe.setVisible( False ) #구간반복
+                rep_ed_lb.setVisible( False ) #구간반복
+                rep_ed_qe.setVisible( False ) #구간반복  
+                rep_cnt_lb.setVisible( False ) #구간반복
+                rep_cnt_qe.setVisible( False ) #구간반복                                                      
+                dnd_bnt0.setVisible( False ) # 드래그 & 드랍
+                dnd_bnt1.setVisible( False ) # 드래그 & 드랍                                                         
             elif str =='방향전환':
                 geo_btn.setVisible( True )
                 col.setVisible(False)                              
@@ -488,6 +532,14 @@ class MyApp(QWidget):
                 cmp_btn.setVisible( True )
                 cap_bnt0.setVisible( False )
                 cap_bnt1.setVisible( False )
+                rep_st_lb.setVisible( False ) #구간반복
+                rep_st_qe.setVisible( False ) #구간반복
+                rep_ed_lb.setVisible( False ) #구간반복
+                rep_ed_qe.setVisible( False ) #구간반복   
+                rep_cnt_lb.setVisible( False ) #구간반복
+                rep_cnt_qe.setVisible( False ) #구간반복                                                     
+                dnd_bnt0.setVisible( False ) # 드래그 & 드랍
+                dnd_bnt1.setVisible( False ) # 드래그 & 드랍                                                         
             elif str == '캡쳐':
                 geo_btn.setVisible( False )
                 col.setVisible(False)                              
@@ -501,6 +553,57 @@ class MyApp(QWidget):
                 cmp_btn.setVisible( True )
                 cap_bnt0.setVisible( True )
                 cap_bnt1.setVisible( True )
+                rep_st_lb.setVisible( False ) #구간반복
+                rep_st_qe.setVisible( False ) #구간반복
+                rep_ed_lb.setVisible( False ) #구간반복
+                rep_ed_qe.setVisible( False ) #구간반복    
+                rep_cnt_lb.setVisible( False ) #구간반복
+                rep_cnt_qe.setVisible( False ) #구간반복                                                   
+                dnd_bnt0.setVisible( False ) # 드래그 & 드랍
+                dnd_bnt1.setVisible( False ) # 드래그 & 드랍                                               
+            elif str == 'D&D' :    
+                geo_btn.setVisible( False )
+                col.setVisible(False)                              
+                ran_btn0.setVisible( False )
+                ran_btn1.setVisible( False )
+                ran_btn2.setVisible( False )
+                ran_btn3.setVisible( False )   
+                key0.setVisible( False )
+                key0_wait.setVisible( False )
+                geo_xy_wait.setVisible( True )  
+                cmp_btn.setVisible( True )
+                cap_bnt0.setVisible( False )
+                cap_bnt1.setVisible( False )
+                rep_st_lb.setVisible( False ) #구간반복
+                rep_st_qe.setVisible( False ) #구간반복
+                rep_ed_lb.setVisible( False ) #구간반복
+                rep_ed_qe.setVisible( False ) #구간반복  
+                rep_cnt_lb.setVisible( False ) #구간반복
+                rep_cnt_qe.setVisible( False ) #구간반복                                   
+                dnd_bnt0.setVisible( True ) # 드래그 & 드랍
+                dnd_bnt1.setVisible( True ) # 드래그 & 드랍
+            elif str == '구간반복':
+                geo_btn.setVisible( False )
+                col.setVisible(False)                              
+                ran_btn0.setVisible( False )
+                ran_btn1.setVisible( False )
+                ran_btn2.setVisible( False )
+                ran_btn3.setVisible( False )   
+                key0.setVisible( False )
+                key0_wait.setVisible( False )
+                geo_xy_wait.setVisible( False )  
+                cmp_btn.setVisible( False )
+                cap_bnt0.setVisible( False )
+                cap_bnt1.setVisible( False )
+                rep_st_lb.setVisible( True ) #구간반복
+                rep_st_qe.setVisible( True ) #구간반복
+                rep_ed_lb.setVisible( True ) #구간반복
+                rep_ed_qe.setVisible( True ) #구간반복
+                rep_cnt_lb.setVisible( True ) #구간반복
+                rep_cnt_qe.setVisible( True ) #구간반복
+                dnd_bnt0.setVisible( False ) # 드래그 & 드랍
+                dnd_bnt1.setVisible( False ) # 드래그 & 드랍                              
+
                 
             fn_cmp()
 
@@ -515,6 +618,18 @@ class MyApp(QWidget):
              if self.__click_rand.get(pos) != None:
                 # 랜던값이 있다면 넣고 시작한다.
                 self.__temp_rand = self.__click_rand.get(pos)
+        
+        def fn_rep( str ):
+            '''구간반복 변수 저장'''
+            if str =='st':
+                self.__rep[pos][0] = rep_st_qe.text()
+            if str == 'ed':
+                self.__rep[pos][1] = rep_ed_qe.text()
+            if str == 'cnt':
+                self.__rep[pos][2] = rep_cnt_qe.text()
+
+            print( self.__rep[pos] )
+            
 
         groupbox = QGroupBox('')        
         hbox = QHBoxLayout()
@@ -524,7 +639,7 @@ class MyApp(QWidget):
         hbox.addWidget( row_seq )
 
         div = QComboBox()
-        div.addItems(['끝','클릭','붙여넣기','글씨쓰기','선택하기','중복선택','방향전환','무시','캡쳐' ])      # ,'키보드-1' 추후 수정
+        div.addItems(['끝','클릭','붙여넣기','글씨쓰기','선택하기','중복선택','방향전환','무시','캡쳐','구간반복','D&D' ])      # ,'키보드-1' 추후 수정
         div.activated[str].connect( fn_div )   
         hbox.addWidget( div )
 
@@ -567,16 +682,60 @@ class MyApp(QWidget):
         key0.setVisible( False )
         hbox.addWidget( key0 )  
 
-        #캡쳐의 시작점
+        #캡쳐 - start
         cap_bnt0 = QPushButton('시작점')
         cap_bnt0.clicked.connect(   lambda : fn_geo2(11)   )
         cap_bnt0.setVisible( False )
-        hbox.addWidget( cap_bnt0 )  
-        #캡쳐의 끝점
+        hbox.addWidget( cap_bnt0 )          
         cap_bnt1 = QPushButton('끝점')
         cap_bnt1.clicked.connect(    lambda : fn_geo2(12)   )
         cap_bnt1.setVisible( False )
         hbox.addWidget( cap_bnt1 )  
+        #캡쳐 - end
+
+        #구간반복 - START
+        rep_st_lb    = QLabel('시작구간 : ')
+        rep_st_lb.setVisible(False)
+        rep_st_qe    = QLineEdit( '0' )
+        rep_st_qe.setVisible(False)
+        rep_st_qe.setStyleSheet( self.__lb_style )
+        rep_st_qe.setValidator(QIntValidator(0,999,self))    # 0..999사이의 정수        
+        rep_st_qe.textChanged.connect(  lambda : fn_rep('st') )
+        hbox.addWidget( rep_st_lb )
+        hbox.addWidget( rep_st_qe )
+
+        rep_ed_lb      = QLabel('종료구간 : ')
+        rep_ed_lb.setVisible(False)
+        rep_ed_qe      = QLineEdit( '0' )
+        rep_ed_qe.setVisible(False)
+        rep_ed_qe.setStyleSheet( self.__lb_style )
+        rep_ed_qe.setValidator(QIntValidator(0,999,self))    # 100..999사이의 정수   
+        rep_ed_qe.textChanged.connect( lambda : fn_rep('ed') )
+            
+        hbox.addWidget( rep_ed_lb )
+        hbox.addWidget( rep_ed_qe ) 
+
+        rep_cnt_lb      = QLabel('횟수 : ')
+        rep_cnt_lb.setVisible(False)
+        rep_cnt_qe      = QLineEdit( '1' )
+        rep_cnt_qe.setVisible(False)
+        rep_cnt_qe.setStyleSheet( self.__lb_style )
+        rep_cnt_qe.setValidator(QIntValidator(0,999,self))    # 100..999사이의 정수   
+        rep_cnt_qe.textChanged.connect( lambda : fn_rep('cnt') )
+        hbox.addWidget( rep_cnt_lb )
+        hbox.addWidget( rep_cnt_qe )
+        #구간반복 - END
+
+        # D&D - START
+        dnd_bnt0 = QPushButton('시작점')
+        dnd_bnt0.clicked.connect(   lambda : fn_geo2(15)   )
+        dnd_bnt0.setVisible( False )
+        hbox.addWidget( dnd_bnt0 )          
+        dnd_bnt1 = QPushButton('끝점')
+        dnd_bnt1.clicked.connect(    lambda : fn_geo2(16)   )
+        dnd_bnt1.setVisible( False )
+        hbox.addWidget( dnd_bnt1 )  
+        # D&D - END
 
 
 
@@ -601,27 +760,35 @@ class MyApp(QWidget):
         def fn_cmp():
             '''각 절의 완료 처리'''
             self.__div[pos] = div.currentText()
-            #print(self.__div)    
-
-            #print( '??? ',self.__click_rand[pos] )        
             
             if self.__click_xy.get(pos) != None:
-                geo_btn.setText( '(x:{0},y:{1})'.format(self.__click_xy[pos].x , self.__click_xy[pos].y) )                           
+                geo_btn.setText( '(x:{0},y:{1})'.format(self.__click_xy[pos].x , self.__click_xy[pos].y) )     
             
-            self.__click_evn[pos] = col.currentText()
-            self.__click_xy_wait[pos] = geo_xy_wait.text()
-            self.__key0[pos] = key0.currentText()
-            self.__key0_wait[pos] = key0_wait.text()
+            '''
+            if self.__rep.get(pos) != None:
+                rep_st_qe.setText( self.__rep[pos][0]  )
+                rep_ed_qe.setText( self.__rep[pos][1]  )
+                rep_cnt_qe.setText(self.__rep[pos][2]  )
+            '''
+
+            self.__click_evn[pos]       = col.currentText()
+            self.__click_xy_wait[pos]   = geo_xy_wait.text()
+            self.__key0[pos]            = key0.currentText()
+            self.__key0_wait[pos]       = key0_wait.text()
             
             if len( self.__temp_rand ) != 0:
                 # 피클로드시 오류 발생
                 self.__click_rand[pos]  = self.__temp_rand
-                self.__temp_rand = {} #초기화
+                self.__temp_rand        = {} #초기화
+            
+            if self.__click_rand.get(pos) != None:                
+                '''D&D 부분'''
+                if self.__click_rand[pos].get(15) != None:
+                    dnd_bnt0.setText( '(x:{0},y:{1})'.format(self.__click_rand[pos][15].x , self.__click_rand[pos][15].y) )
+                if self.__click_rand[pos].get(16) != None:
+                    dnd_bnt1.setText( '(x:{0},y:{1})'.format(self.__click_rand[pos][16].x , self.__click_rand[pos][16].y) )                             
 
             if self.__click_rand.get(pos) != None:
-                #print('*'*10)
-                #print( self.__click_rand[pos] )
-
                 print('*'*10)
                 '''랜덤 버튼 정의 값 저장'''
                 if self.__click_rand[pos].get(0) != None:                    
@@ -636,7 +803,11 @@ class MyApp(QWidget):
                 if self.__click_rand[pos].get(11) != None:
                     cap_bnt0.setText( '(x:{0},y:{1})'.format(self.__click_rand[pos][11].x , self.__click_rand[pos][11].y) )
                 if self.__click_rand[pos].get(12) != None:
-                    cap_bnt1.setText( '(x:{0},y:{1})'.format(self.__click_rand[pos][12].x , self.__click_rand[pos][12].y) )                
+                    cap_bnt1.setText( '(x:{0},y:{1})'.format(self.__click_rand[pos][12].x , self.__click_rand[pos][12].y) ) 
+            
+
+
+
 
 
 
@@ -648,6 +819,27 @@ class MyApp(QWidget):
         
         if self.__div.get(pos) != None:            
             div.setCurrentText( self.__div[pos] ) # 행동 선택
+        
+        if self.__rep.get(pos) != None:
+            rep_st_qe.setText( self.__rep[pos][0]  )
+            rep_ed_qe.setText( self.__rep[pos][1]  )
+            rep_cnt_qe.setText(self.__rep[pos][2]  )        
+
+        if self.__click_rand.get(pos) != None:
+            if self.__click_rand[pos].get(15) != None:
+                dnd_bnt0.setText( '(x:{0},y:{1})'.format(self.__click_rand[pos][15].x , self.__click_rand[pos][15].y) )
+            if self.__click_rand[pos].get(16) != None:
+                dnd_bnt1.setText( '(x:{0},y:{1})'.format(self.__click_rand[pos][16].x , self.__click_rand[pos][16].y) )                                                
+        
+        if self.__rep.get(pos) != None:
+            temp = self.__rep[pos]
+            print('반복데이터',temp)
+            #rep_st_qe.setText(  self.__rep[pos][0] )
+            #rep_ed_qe.setText(  self.__rep[pos][1] )
+            #rep_cnt_qe.setText( self.__rep[pos][2] )
+        
+        # 활성화
+        fn_div( self.__div[pos] )   # 활성화부분                
 
         # 로드시 선택 적용.
         if self.__click_xy.get(pos) != None:            
@@ -658,9 +850,10 @@ class MyApp(QWidget):
             geo_xy_wait.setText( self.__click_xy_wait[pos] ) #해당행 끝나후 대기 시간.
             key0.setCurrentText( self.__key0[pos] )     # 키입력 이벤트 처리
             key0_wait.setText( self.__key0_wait[pos] )      # 키입력후 대기 시간
-            fn_div( self.__div[pos] )   # 활성화부분    
-            #print('로드시 : ',pos , self.__click_rand.get(pos) )
+            
+
             if self.__click_rand.get(pos) != None:
+                print( self.__click_rand.get(pos) )
                 #랜덤 버튼 정의 값 저장
                 if self.__click_rand[pos].get(0) != None:                    
                     ran_btn0.setText( '(x:{0},y:{1})'.format(self.__click_rand[pos][0].x , self.__click_rand[pos][0].y) )
@@ -674,7 +867,9 @@ class MyApp(QWidget):
                 if self.__click_rand[pos].get(11) != None:
                     cap_bnt0.setText( '(x:{0},y:{1})'.format(self.__click_rand[pos][11].x , self.__click_rand[pos][11].y) )
                 if self.__click_rand[pos].get(12) != None:
-                    cap_bnt1.setText( '(x:{0},y:{1})'.format(self.__click_rand[pos][12].x , self.__click_rand[pos][12].y) )                
+                    cap_bnt1.setText( '(x:{0},y:{1})'.format(self.__click_rand[pos][12].x , self.__click_rand[pos][12].y) )   
+            
+
         
         hbox.addStretch()
 
@@ -705,7 +900,7 @@ class MyApp(QWidget):
                 end_qe.setText( str(int(e)) )                    
                 self.__seq_end = int(e)            
 
-        # 시작구간 , 끝구간 지정.
+        # 시작구간 , 끝구간 지정. - START
         start_lb    = QLabel('시작구간 : ')
         start_qe    = QLineEdit('0')
         start_qe.setStyleSheet( self.__lb_style )
@@ -715,7 +910,6 @@ class MyApp(QWidget):
         end_qe      = QLineEdit(  str(self.__max_obj)  )
         end_qe.setStyleSheet( self.__lb_style )
         end_qe.setValidator(QIntValidator(0,999999,self))    # 100..999사이의 정수   
-        #end_qe.returnPressed.connect( repeatEvent )
         end_qe.textChanged.connect( repeatEvent )
 
         grid.addWidget( start_lb  , 0 , 0)
@@ -724,6 +918,7 @@ class MyApp(QWidget):
         grid.addWidget( end_qe  , 0 , 3)  
         groupbox.setFixedHeight(40)
         groupbox.setLayout(grid)        
+        # 시작구간 , 끝구간 지정. - end
         return groupbox        
 
 
@@ -750,7 +945,8 @@ class MyApp(QWidget):
                     , 'key0'            : self.__key0           # 키보드0 단일키 하나
                     , 'key0_wait'       : self.__key0_wait      # 키보드0 대기
                     , 'key1'            : self.__key1           # 키보드1 복합키 두개 - hot key 하기
-                    , 'key1_wait'       : self.__key1_wait      # 키보드1 대기                                
+                    , 'key1_wait'       : self.__key1_wait      # 키보드1 대기    
+                    , 'rep'             : self.__rep            # 구간반복               
                 }
             )  
             file_name = save_file_nm.text().replace(' ','')
@@ -787,18 +983,23 @@ class MyApp(QWidget):
             self.__key0             = _load_data[0]['key0']             # 키보드0 단일키 하나
             self.__key0_wait        = _load_data[0]['key0_wait']        # 키보드0 대기
             self.__key1             = _load_data[0]['key1']             # 키보드1 복합키 두개 - hot key 하기
-            self.__key1_wait        = _load_data[0]['key1_wait']        # 키보드1 대기  
-            #self.__cap1             = _load_data[0]['cap1']                  
+            self.__key1_wait        = _load_data[0]['key1_wait']        # 키보드1 대기 
+            
+            try:
+                #print( 'rep - asis' , _load_data[0]['rep'] )
+                self.__rep          = _load_data[0]['rep']              # 구간반복
+                print( 'rep - tobe' , self.__rep  )
+                
+            except Exception as e:
+                print('rep error',e) 
+
+                
             
             # 기존 자료 마이그레이션. 
             for i in self.__div:
                 str = self.__div.get(i)
                 str = str.replace('클릭-0','클릭').replace('클릭-1','붙여넣기').replace('클릭-2','글씨쓰기').replace('클릭-3','선택하기').replace('클릭-4','중복선택').replace('키보드-0','방향전환')
                 self.__div[i] = str
-
-
-            #print( 'self.__click_rand',self.__click_rand )
-            #print( 'self.__click_rand.get(0)',self.__click_rand.get(0) )
             self.fnLoad()
 
         load_btn = QPushButton('Load')
@@ -826,15 +1027,15 @@ class MyApp(QWidget):
                 , self.__key1
                 , self.__key1_wait
                 , csv_data
-                , self.__seq_start # 시작구간
-                , self.__seq_end # 종료구간
+                , self.__seq_start  # 시작구간
+                , self.__seq_end    # 종료구간
+                , self.__rep        # 구간반복
             )
             self.__work.start()
         
         def fnStop():
             '''매크로 종료 버튼'''
             print('fnStop','*'*50)
-            #stop_btn.setEnabled(False)
             start_btn.setEnabled(True)            
             self.__work.stop()
 
