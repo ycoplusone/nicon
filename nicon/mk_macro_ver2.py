@@ -628,7 +628,7 @@ class MyApp(QWidget):
             if str == 'cnt':
                 self.__rep[pos][2] = rep_cnt_qe.text()
 
-            print( self.__rep[pos] )
+            #print( self.__rep[pos] )
             
 
         groupbox = QGroupBox('')        
@@ -831,13 +831,6 @@ class MyApp(QWidget):
             if self.__click_rand[pos].get(16) != None:
                 dnd_bnt1.setText( '(x:{0},y:{1})'.format(self.__click_rand[pos][16].x , self.__click_rand[pos][16].y) )                                                
         
-        if self.__rep.get(pos) != None:
-            temp = self.__rep[pos]
-            print('반복데이터',temp)
-            #rep_st_qe.setText(  self.__rep[pos][0] )
-            #rep_ed_qe.setText(  self.__rep[pos][1] )
-            #rep_cnt_qe.setText( self.__rep[pos][2] )
-        
         # 활성화
         fn_div( self.__div[pos] )   # 활성화부분                
 
@@ -846,10 +839,10 @@ class MyApp(QWidget):
             if self.__click_xy.get(pos) != None:
                 geo_btn.setText( '(x:{0},y:{1})'.format(self.__click_xy[pos].x , self.__click_xy[pos].y) )   #좌표값.
 
-            col.setCurrentText( self.__click_evn[pos] ) # 클릭후 이벤트 컬럼 혹은 횟수. 행동후 대기사간은 공통 1초이다.
-            geo_xy_wait.setText( self.__click_xy_wait[pos] ) #해당행 끝나후 대기 시간.
-            key0.setCurrentText( self.__key0[pos] )     # 키입력 이벤트 처리
-            key0_wait.setText( self.__key0_wait[pos] )      # 키입력후 대기 시간
+            col.setCurrentText(     self.__click_evn[pos] ) # 클릭후 이벤트 컬럼 혹은 횟수. 행동후 대기사간은 공통 1초이다.
+            geo_xy_wait.setText(    self.__click_xy_wait[pos] ) #해당행 끝나후 대기 시간.
+            key0.setCurrentText(    self.__key0[pos] )     # 키입력 이벤트 처리
+            key0_wait.setText(      self.__key0_wait[pos] )      # 키입력후 대기 시간
             
 
             if self.__click_rand.get(pos) != None:
@@ -988,7 +981,6 @@ class MyApp(QWidget):
             try:
                 #print( 'rep - asis' , _load_data[0]['rep'] )
                 self.__rep          = _load_data[0]['rep']              # 구간반복
-                print( 'rep - tobe' , self.__rep  )
                 
             except Exception as e:
                 print('rep error',e) 
