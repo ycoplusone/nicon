@@ -13,6 +13,7 @@ import pandas as pd
 import random
 from dotenv import load_dotenv
 from openai import OpenAI #챗gpt api
+import lib.util as w2ji
 
 __g_wait = 5
 
@@ -282,7 +283,7 @@ def fnMain():
                 break
         #로그인 한다. - end
         
-        '''
+        
         # 출석체크 - begin
         for j in range(0,20):
             aa = fnAttendance(driver , i )    # 출석체크
@@ -290,7 +291,7 @@ def fnMain():
                 print(i[0],' : 출석체크 완료.')
                 break
         # 출석체크 - end
-        '''
+        
 
         # 댓글달기 - begin
         r_list = [1,2,3,4,5,6]
@@ -307,7 +308,7 @@ def fnMain():
                 break
         # 댓글달기 - end
         
-        '''
+        
         # 글쓰기 - begin
         for j in range(0,10):
             aa = fnWrite(driver , i )           # 글쓰기        
@@ -315,9 +316,9 @@ def fnMain():
                 print(i[0],' : ', '글쓰기 완료.')
                 break        
         # 글쓰기 - end
-        '''
-
         driver.quit()                   # 드라이버 종료    
+    
+    w2ji.send_telegram_message( '프렌즈 작업이 완료 되었습니다. 확인은 필요힙니다. 캡쳐를 확인하세요.' )
     
 
 def  fntest():
