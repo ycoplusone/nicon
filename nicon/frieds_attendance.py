@@ -11,8 +11,39 @@ import time
 import os
 import pandas as pd
 import random
+from dotenv import load_dotenv
+from openai import OpenAI #챗gpt api
 
 __g_wait = 5
+
+
+def fnOpenAiAsk( text ):
+    '''인공지능'''
+    try:
+        load_dotenv()        
+        client = OpenAI( api_key = os.environ.get('open_api_key') )
+        ages    = [20,30,40,50,60]
+        age     = random.sample(ages,1)
+        sexs    = ['남자','여자']
+        sex     = random.sample(sexs,1)
+        query = f"'{text}'에 대한 {age[0]}대 {sex[0]}같은 짧은 댓글."  
+        print('\t task : ', query)
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo" ,
+            messages=[
+            {   "role": "system"
+                , "content": "You are a helpful assistant. You must answer in only Korean."
+            }
+            , {   
+                "role": "user"
+                , "content": query
+            }            
+            ]
+        )
+        return response.choices[0].message.content 
+    except Exception as e:
+        print('error : ',e)
+
 
 def fnClick(driver , str):    
     time.sleep(0.5)
@@ -22,7 +53,6 @@ def fnClick(driver , str):
     except Exception as e:
         print('error : fnClick')
         return False
-
 
 
 def fnScript(driver , txt):
@@ -79,6 +109,20 @@ def fnCapture(driver , str):
         #print("### capture complete \t", file_name)
     except Exception as e:
         print('### error msg :: ', e)    
+
+def fnGetTag(driver , xpath_str):
+    '''태그 읽어오기'''
+    time.sleep(0.5)
+    rt_str = ''
+    try:
+        element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, xpath_str )))
+        rt_str = element.text
+        return rt_str
+    except Exception as e:
+        print('error : fnGetTag')
+        return ''
+        
+
 
 
 def fnLogin(driver , list ):
@@ -138,11 +182,15 @@ def fnAttendance(driver , list):
         return False
         
 
-def fnReply(driver, list , rep_txt , seq):
+def fnReply(driver, list , seq):
     '''댓글쓰기'''    
     try:
         rt = True
-        url = 'https://friends001.com/bbs/board.php?bo_table=free'
+        rep_txt = '' #댓글내용
+        pages = [1,2,3,4,5,6,7,8,9,10]
+        page = random.sample(pages,1)   # 글선택번호        
+        url = f'https://friends001.com/bbs/board.php?bo_table=free&page={page[0]}'
+        
         driver.get( url )     
         driver.implicitly_wait(15)
         time.sleep( __g_wait )
@@ -153,20 +201,30 @@ def fnReply(driver, list , rep_txt , seq):
         if _bool == False:
             rt = False        
         
+        # 글읽기
+        ask_txt = fnGetTag(driver,'//*[@id="thema_wrapper"]/div[1]/div/div/div[3]/div[3]/section/article/div[2]/div[2]')
+        if ask_txt == '':
+            rt = False
+        else :    
+            rep_txt = fnOpenAiAsk(ask_txt)
+        print('\t 답변 : ',rep_txt)
+
+        
         txt = f"$('#wr_content').val('{rep_txt}');"                
         _bool = fnScript(driver, txt )
         if _bool == False:
             rt = False                   
 
-        #_bool = fnClick( driver , "/html/body/div[1]/div[1]/div/div/div[3]/div[3]/div[2]/aside/form/div/div[2]/div[2]" ) #댓글쓰기 버튼
         _bool = fnScript(driver , "apms_comment_submit();")#댓글쓰기 버튼
         time.sleep( __g_wait )
         if _bool == False:
             rt = False        
         
         if _bool:
+            time.sleep(1)
             fnCapture( driver , list[0]+'_댓글' ) #캡쳐
         time.sleep(0.5)
+        
         return rt
     except Exception as e:
         return False
@@ -209,57 +267,72 @@ def fnWrite( driver, list ):
     except Exception as e:
         return False
 
-    
 
-if __name__ == "__main__":  
-    '''프렌즈 출석'''    
+
+def fnMain():
     datas = readfile("C:\\ncnc_class\\프렌즈 정보.xlsx") # 0:id , 1:ps , 2:출석  , 3,4,5 : 댓글 , 6:제목, 7:내용
-    #driver = fnDriver()                 # 드라이버생성
-    #fnLogin(driver , datas[0] )         # 로그인
-    #fnAttendance(driver , datas[0] )    # 출석체크
-    #fnReply(driver , datas[0] , datas)  # 댓글 3개 달기
-    #fnWrite(driver , datas[0])          # 글쓰기
-
-        
-    
     for i in datas:
         driver = fnDriver()          # 드라이버생성
 
-        # 반복 로그인 한다.
+        #로그인 한다. - begin
         for j in range(0,20):
             aa = fnLogin(driver , i )
             if aa :         # 로그인
                 print(i[0],' : 로그인 완료.')
                 break
+        #로그인 한다. - end
         
+        '''
+        # 출석체크 - begin
         for j in range(0,20):
             aa = fnAttendance(driver , i )    # 출석체크
             if aa :
                 print(i[0],' : 출석체크 완료.')
                 break
-        
+        # 출석체크 - end
+        '''
+
+        # 댓글달기 - begin
         r_list = [1,2,3,4,5,6]
         line = random.sample(r_list,3)   # 글선택번호        
         cnt = 0
         for j in range(0,20):
             ''''''            
-            # 첫댓글
-            r1 = random.randrange(0, len(datas) )
-            r2 = random.randrange(3,6)
-            reply_txt = datas[r1][r2]       #댓글내용       
-            aa = fnReply(driver , i , reply_txt , line[cnt] )     # 댓글 3개 달기
+            aa = fnReply(driver , i ,  line[cnt] )     # 댓글 3개 달기
             if aa :
                 print(i[0],' : ', cnt,'번째 댓글쓰기 완료')
                 cnt += 1
             if cnt == 3:
                 print(i[0], ' 댓글쓰기 완료.')
                 break
+        # 댓글달기 - end
         
+        '''
+        # 글쓰기 - begin
         for j in range(0,10):
             aa = fnWrite(driver , i )           # 글쓰기        
             if aa:
                 print(i[0],' : ', '글쓰기 완료.')
-                break
+                break        
+        # 글쓰기 - end
+        '''
 
-        driver.quit()                   # 드라이버 종료
+        driver.quit()                   # 드라이버 종료    
+    
+
+def  fntest():
+    '''테스트 함수'''    
+    datas = readfile("C:\\ncnc_class\\프렌즈 정보.xlsx") # 0:id , 1:ps , 2:출석  , 3,4,5 : 댓글 , 6:제목, 7:내용
+    driver = fnDriver()                 # 드라이버생성
+    #fnLogin(driver , datas[0] )         # 로그인
+    #fnAttendance(driver , datas[0] )    # 출석체크
+    fnReply(driver , datas[0] , 2 )     # 댓글 3개 달기
+
+if __name__ == "__main__":  
+    '''프렌즈 출석'''    
+    #fntest() # 테스트 프로세스
+
+    fnMain() #메인프로세스 전체 수행부분
+
+    
     
