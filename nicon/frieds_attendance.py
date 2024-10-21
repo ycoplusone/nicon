@@ -41,8 +41,9 @@ class friends(object):
             query = (
                     "INSERT INTO friends_reply_list (query, result, c_date) "
                     " VALUES('{query}', '{result}', now())"
-            )
+            )            
             query = query.format( **param )     
+            print(query)
             cur.execute( query )
             self.__conn.commit()
         except Exception as e:
@@ -377,7 +378,6 @@ class friends(object):
             actions = driver.find_element(By.CSS_SELECTOR, 'body')
             actions.send_keys(Keys.PAGE_DOWN)    
             
-            time.sleep( 10 )
             _bool = self.fnClick(driver , '//*[@id="btn_submit"]') #글쓰기 버튼        
             
             time.sleep( self.__g_wait )
@@ -446,14 +446,12 @@ class friends(object):
     def  fntest(self):
         '''테스트 함수'''    
         datas = self.readfile("C:\\ncnc_class\\프렌즈 정보.xlsx") # 0:id , 1:ps , 2:출석  , 3,4,5 : 댓글 , 6:제목, 7:내용
-        for i in datas:
-            print( i )
         driver = self.fnDriver()                 # 드라이버생성
         #time.sleep(1)
         self.fnLogin(driver , datas[0] )         # 로그인
-        #fnAttendance(driver , datas[0] )    # 출석체크
-        #fnReply(driver , datas[0] , 2 )     # 댓글 3개 달기
-        self.fnWrite(driver , datas[0])     # 글쓰기
+        #self.fnAttendance(driver , datas[0] )    # 출석체크
+        self.fnReply(driver , datas[0] , 2 )     # 댓글 3개 달기
+        #self.fnWrite(driver , datas[0])     # 글쓰기
         
 
 if __name__ == "__main__":  
@@ -461,8 +459,8 @@ if __name__ == "__main__":
     
     fr = friends() # 선언
     fr.fnDbcon() # db 변경 할당.
-    fr.fnMain() #메인프로세스 전체 수행부분
-    #fr.fntest() # 테스트 프로세스
+    #fr.fnMain() #메인프로세스 전체 수행부분
+    fr.fntest() # 테스트 프로세스
 
     
     
