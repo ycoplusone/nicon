@@ -58,7 +58,7 @@ class friends(object):
             query = (
             " update friends_board_summary "
             " set use_yn = 'N'  "
-            " where DATE_FORMAT(use_dt ,'%Y%m%d') <= DATE_FORMAT(ADDDATE(now() , -360),'%Y%m%d') " 
+            " where DATE_FORMAT(use_dt ,'%Y%m%d') <= DATE_FORMAT(ADDDATE(now() , -180),'%Y%m%d') " 
             " and use_yn = 'Y'        "
             )            
             query = query.format( )                      
