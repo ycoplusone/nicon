@@ -12,7 +12,7 @@ import os
 import pandas as pd
 import random
 import pyperclip #복사
-from dotenv import load_dotenv
+from dotenv import load_dotenv      # pip install python-dotenv , pip install dotenv 
 from openai import OpenAI #챗gpt api
 import lib.util as w2ji
 import re
@@ -56,7 +56,7 @@ class friends(object):
         try :
             cur = self.__conn.cursor()                        
             query = (
-            " update friends_board_list "
+            " update friends_board_summary "
             " set use_yn = 'N'  "
             " where DATE_FORMAT(use_dt ,'%Y%m%d') <= DATE_FORMAT(ADDDATE(now() , -360),'%Y%m%d') " 
             " and use_yn = 'Y'        "
@@ -76,7 +76,7 @@ class friends(object):
             _lists = []
             query = (
                 " select site_domin , type_nm , seq , subject , content  "
-                " from friends_board_list  "
+                " from friends_board_summary  "
                 " where use_yn = 'N' "
                 " order by rand() limit 1 "
             )
@@ -93,7 +93,7 @@ class friends(object):
             cur = self.__conn.cursor()
                         
             query = (
-            " update friends_board_list  "
+            " update friends_board_summary  "
             " set use_yn='Y', use_dt = now() "
             " WHERE site_domin='{site_domin}' AND type_nm='{type_nm}' AND seq={seq} "
             )            
