@@ -131,7 +131,7 @@ class friends(object):
                 ]
             )
             rt_txt = response.choices[0].message.content 
-            rt_txt = re.sub(r"[^\uAC00-\uD7A30-9a-zA-Z\s]", "", rt_txt)
+            rt_txt = re.sub(r"[^\uAC00-\uD7A30-9a-zA-Z\s,.!?;]", "", rt_txt) #re.sub(r"[^\uAC00-\uD7A30-9a-zA-Z\s]", "", rt_txt)
             return rt_txt
         except Exception as e:
             print('error : ',e)
@@ -299,11 +299,14 @@ class friends(object):
                 rt = False        
             
             # 글읽기
-            ask_txt = self.fnGetTag(driver,'//*[@id="thema_wrapper"]/div[1]/div/div/div[3]/div[3]/section/article/div[2]/div[2]')
-            if ask_txt == '':
+            ask_subject = self.fnGetTag(driver,'//*[@id="thema_wrapper"]/div[1]/div/div/div[3]/div[3]/section/article/h1')
+            ask_subject = re.sub(r"[^\uAC00-\uD7A30-9a-zA-Z\s,.!?;]", "", ask_subject) # 특수문자 제외
+            ask_txt     = self.fnGetTag(driver,'//*[@id="thema_wrapper"]/div[1]/div/div/div[3]/div[3]/section/article/div[2]/div[2]')
+            if (ask_txt == '') or (ask_subject == '') :
                 rt = False
             else :    
-                rep_txt = self.fnOpenAiAsk(ask_txt)
+                _temp_txt = ask_subject+' '+ask_txt
+                rep_txt = self.fnOpenAiAsk(_temp_txt)
             print('\t 답변 : ',rep_txt)
 
             actions = driver.find_element(By.CSS_SELECTOR, 'body')
