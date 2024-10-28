@@ -20,6 +20,7 @@ import pymysql
 
 
 
+
 class friends(object):
     __g_wait = 5
     __conn = ''
@@ -317,7 +318,6 @@ class friends(object):
                 rep_txt = self.fnOpenAiAsk(_temp_txt)
             print('\t 답변 : ',rep_txt)
 
-            '''
             actions = driver.find_element(By.CSS_SELECTOR, 'body')
             actions.send_keys(Keys.DOWN)    
             actions.send_keys(Keys.DOWN)    
@@ -347,7 +347,7 @@ class friends(object):
                 bb = bb[0:1024]
                 self.fnDbreply({'query': aa ,'result':bb}) # 인공지능 댓글 기록하기.
             time.sleep(0.5)
-            '''
+
             return rt
         except Exception as e:
             return False
@@ -356,14 +356,16 @@ class friends(object):
     def fnWrite( self , driver, list ):
         '''글쓰기'''
         try :
-            #subject = list[6]
-            #content = list[7]
+            subject = list[6]
+            content = list[7]
+            '''
             str = self.fnDbBoard()
             site_domin  = str[0]['site_domin']
             type_nm     = str[0]['type_nm']
             seq         = str[0]['seq']
             subject     = str[0]['subject']
             content     = str[0]['content']            
+            '''
             print('subject : ', subject)
             print('content : ', content)
             rt = True
@@ -398,7 +400,7 @@ class friends(object):
 
             if _bool:
                 self.fnCapture( driver , list[0]+'_글쓰기' ) #캡쳐
-                self.fnDbBoardUse({'site_domin':site_domin , 'type_nm':type_nm , 'seq':seq}) # 사용이력 남기기
+                #self.fnDbBoardUse({'site_domin':site_domin , 'type_nm':type_nm , 'seq':seq}) # 사용이력 남기기
             time.sleep(0.5)
             return rt
         except Exception as e:
@@ -408,6 +410,7 @@ class friends(object):
 
     def fnMain(self):
         datas = self.readfile("C:\\ncnc_class\\프렌즈 정보.xlsx") # 0:id , 1:ps , 2:출석  , 3,4,5 : 댓글 , 6:제목, 7:내용
+        random.shuffle(datas) # 순서 섞기.
         for i in datas:
             driver = self.fnDriver()          # 드라이버생성
 
@@ -470,9 +473,22 @@ if __name__ == "__main__":
     '''프렌즈 출석'''    
     
     fr = friends() # 선언
-    fr.fnDbcon() # db 변경 할당.
+    #fr.fnDbcon() # db 변경 할당.
     #fr.fnMain() #메인프로세스 전체 수행부분
-    fr.fntest() # 테스트 프로세스
+    #fr.fntest() # 테스트 프로세스
+    datas = fr.readfile("C:\\ncnc_class\\프렌즈 정보.xlsx") # 0:id , 1:ps , 2:출석  , 3,4,5 : 댓글 , 6:제목, 7:내용
+
+    print((datas))
+    for i  in datas:
+        print(i[0])
+    
+    random.shuffle(datas)
+    print('*'*100)
+    for i  in datas:
+        print(i[0])
+
+
+
 
     
     
