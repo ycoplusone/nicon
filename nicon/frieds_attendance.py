@@ -112,11 +112,7 @@ class friends(object):
                     
             client = OpenAI( api_key = os.environ.get('open_api_key') )
             
-            ages    = [20,30,40,50,60]
-            age     = random.sample(ages,1)
-            sexs    = ['남자','여자']
-            sex     = random.sample(sexs,1)
-            query = f"'{text}'에 대한 {age[0]}대 {sex[0]}같은 짧은 댓글."  
+            query = f"'{text}'에 대한 20자이내의 짧은 댓글."  
             print('\t task : ', query)
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo" ,
@@ -218,8 +214,18 @@ class friends(object):
         except Exception as e:
             print('error : fnGetTag')
             return ''
-            
-
+    
+    def fnGetAttribute(self, driver , xpath_str , attr_str): # attribute 읽기
+        '''태그 읽어오기'''
+        time.sleep(0.5)
+        rt_str = ''
+        try:            
+            element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, xpath_str )))
+            rt_str  = element.get_attribute( attr_str )
+            return rt_str
+        except Exception as e:
+            print('error : fnGetTag')
+            return ''
 
 
     def fnLogin( self , driver , list ):
@@ -299,9 +305,11 @@ class friends(object):
                 rt = False        
             
             # 글읽기
-            ask_subject = self.fnGetTag(driver,'//*[@id="thema_wrapper"]/div[1]/div/div/div[3]/div[3]/section/article/h1')
+            ask_subject = self.fnGetAttribute(driver ,'/html/body/div[1]/div[1]/div/div/div[3]/div[3]/section[1]/article/h1' , 'content' )
+            
             ask_subject = re.sub(r"[^\uAC00-\uD7A30-9a-zA-Z\s,.!?;]", "", ask_subject) # 특수문자 제외
             ask_txt     = self.fnGetTag(driver,'//*[@id="thema_wrapper"]/div[1]/div/div/div[3]/div[3]/section/article/div[2]/div[2]')
+
             if (ask_txt == '') or (ask_subject == '') :
                 rt = False
             else :    
@@ -309,6 +317,7 @@ class friends(object):
                 rep_txt = self.fnOpenAiAsk(_temp_txt)
             print('\t 답변 : ',rep_txt)
 
+            '''
             actions = driver.find_element(By.CSS_SELECTOR, 'body')
             actions.send_keys(Keys.DOWN)    
             actions.send_keys(Keys.DOWN)    
@@ -338,7 +347,7 @@ class friends(object):
                 bb = bb[0:1024]
                 self.fnDbreply({'query': aa ,'result':bb}) # 인공지능 댓글 기록하기.
             time.sleep(0.5)
-            
+            '''
             return rt
         except Exception as e:
             return False
