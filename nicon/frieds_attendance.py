@@ -407,7 +407,7 @@ class friends(object):
         페이지로 이동한다.
         '''
         datas = self.readfile("C:\\ncnc_class\\프렌즈 포인트.xlsx") # 0:id , 1:ps , 2:출석  , 3,4,5 : 댓글 , 6:제목, 7:내용
-        driver      = self.fnDriver()          # 드라이버생성
+        
         for i in datas:
             condition = datetime.now(timezone('Asia/Seoul')).strftime('%H')
             if ( condition not in ['12','13','14','15','16','17','18','19'] ) :                    
@@ -416,7 +416,7 @@ class friends(object):
                 print('*'*100)
                 break
             else :
-                driver.get('https://friends001.com/bbs/login.php?url=%2F') # 로그인 페이지 이동.
+                driver      = self.fnDriver()          # 드라이버생성
                 time.sleep(1)
                 _app_url    = 'https://friends001.com/bbs/write.php?bo_table=free_3'    # 신청 페이지 url
                 
@@ -452,7 +452,7 @@ class friends(object):
                 time.sleep(2)
                 self.fnClick( driver , '/html/body/div[1]/div[1]/div/div/div[3]/div[4]/form/div[3]/div/div/input' ) 
                 time.sleep(0.5)
-                self.fnCopyNpaste(driver , '1만원 기프티콘 신청합니다')
+                self.fnCopyNpaste(driver , '기프티콘 신청합니다')
                 time.sleep(0.5)
                 actions = driver.find_element(By.CSS_SELECTOR, 'body')
                 for x in range(0,9):
@@ -470,9 +470,10 @@ class friends(object):
 
                 self.fnClick(driver , '//*[@id="btn_submit"]') #글쓰기 버튼  
                 time.sleep(1)      
-                self.fnCapture( driver , i[0]+'_신청' ) #캡쳐
+                self.fnCapture( driver , i[0]+'_신청' ) #캡쳐                
                 rest_time = 300 + random.randint(300, 600)
                 print(f'{rest_time} 초 대기합니다.')
+                driver.quit()
                 time.sleep( rest_time )
             
         
