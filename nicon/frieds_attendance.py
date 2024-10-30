@@ -17,6 +17,7 @@ from openai import OpenAI #챗gpt api
 import lib.util as w2ji
 import re
 import pymysql
+import sys
 
 
 
@@ -133,7 +134,6 @@ class friends(object):
         except Exception as e:
             print('error : ',e)
 
-
     def fnClick( self,  driver , str):    
         time.sleep(0.5)
         try:
@@ -157,8 +157,6 @@ class friends(object):
         except Exception as e:
             print('error : fnScript')
             return False
-
-
 
     def readfile(self , path ):
         '''파일 읽기'''
@@ -228,7 +226,6 @@ class friends(object):
             print('error : fnGetTag')
             return ''
 
-
     def fnLogin( self , driver , list ):
         '''로그인'''    
         try:
@@ -255,7 +252,6 @@ class friends(object):
             return rt
         except Exception as e:
             return False
-        
 
     def fnAttendance(self , driver , list):
         '''출석 체크 페이지'''    
@@ -285,7 +281,6 @@ class friends(object):
             ''''''
             return False
             
-
     def fnReply(self , driver, list , seq):
         '''댓글쓰기'''    
         try:
@@ -351,8 +346,7 @@ class friends(object):
             return rt
         except Exception as e:
             return False
-
-        
+       
     def fnWrite( self , driver, list ):
         '''글쓰기'''
         try :
@@ -406,6 +400,77 @@ class friends(object):
         except Exception as e:
             return False
 
+    def fnApplication( self ): # 포인트신청하기
+        '''
+        로그인후 
+        id 값과 닉네임 값을 가져온다.
+        페이지로 이동한다.
+        '''
+        datas = self.readfile("C:\\ncnc_class\\프렌즈 포인트.xlsx") # 0:id , 1:ps , 2:출석  , 3,4,5 : 댓글 , 6:제목, 7:내용
+        for i in datas:
+            condition = datetime.now(timezone('Asia/Seoul')).strftime('%H')
+            if ( condition not in ['12','13','14','15','16','17','18','19'] ) :                    
+                print('*'*100)
+                print(f'현재 {condition}시 입니다. 실행을 종료 합니다.')
+                print('*'*100)
+                break
+            else :
+                driver      = self.fnDriver()          # 드라이버생성
+                _app_url    = 'https://friends001.com/bbs/write.php?bo_table=free_3'    # 신청 페이지 url
+                
+                _user_nick  = ''    # 닉네임
+                _user_id    = i[0]  # ID
+                _app_dt     = datetime.now(timezone('Asia/Seoul')).strftime('%m월 %d일')    # 신청일자 10월 30일
+                _app_tm     = datetime.now(timezone('Asia/Seoul')).strftime('%p %H:%M')     # 신청시간 AM 11:02
+                _app_tx     = '(기존) GS25 1만원'    # 신청내용 (기존) GS25 1만원
+
+
+                id_tag = f"$('#login_id').val('{i[0]}');"
+                ps_tag = f"$('#login_pw').val('{i[1]}');"    
+                
+                self.fnScript(driver, id_tag )  # id 입력
+                self.fnScript(driver, ps_tag )  # ps 입력
+                self.fnClick( driver , '/html/body/div[1]/div[1]/div/div/div/div/div[1]/div[2]/form/div[3]/div[2]/button')  # 로그인버튼
+                time.sleep(1)    
+                driver.get('https://friends001.com/bbs/mypage.php') #닉네임을 가져가기위해서 페이지를 이동한다.
+                time.sleep(2)
+                _user_nick     = self.fnGetTag(driver,'/html/body/div[1]/div[1]/div/div/div[3]/div[3]/div[1]/div[2]/div[2]/div[1]/b/a/span')            
+                _app_text  = (
+                f"아이디 : {_user_id} \n\n"
+                f"닉네임 : {_user_nick} \n\n"
+                f"신청 날짜 : {_app_dt} \n\n"
+                f"신청 시간 : {_app_tm} \n\n"
+                f"신청 내용 : {_app_tx} \n\n"                           
+                ) #신청문구
+                print('*'*30)
+                print( _app_text )
+                print('*'*30)
+
+                driver.get( _app_url )
+                time.sleep(2)
+                self.fnClick( driver , '/html/body/div[1]/div[1]/div/div/div[3]/div[4]/form/div[3]/div/div/input' ) 
+                time.sleep(0.5)
+                self.fnCopyNpaste(driver , '1만원 기프티콘 신청합니다')
+                time.sleep(0.5)
+                actions = driver.find_element(By.CSS_SELECTOR, 'body')
+                for x in range(0,14):
+                    actions.send_keys(Keys.DOWN)            
+
+                self.fnClick( driver , '/html/body' )                
+                time.sleep(0.5)
+                self.fnCopyNpaste(driver,_app_text)
+                time.sleep(0.5)
+
+                self.fnClick(driver , '//*[@id="btn_submit"]') #글쓰기 버튼  
+                time.sleep(1)      
+                self.fnCapture( driver , i[0]+'_신청' ) #캡쳐
+                rest_time = 300 + random.randint(300, 600)
+                print(f'{rest_time} 초 대기합니다.')
+                time.sleep( rest_time )
+            
+        
+
+
 
 
     def fnMain(self):
@@ -457,7 +522,7 @@ class friends(object):
             
         w2ji.send_telegram_message( '프렌즈 작업이 완료 되었습니다. 확인은 필요힙니다. 캡쳐를 확인하세요.' )
         
-
+    
     def  fntest(self):
         '''테스트 함수'''    
         datas = self.readfile("C:\\ncnc_class\\프렌즈 정보.xlsx") # 0:id , 1:ps , 2:출석  , 3,4,5 : 댓글 , 6:제목, 7:내용
@@ -471,21 +536,20 @@ class friends(object):
 
 if __name__ == "__main__":  
     '''프렌즈 출석'''    
-    
-    fr = friends() # 선언
-    #fr.fnDbcon() # db 변경 할당.
-    #fr.fnMain() #메인프로세스 전체 수행부분
-    #fr.fntest() # 테스트 프로세스
-    datas = fr.readfile("C:\\ncnc_class\\프렌즈 정보.xlsx") # 0:id , 1:ps , 2:출석  , 3,4,5 : 댓글 , 6:제목, 7:내용
+    args = sys.argv # 실행시 매개값으로 실행 방법 구분 2번째 값이 특정 값 무엇이면 처리하는 방식이다.
+    print( args  , len(args) )
+    if len(args) == 1:
+        print( '로그인 & 댓글 & 게시판글 신청.' )
+        fr = friends() # 선언
+        fr.fnDbcon() # db 변경 할당.
+        fr.fnMain() #메인프로세스 전체 수행부분        
+    elif (len(args) >= 2) and (args[1] == 'point'): # 신청으로 포
+        print( '신청페이지 시작' )
+        fr = friends() # 선언
+        fr.fnApplication()
 
-    print((datas))
-    for i  in datas:
-        print(i[0])
     
-    random.shuffle(datas)
-    print('*'*100)
-    for i  in datas:
-        print(i[0])
+
 
 
 
