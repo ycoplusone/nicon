@@ -22,8 +22,12 @@ import sys
 
 
 class friends(object):
+    __version = '2411.1'
     __g_wait = 5
     __conn = ''
+
+    __nick_name = '' # 로그인후 닉네임을 가져와서 할당한다.
+
     def __init__(self):
         self.load_env()
 
@@ -263,6 +267,13 @@ class friends(object):
         except Exception as e:
             return False
 
+    def fnGetNickName(self , driver):
+        self.__nick_name ='' # 닉네임 초기화
+        driver.get('https://friends001.com/bbs/mypage.php') #닉네임을 가져가기위해서 페이지를 이동한다.
+        time.sleep(2)
+        self.__nick_name = self.fnGetTag(driver,'/html/body/div[1]/div[1]/div/div/div[3]/div[3]/div[1]/div[2]/div[2]/div[1]/b/a/span')
+        print( f'self.__nick_name : {self.__nick_name}' )
+
     def fnAttendance(self , driver , list):
         '''출석 체크 페이지'''    
         try :        
@@ -291,68 +302,94 @@ class friends(object):
             ''''''
             return False
             
-    def fnReply(self , driver, list , seq):
-        '''댓글쓰기'''    
+    def fnReply(self , driver, list, page):
+        '''댓글쓰기'''            
         try:
-            rt = True
-            rep_txt = '' #댓글내용
-            pages = [1,2,3,4,5,6,7,8,9,10]
-            page = random.sample(pages,1)   # 글선택번호        
-            url = f'https://friends001.com/bbs/board.php?bo_table=free&page={page[0]}'
+            rt = True    
+            rep_txt = '' #댓글내용           
+            artcle_seq = [1,2,3,4,5,6,7,8,10]
+            for seq in artcle_seq: # 게시판 목록 1~10까지에서
+                rt = True  #초기화한다. 중간에 False로 반복구간을 다시 처리해야 한다.
+                url = f'https://friends001.com/bbs/board.php?bo_table=free&page={page}'
+                print('페이지',url)
+                driver.get( url )     
+                driver.implicitly_wait(15)
+                time.sleep( self.__g_wait )
+                actions = driver.find_element(By.CSS_SELECTOR, 'body')
+                actions.send_keys(Keys.DOWN)    
+                actions.send_keys(Keys.DOWN)    
+                actions.send_keys(Keys.DOWN)    
+                actions.send_keys(Keys.DOWN)    
+                actions.send_keys(Keys.DOWN)                   
+                time.sleep(1)                            
+                _nick_nm = self.fnGetTag(driver,f'/html/body/div[1]/div[1]/div/div/div[3]/section/div/form/div[1]/ul/li[{seq}]/div[3]/a/span') # 글의 작성자명가져오기
+                _nick_nm = _nick_nm.lstrip().rstrip() #양쪽 공백제거
+                print(f'닉네임 : {self.__nick_name} , 글이름 : {_nick_nm}')
+                if self.__nick_name != _nick_nm: # 계정의 닉네임과 글의 닉네임이 다르면
+                    tag = f"/html/body/div[1]/div[1]/div/div/div[3]/section/div/form/div[1]/ul/li[{seq}]/div[2]/a"        
+                    _bool = self.fnClick( driver , tag ) # 해당글 클릭
+                    time.sleep( self.__g_wait )
+                    if _bool == False:
+                        rt = False
+                    
+                    max_reply_cnt = self.fnGetTag(driver,'/html/body/div[1]/div[1]/div/div/div[3]/div[3]/div[1]/span') # 댓글수 가져오기
+                    for reply_seq in range(1,int(max_reply_cnt)+1):
+                        try:
+                            _reply_nick = self.fnGetTag(driver,f'/html/body/div[1]/div[1]/div/div/div[3]/div[3]/section[2]/div[{reply_seq}]/div[2]/div[1]/b/a/span') # 댓글 장성자 
+                            _reply_nick = _reply_nick.lstrip().rstrip() #양쪽 공백제거
+                            print(f'self.__nick_name:{self.__nick_name},_temp_txt:{_reply_nick}')
+                            if self.__nick_name == _reply_nick:
+                                rt = False                                
+                                break
+                        except Exception as e:
+                            print('reply_seq 에서 오류')
+                            break;
+                    if rt == True:
+                        print('글 댓글에 해당 사용자의 댓글은 없습니다.')
+                        break
             
-            driver.get( url )     
-            driver.implicitly_wait(15)
-            time.sleep( self.__g_wait )
-            tag = f"/html/body/div[1]/div[1]/div/div/div[3]/section/div/form/div[1]/ul/li[{seq}]/div[2]/a"
+            if rt == True:
+                # 글읽기
+                ask_subject = self.fnGetAttribute(driver ,'/html/body/div[1]/div[1]/div/div/div[3]/div[3]/section[1]/article/h1' , 'content' )            
+                ask_subject = re.sub(r"[^\uAC00-\uD7A30-9a-zA-Z\s,.!?;]", "", ask_subject) # 특수문자 제외
+                ask_txt     = self.fnGetTag(driver,'//*[@id="thema_wrapper"]/div[1]/div/div/div[3]/div[3]/section/article/div[2]/div[2]')
 
-            _bool = self.fnClick( driver , tag )
-            time.sleep( self.__g_wait )
-            if _bool == False:
-                rt = False        
-            
-            # 글읽기
-            ask_subject = self.fnGetAttribute(driver ,'/html/body/div[1]/div[1]/div/div/div[3]/div[3]/section[1]/article/h1' , 'content' )
-            
-            ask_subject = re.sub(r"[^\uAC00-\uD7A30-9a-zA-Z\s,.!?;]", "", ask_subject) # 특수문자 제외
-            ask_txt     = self.fnGetTag(driver,'//*[@id="thema_wrapper"]/div[1]/div/div/div[3]/div[3]/section/article/div[2]/div[2]')
+                if (ask_txt == '') or (ask_subject == '') :
+                    rt = False
+                else :    
+                    _temp_txt = ask_subject+' '+ask_txt
+                rep_txt = self.fnOpenAiAsk(_temp_txt)            
 
-            if (ask_txt == '') or (ask_subject == '') :
-                rt = False
-            else :    
-                _temp_txt = ask_subject+' '+ask_txt
-                rep_txt = self.fnOpenAiAsk(_temp_txt)
-            print('\t 답변 : ',rep_txt)
-
-            actions = driver.find_element(By.CSS_SELECTOR, 'body')
-            actions.send_keys(Keys.DOWN)    
-            actions.send_keys(Keys.DOWN)    
-            actions.send_keys(Keys.DOWN)    
-            actions.send_keys(Keys.DOWN)    
-            actions.send_keys(Keys.DOWN)    
-            actions.send_keys(Keys.DOWN)    
-            time.sleep(0.1)
-            _bool = self.fnClick( driver , '/html/body/div[1]/div[1]/div/div/div[3]/div[3]/div[2]/aside/form/div/div[2]/div[1]/textarea' )      
-            time.sleep(0.1)
-            self.fnCopyNpaste(driver , rep_txt)
-            time.sleep(0.5)
-            if _bool == False:
-                rt = False                      
-
-            _bool = self.fnScript(driver , "apms_comment_submit();")#댓글쓰기 버튼
-            time.sleep( self.__g_wait )
-            if _bool == False:
-                rt = False        
-            
-            if _bool:
-                time.sleep(1)
-                self.fnCapture( driver , list[0]+'_댓글' ) #캡쳐      
-                aa = re.sub(r"[^\uAC00-\uD7A30-9a-zA-Z\s]", "", ask_txt)  # 특수문자 제외
-                aa = aa[0:1024]
-                bb = re.sub(r"[^\uAC00-\uD7A30-9a-zA-Z\s]", "", rep_txt)  # 특수문자 제외        
-                bb = bb[0:1024]
-                self.fnDbreply({'query': aa ,'result':bb}) # 인공지능 댓글 기록하기.
-            time.sleep(0.5)
-
+                actions = driver.find_element(By.CSS_SELECTOR, 'body')
+                actions.send_keys(Keys.DOWN)    
+                actions.send_keys(Keys.DOWN)    
+                actions.send_keys(Keys.DOWN)    
+                actions.send_keys(Keys.DOWN)    
+                actions.send_keys(Keys.DOWN)    
+                actions.send_keys(Keys.DOWN)    
+                time.sleep(0.1)
+                _bool = self.fnClick( driver , '/html/body/div[1]/div[1]/div/div/div[3]/div[3]/div[2]/aside/form/div/div[2]/div[1]/textarea' )      
+                time.sleep(0.1)
+                self.fnCopyNpaste(driver , rep_txt)
+                time.sleep(0.5)
+                if _bool == False:
+                    rt = False                      
+                _bool = self.fnScript(driver , "apms_comment_submit();")#댓글쓰기 버튼
+                time.sleep( self.__g_wait )
+                if _bool == False:
+                    rt = False        
+                if _bool:
+                    try:
+                        time.sleep(1)
+                        self.fnCapture( driver , list[0]+'_댓글' ) #캡쳐      
+                        aa = re.sub(r"[^\uAC00-\uD7A30-9a-zA-Z\s]", "", ask_txt)  # 특수문자 제외
+                        aa = aa[0:1024]
+                        bb = re.sub(r"[^\uAC00-\uD7A30-9a-zA-Z\s]", "", rep_txt)  # 특수문자 제외        
+                        bb = bb[0:1024]
+                        self.fnDbreply({'query': aa ,'result':bb}) # 인공지능 댓글 기록하기.
+                    except Exception as e:
+                        print('마지막',e)
+                time.sleep(0.5)
             return rt
         except Exception as e:
             return False
@@ -406,6 +443,7 @@ class friends(object):
                 self.fnCapture( driver , list[0]+'_글쓰기' ) #캡쳐
                 #self.fnDbBoardUse({'site_domin':site_domin , 'type_nm':type_nm , 'seq':seq}) # 사용이력 남기기
             time.sleep(0.5)
+            
             return rt
         except Exception as e:
             return False
@@ -506,8 +544,11 @@ class friends(object):
                     print(i[0],' : 로그인 완료.')
                     break
             #로그인 한다. - end
-            
 
+            #닉네임 가져오기 - begin
+            self.fnGetNickName(driver) #닉네임 가져오기
+            #닉네임 가져오기 - end
+            
             # 출석체크 - begin
             for j in range(0,20):
                 aa = self.fnAttendance(driver , i )    # 출석체크
@@ -515,20 +556,22 @@ class friends(object):
                     print(i[0],' : 출석체크 완료.')
                     break
             # 출석체크 - end            
-
+            
             # 댓글달기 - begin        
             cnt = 0
+            pages = [1,2,3,4,5,6,7,8,9,10]
+            page = random.sample(pages,10)   # 글선택번호        
             for j in range(0,20):
-                ''''''        
-                r_list = [1,2,3,4,5]
-                line = random.sample(r_list,3)   # 글선택번호            
-                aa = self.fnReply(driver , i ,  line[cnt] )     # 댓글 3개 달기
+                ''''''                        
+                aa = self.fnReply(driver , i , page[cnt]  )     # 댓글 3개 달기                
                 if aa :
                     print(i[0],' : ', cnt,'번째 댓글쓰기 완료')
                     cnt += 1
                 if cnt == 3:
                     print(i[0], ' 댓글쓰기 완료.')
                     break
+                print('오잉?',j,aa,cnt)
+                
             # 댓글달기 - end
             
             # 글쓰기 - begin
