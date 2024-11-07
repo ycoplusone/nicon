@@ -551,7 +551,7 @@ class friends(object):
             #닉네임 가져오기 - begin
             self.fnGetNickName(driver) #닉네임 가져오기
             #닉네임 가져오기 - end
-            '''
+
             # 출석체크 - begin
             for j in range(0,20):
                 aa = self.fnAttendance(driver , i )    # 출석체크
@@ -565,7 +565,6 @@ class friends(object):
             pages = [1,2,3,4,5,6,7,8,9,10]
             page = random.sample(pages,10)   # 글선택번호        
             for j in range(0,20):
-                ''''''                        
                 aa = self.fnReply(driver , i , page[cnt]  )     # 댓글 3개 달기                
                 if aa :
                     print(i[0],' : ', cnt,'번째 댓글쓰기 완료')
@@ -576,7 +575,7 @@ class friends(object):
                 print('오잉?',j,aa,cnt)
                 
             # 댓글달기 - end
-            '''
+
             # 글쓰기 - begin
             for j in range(0,10):
                 aa = self.fnWrite(driver , i )           # 글쓰기        
