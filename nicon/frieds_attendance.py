@@ -22,7 +22,7 @@ import sys
 
 
 class friends(object):
-    __version = '2411.1'
+    __version = '2411.2' #버전.
     __g_wait = 5
     __conn = ''
 
@@ -410,16 +410,22 @@ class friends(object):
             print('subject : ', subject)
             print('content : ', content)
             rt = True
-            url = 'https://friends001.com/bbs/board.php?bo_table=free'
+            url = 'https://friends001.com/bbs/write.php?bo_table=free'
             driver.get( url )
             driver.implicitly_wait(15)
-            time.sleep( self.__g_wait )   
+            time.sleep( 2 )   
 
-            _bool = self.fnClick(driver , '//*[@id="fboardlist"]/div[2]/div[1]/div/a[2]/img') #글쓰기 가기버튼
-            time.sleep( self.__g_wait )
-            if _bool == False:
-                rt = False 
-            
+            actions = driver.find_element(By.CSS_SELECTOR, 'body')
+            actions.send_keys(Keys.DOWN)    
+            actions.send_keys(Keys.DOWN)               
+            actions.send_keys(Keys.DOWN)  
+            actions.send_keys(Keys.DOWN)  
+            actions.send_keys(Keys.DOWN)  
+            actions.send_keys(Keys.DOWN)  
+            actions.send_keys(Keys.DOWN)  
+            actions.send_keys(Keys.DOWN)  
+            time.sleep(1)
+
             _bool = self.fnClick( driver , '/html/body/div[1]/div[1]/div/div/div[3]/div[4]/form/div[3]/div/div/input' )        
             self.fnCopyNpaste(driver , subject)
             if _bool == False:
@@ -430,9 +436,6 @@ class friends(object):
             if _bool == False:
                 rt = False                
 
-            actions = driver.find_element(By.CSS_SELECTOR, 'body')
-            actions.send_keys(Keys.PAGE_DOWN)    
-            
             _bool = self.fnClick(driver , '//*[@id="btn_submit"]') #글쓰기 버튼        
             
             time.sleep( self.__g_wait )
@@ -544,11 +547,11 @@ class friends(object):
                     print(i[0],' : 로그인 완료.')
                     break
             #로그인 한다. - end
-
+            
             #닉네임 가져오기 - begin
             self.fnGetNickName(driver) #닉네임 가져오기
             #닉네임 가져오기 - end
-            
+            '''
             # 출석체크 - begin
             for j in range(0,20):
                 aa = self.fnAttendance(driver , i )    # 출석체크
@@ -573,7 +576,7 @@ class friends(object):
                 print('오잉?',j,aa,cnt)
                 
             # 댓글달기 - end
-            
+            '''
             # 글쓰기 - begin
             for j in range(0,10):
                 aa = self.fnWrite(driver , i )           # 글쓰기        
