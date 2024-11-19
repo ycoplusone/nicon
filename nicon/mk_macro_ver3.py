@@ -1032,7 +1032,7 @@ class MyApp(QWidget):
         # 클릭 의 대기시간 - begin
         self.__geo_xy_wait[i] = QLineEdit()     
         self.__geo_xy_wait[i].setStyleSheet( self.__lb_style )
-        self.__geo_xy_wait[i].setText('0.5')      
+        self.__geo_xy_wait[i].setText('1')      
         self.__geo_xy_wait[i].setFixedWidth(50)
         self.__geo_xy_wait[i].setVisible( False )
         self.__geo_xy_wait[i].textChanged.connect( fnGeo_xy_wait )
