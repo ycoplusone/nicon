@@ -23,6 +23,11 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 
 class Work(QThread):
+    '''
+    24.11.2 랜덤선택 , 랜덤대기 생성.
+    '''
+    __version   = '24.11.2' # 버전
+
     __url_xy            = () # url 클릭 좌표
     __url_xy_wait       = 0.5 # 0.5 초 기본 대기 url 클릭후 대기
     __url_path          = '' #url 주소
@@ -172,7 +177,19 @@ class Work(QThread):
             self.fnclick( r2 , 0.5 ) #클릭                           
             self.fnclick( r3 , 0.5 ) #클릭   
             time.sleep( float(xy_wait) ) #대기 
-
+        elif ( step_name == '랜덤선택') and ( self.__power == True ):
+            self.fnclick( xy , 0.5 ) #클릭
+            numbers = [0,1,2,3]
+            n = random.sample(numbers,4)            
+            r0 = rand.get(n[0])
+            r1 = rand.get(n[1])
+            r2 = rand.get(n[2])
+            r3 = rand.get(n[3])
+            self.fnclick( r0 , 0.5 ) #클릭   
+            self.fnclick( r1 , 0.5 ) #클릭   
+            self.fnclick( r2 , 0.5 ) #클릭   
+            self.fnclick( r3 , 0.5 ) #클릭 
+            time.sleep( float(xy_wait) ) #대기
         elif ( step_name == '방향전환') and ( self.__power == True ):
             self.fnclick( xy , 0.1 ) #클릭                        
             self.fnkey( key0 , int(key0_wait) )                        
@@ -180,6 +197,9 @@ class Work(QThread):
 
         elif ( step_name == '무시') and ( self.__power == True ):
             '''행동 없음.'''
+        elif ( step_name == '랜덤대기') and ( self.__power == True ):            
+            rand_wait_t = round(random.uniform(3,20),1)
+            time.sleep( rand_wait_t )
 
         elif ( step_name == '캡쳐') and ( self.__power == True ):
             '''캡쳐'''
@@ -242,7 +262,7 @@ class Work(QThread):
                                         self.fnMain( self.__div.get(m) , m , _j ) 
                                 print(i,'구간반복 - 종료','='*15)
                                         
-                            elif (self.__div.get(i) in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','방향전환','무시','캡쳐','D&D'] ) :
+                            elif (self.__div.get(i) in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','방향전환','무시','캡쳐','D&D','랜덤대기'] ) :
                                 self.fnMain( self.__div.get(i) , i , _j )                            
 
         except Exception as e:
@@ -251,7 +271,7 @@ class Work(QThread):
             self.__power = False
         
         if self.__power == True:
-            w2ji.send_telegram_message( 'mk_macro_ver2 가 완료 되었습니다.' )
+            w2ji.send_telegram_message( f'mk_macro_ver {self.__version} 가 완료 되었습니다.' )
             pyautogui.alert('완료 되었습니다.')
             
         else :
@@ -266,7 +286,7 @@ class Work(QThread):
         self.__power = False
 
 
-class MyApp(QWidget):
+class MyApp(QWidget):    
     __lb_style  = 'border-radius: 5px;border: 1px solid gray;'
     __lb_style2 = 'border-radius: 5px;border: 1px solid red;'
 
@@ -782,13 +802,13 @@ class MyApp(QWidget):
         self.__rep_cnt_qe[i].setVisible( False )    # 구간반복                                                   
         self.__dnd_bnt0[i].setVisible( False )      # 드래그 & 드랍
         self.__dnd_bnt1[i].setVisible( False )      # 드래그 & 드랍     
-        if (str == '끝') or (str == '무시'):                
+        if (str == '끝') or (str == '무시')or (str == '랜덤대기'):                
             ''''''                                             
         elif (str == '클릭') or (str == '붙여넣기') or (str == '글씨쓰기'):
             self.__geo_btn[i].setVisible( True )                
             self.__geo_xy_wait[i].setVisible( True )
             self.__col[i].setVisible(True)
-        elif (str == '선택하기') or ( str == '중복선택' ):
+        elif (str == '선택하기') or ( str == '중복선택' ) or ( str == '랜덤선택' ):
             self.__geo_btn[i].setVisible( True )
             self.__geo_xy_wait[i].setVisible( True )                                                
             self.__ran_btn0[i].setVisible( True )
@@ -892,7 +912,7 @@ class MyApp(QWidget):
 
         # 행동구분 - begin
         self.__qt_div[i] = QComboBox()
-        self.__qt_div[i].addItems(['끝','클릭','붙여넣기','글씨쓰기','선택하기','중복선택','방향전환','무시','캡쳐','구간반복','D&D' ])
+        self.__qt_div[i].addItems(['끝','클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','방향전환','무시','캡쳐','구간반복','D&D','랜덤대기' ])
         self.__qt_div[i].activated[str].connect( fnDiv )   
         hbox.addWidget( self.__qt_div[i] )        
         # 행동구분 - end
