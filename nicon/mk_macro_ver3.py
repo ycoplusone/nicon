@@ -25,8 +25,9 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 class Work(QThread):
     '''
     24.11.2 랜덤선택 , 랜덤대기 생성.
+    24.11.3 콤보박스 리스트 길이 늘리기
     '''
-    __version   = '24.11.2' # 버전
+    __version   = '24.11.3' # 버전
 
     __url_xy            = () # url 클릭 좌표
     __url_xy_wait       = 0.5 # 0.5 초 기본 대기 url 클릭후 대기
@@ -911,9 +912,11 @@ class MyApp(QWidget):
         # 행번호 출력 - end
 
         # 행동구분 - begin
-        self.__qt_div[i] = QComboBox()
+        combo_style = 'QAbstractItemView {min-height: 180px;}' # 콤보박스 리스트 길이 스타일        
+        self.__qt_div[i] = QComboBox()        
+        self.__qt_div[i].setStyleSheet(combo_style)
         self.__qt_div[i].addItems(['끝','클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','방향전환','무시','캡쳐','구간반복','D&D','랜덤대기' ])
-        self.__qt_div[i].activated[str].connect( fnDiv )   
+        self.__qt_div[i].activated[str].connect( fnDiv )           
         hbox.addWidget( self.__qt_div[i] )        
         # 행동구분 - end
 
@@ -967,7 +970,7 @@ class MyApp(QWidget):
         # 키입력후 의 대기시간 - begin
         self.__key_wait[i] = QLineEdit()     
         self.__key_wait[i].setStyleSheet( self.__lb_style2 )
-        self.__key_wait[i].setText('0.5')      
+        self.__key_wait[i].setText('1')      
         self.__key_wait[i].setFixedWidth(50)
         self.__key_wait[i].setVisible( False )
         self.__key_wait[i].textChanged.connect(  fnkeywait )
@@ -1032,7 +1035,7 @@ class MyApp(QWidget):
         # 클릭 의 대기시간 - begin
         self.__geo_xy_wait[i] = QLineEdit()     
         self.__geo_xy_wait[i].setStyleSheet( self.__lb_style )
-        self.__geo_xy_wait[i].setText('1')      
+        self.__geo_xy_wait[i].setText('0.5')      
         self.__geo_xy_wait[i].setFixedWidth(50)
         self.__geo_xy_wait[i].setVisible( False )
         self.__geo_xy_wait[i].textChanged.connect( fnGeo_xy_wait )
