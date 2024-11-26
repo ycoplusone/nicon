@@ -15,6 +15,7 @@ from datetime import datetime
 from pytz import timezone
 from PIL import ImageGrab , Image
 import lib.util as w2ji
+import re
 
 import mouse        # 20241015 마우스 이벤트 pip install mouse
 import keyboard     # 20241015 키보드 이벤트 pip install keyboard
@@ -25,9 +26,10 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 class Work(QThread):
     '''
     24.11.2 랜덤선택 , 랜덤대기 생성.
-    24.11.3 콤보박스 리스트 길이 늘리기
+    24.11.3 콤보박스 리스트 길이 늘리기.
+    24.11.4 저장시 특수문자일경우 오류일경우 방지.
     '''
-    __version   = '24.11.3' # 버전
+    __version   = '24.11.4' # 버전
 
     __url_xy            = () # url 클릭 좌표
     __url_xy_wait       = 0.5 # 0.5 초 기본 대기 url 클릭후 대기
@@ -540,7 +542,9 @@ class MyApp(QWidget):
                     , 'rep'             : self.__rep                    # 구간반복               
                 }
             )  
-            file_name = self.__save_file_nm_ui.text().replace(' ','').replace('ver3_','')
+            file_name = self.__save_file_nm_ui.text()
+            file_name = re.sub('[\/:*?"<>|]','',file_name)
+            file_name = file_name.replace(' ','').replace('ver3_','')
             if file_name == '':
                 QMessageBox.about(self,'About Title','파일이름이 없습니다. ')
             else :
