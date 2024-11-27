@@ -28,8 +28,9 @@ class Work(QThread):
     24.11.2 랜덤선택 , 랜덤대기 생성.
     24.11.3 콤보박스 리스트 길이 늘리기.
     24.11.4 저장시 특수문자일경우 오류일경우 방지.
+    24.11.5 이미파일로 자동 저장.
     '''
-    __version   = '24.11.4' # 버전
+    __version   = '24.11.5' # 버전
 
     __url_xy            = () # url 클릭 좌표
     __url_xy_wait       = 0.5 # 0.5 초 기본 대기 url 클릭후 대기
@@ -520,43 +521,9 @@ class MyApp(QWidget):
         groupbox = QGroupBox('')
         grid = QGridLayout()
         grid.setSpacing(0)
-
-        def fn_save(): # 파일저장
-            save_array = []
-            save_array.append(
-                {
-                      'url_xy'          : self.__url_xy                 # url 클릭 좌표
-                    , 'url_xy_wait'     : self.__url_xy_wait            # 0.5 초 기본 대기 url 클릭후 대기
-                    , 'url_path'        : self.__url_path               # url 클릭 좌표
-                    , 'url_path_wait'   : self.__url_path_wait          # 2초 기본 대기 url 주소 입력후 대기시간
-                    , 'cvs_path'        : self.__cvs_path               # cvs 파일 위치
-                    , 'div'             : self.__div                    # 선택값
-                    , 'click_xy'        : self.__click_xy               # 클릭 
-                    , 'click_evn'       : self.__click_evn              # 클릭   복사 컬럼 위치 선택후 붙여넣기
-                    , 'click_rand'      : self.__click_rand             # 랜덤클릭
-                    , 'click_xy_wait'   : self.__click_xy_wait          # 클릭 실행후 대기시간    
-                    , 'key0'            : self.__key0                   # 키보드0 단일키 하나
-                    , 'key0_wait'       : self.__key0_wait              # 키보드0 대기
-                    , 'key1'            : self.__key1                   # 키보드1 복합키 두개 - hot key 하기
-                    , 'key1_wait'       : self.__key1_wait              # 키보드1 대기    
-                    , 'rep'             : self.__rep                    # 구간반복               
-                }
-            )  
-            file_name = self.__save_file_nm_ui.text()
-            file_name = re.sub('[\/:*?"<>|]','',file_name)
-            file_name = file_name.replace(' ','').replace('ver3_','')
-            if file_name == '':
-                QMessageBox.about(self,'About Title','파일이름이 없습니다. ')
-            else :
-                QMessageBox.about(self,'About Title','파일명 "{0}" 저장합니다. '.format( file_name ) )
-                with open('c:\\ncnc_class\\'+'ver3_'+file_name+'.pickle',"wb") as f:
-                    pickle.dump(save_array, f) # 위에서 생성한 리스트를 list.pickle로 저장  
-                    self.__load_cb_ui.addItem('ver3_'+file_name)            
-
         save_btn = QPushButton('Save')
-        save_btn.clicked.connect(    fn_save   )  
+        save_btn.clicked.connect(    self.fnSave   )  
         grid.addWidget( save_btn , 0 , 0 ,1,1)
-
    
         def fn_load(): # 피클 데이터 로드
             self.__file_nm = self.__load_cb_ui.currentText()  
@@ -657,10 +624,8 @@ class MyApp(QWidget):
                         if self.__click_rand[i].get(16) != None: # 드래그앤 드랍
                             self.__dnd_bnt1[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][16].x , self.__click_rand[i][16].y) )
                
-
-
         load_btn = QPushButton('Load')
-        load_btn.clicked.connect(    fn_load   )  
+        load_btn.clicked.connect( fn_load )
         grid.addWidget( load_btn , 0 , 1 ,1,2 )
 
         def fnStart():
@@ -783,6 +748,64 @@ class MyApp(QWidget):
         # 시작구간 , 끝구간 지정. - end
         return groupbox        
     
+    def fnSave(self):
+        '''통합 저장'''
+        file_name = self.__save_file_nm_ui.text()        
+        file_name = re.sub('[\/:*?"<>|]','',file_name)
+        file_name = file_name.replace(' ','').replace('ver3_','')   
+        if file_name == '':
+            QMessageBox.about(self,'About Title','파일이름이 없습니다... ')
+        else :
+            QMessageBox.about(self,'About Title','파일명 "{0}" 저장합니다... '.format( file_name ) )
+            self.fnSavePickle( file_name )
+
+
+    def fnSavePickle( self , name ):
+        '''피클 저장 부분'''
+        if name == 'asTEMP':
+            file_name = name
+        else :
+            file_name = 'ver3_'+name
+        
+        # 항목 추가 함수        
+        def add_item( item ):
+            try:
+                # 모든 항목 목록 가져오기
+                item_count = self.__load_cb_ui.count()
+                items = []
+                for i in range(item_count):
+                    item = self.__load_cb_ui.itemText(i)
+                    items.append(item)                        
+                if item not in items: #중복이 있으면 추가하지 않는다.
+                    self.__load_cb_ui.addItem(item)     
+            except Exception as e:
+                print( '항목 추가 오류',e )
+
+        save_array = []
+        save_array.append(
+            {
+                'url_xy'            : self.__url_xy                 # url 클릭 좌표
+                , 'url_xy_wait'     : self.__url_xy_wait            # 0.5 초 기본 대기 url 클릭후 대기
+                , 'url_path'        : self.__url_path               # url 클릭 좌표
+                , 'url_path_wait'   : self.__url_path_wait          # 2초 기본 대기 url 주소 입력후 대기시간
+                , 'cvs_path'        : self.__cvs_path               # cvs 파일 위치
+                , 'div'             : self.__div                    # 선택값
+                , 'click_xy'        : self.__click_xy               # 클릭 
+                , 'click_evn'       : self.__click_evn              # 클릭   복사 컬럼 위치 선택후 붙여넣기
+                , 'click_rand'      : self.__click_rand             # 랜덤클릭
+                , 'click_xy_wait'   : self.__click_xy_wait          # 클릭 실행후 대기시간    
+                , 'key0'            : self.__key0                   # 키보드0 단일키 하나
+                , 'key0_wait'       : self.__key0_wait              # 키보드0 대기
+                , 'key1'            : self.__key1                   # 키보드1 복합키 두개 - hot key 하기
+                , 'key1_wait'       : self.__key1_wait              # 키보드1 대기    
+                , 'rep'             : self.__rep                    # 구간반복               
+            }
+        )      
+        with open('c:\\ncnc_class\\'+file_name+'.pickle',"wb") as f:
+            pickle.dump(save_array, f) # 위에서 생성한 리스트를 list.pickle로 저장              
+            #self.__load_cb_ui.addItem(file_name)               
+            add_item(file_name)
+
     def fnDivEvn( self , i , str ): # 행동구분 이벤트
         '''행동구분 이벤트
         i : 행번호 , str : 행동명
@@ -795,8 +818,8 @@ class MyApp(QWidget):
         self.__ran_btn1[i].setVisible( False )      # 좌표1
         self.__ran_btn2[i].setVisible( False )      # 좌표2
         self.__ran_btn3[i].setVisible( False )      # 좌표3
-        self.__key[i].setVisible( False )          # 키보드 입력값
-        self.__key_wait[i].setVisible( False )     # 키보드 입력후 대기 시간
+        self.__key[i].setVisible( False )           # 키보드 입력값
+        self.__key_wait[i].setVisible( False )      # 키보드 입력후 대기 시간
         self.__cap_bnt0[i].setVisible( False )      # 캡쳐 시작 포인트
         self.__cap_bnt1[i].setVisible( False )      # 캡쳐 종료 포인트
         self.__rep_st_lb[i].setVisible( False )     # 구간반복
@@ -865,6 +888,7 @@ class MyApp(QWidget):
             fnkeywait() # __key_wait 키보드 입력후 대기시간                  
             fnGeo_xy_wait() # __geo_xy_wait 클릭후 대기 시간 초기값                 
             self.fnDivEvn( i , str ) #메인 호출
+            self.fnSavePickle('asTEMP')
 
         def fnGeo( pos : int , sub_pos : int): # 좌표지정 이벤트
             '''
