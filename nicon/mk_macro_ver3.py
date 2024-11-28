@@ -3,7 +3,6 @@ import os
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-
 import pyautogui
 import pyperclip
 import csv
@@ -28,7 +27,8 @@ class Work(QThread):
     24.11.2 랜덤선택 , 랜덤대기 생성.
     24.11.3 콤보박스 리스트 길이 늘리기.
     24.11.4 저장시 특수문자일경우 오류일경우 방지.
-    24.11.5 이미파일로 자동 저장.
+    24.11.5 임시 파일로 자동 저장.
+    24.11.6 0~5까지 무시 기본, new 버튼 , 로드할 파일 asTEMP 우선.
     '''
     __version   = '24.11.5' # 버전
 
@@ -320,13 +320,6 @@ class MyApp(QWidget):
     __seq_end           = 9999  # 테스트 종료구간
     # 전역변수 - end
 
-    for i in range(0,__max_obj): #초기화
-        __div[i]        = '끝'
-        __click_evn[i]  = '1'
-        __rep[i]        = {0:'0', 1:'0' , 2:'1'} #구간반복 초기값 설정.
-    
-
-
     # 임시 시작
     __pos               = -1 # 임시 배열번호 
     __sub_pos           = -1 # 임시 배열번호 랜덤 좌표를 위한   
@@ -362,6 +355,37 @@ class MyApp(QWidget):
     __dnd_bnt0      = {} # 드래그 & 드랍
     __dnd_bnt1      = {} # 드래그 & 드랍     
     # UI - END
+
+    def init_param(self): # 파라미터 초기화
+        ''''''
+        # 전역변수 - begin
+        self.__url_xy            = ()  # url 클릭 좌표
+        self.__url_xy_wait       = 0.5 # 0.5 초 기본 대기 url 클릭후 대기
+        self.__url_path          = ''  # url 주소
+        self.__url_path_wait     = 2   # 2초 기본 대기 url 주소 입력후 대기시간
+        self.__cvs_path          = ''  # cvs 파일 위치
+        self.__div               = {}  # 선택값        
+        self.__click_xy          = {}  # 클릭좌표    
+        self.__click_rand        = {}  # 클릭 랜덤클릭
+        self.__click_xy_wait     = {}  # 클릭 실행후 대기시간    
+        self.__click_evn         = {}  # 클릭   복사 컬럼 위치 선택후 붙여넣기
+        self.__key0              = {}  # 키보드0 단일키 하나
+        self.__key0_wait         = {}  # 키보드0 대기
+        self.__key1              = {}  # 키보드1 복합키 두개 - hot key 하기
+        self.__key1_wait         = {}  # 키보드1 대기
+        self.__rep               = {}  # 구간반복 배열
+        self.__seq_start         = 0     # 테스트 시작구간 
+        self.__seq_end           = 9999  # 테스트 종료구간
+        # 전역변수 - end
+        for i in range(0,self.__max_obj): #초기화
+            if i in range(0,5):
+                self.__div[i]        = '무시'
+                self.__click_evn[i]  = '1'
+                self.__rep[i]        = {0:'0', 1:'0' , 2:'1'} #구간반복 초기값 설정.            
+            else :
+                self.__div[i]        = '끝'
+                self.__click_evn[i]  = '1'
+                self.__rep[i]        = {0:'0', 1:'0' , 2:'1'} #구간반복 초기값 설정.        
 
     def mouse_event(self , event): #마우스이벤트처리
         '''마우스 이벤트 처리'''
@@ -432,6 +456,7 @@ class MyApp(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.init_param() # 전역변수 초기화
         self.initUI()
         self.setMinimumHeight(800)
         self.setGeometry(self.__x, 30, 712, 800)
@@ -521,17 +546,34 @@ class MyApp(QWidget):
         groupbox = QGroupBox('')
         grid = QGridLayout()
         grid.setSpacing(0)
+
+        def fnNew():# 초기
+            '''            '''
+            print('new - s',  self.__click_rand )
+            self.init_param() #전역 변수 초기화
+            print('new - e',  self.__click_rand )
+            self.fnAfterUiLoad('new')
+
+        new_btn  = QPushButton('New')
+        new_btn.clicked.connect( fnNew )
+        grid.addWidget( new_btn , 0 , 0 ,1,1)
+
+
         save_btn = QPushButton('Save')
         save_btn.clicked.connect(    self.fnSave   )  
-        grid.addWidget( save_btn , 0 , 0 ,1,1)
+        grid.addWidget( save_btn , 0 , 1 ,1,1)
    
         def fn_load(): # 피클 데이터 로드
-            self.__file_nm = self.__load_cb_ui.currentText()  
-            
+            self.__file_nm = self.__load_cb_ui.currentText()                
             if self.__file_nm == '':
                 print('로드할수 없습니다.')
             else :
-                self.__save_file_nm_ui.setText( self.__file_nm.replace('ver3_','') ) # 로드한 파일명 저장이름에 등록
+                if  self.__file_nm == 'asTEMP': # asTEMP는 임시 파일명이기때문에 로드 명으로 하지 않느다.
+                    self.__save_file_nm_ui.setText( '' ) # 로드한 파일명 저장이름에 등록
+                else:    
+                    self.__save_file_nm_ui.setText( self.__file_nm.replace('ver3_','') ) # 로드한 파일명 저장이름에 등록
+                
+
                 self.__load_cb_ui.setCurrentText('') # 로드파일 초기화
                 file_path = 'C:\\ncnc_class\\{}{}'.format( self.__file_nm ,'.pickle')                
                 _load_data = []
@@ -561,72 +603,16 @@ class MyApp(QWidget):
                 for i in self.__div:
                     str = self.__div.get(i)
                     str = str.replace('클릭-0','클릭').replace('클릭-1','붙여넣기').replace('클릭-2','글씨쓰기').replace('클릭-3','선택하기').replace('클릭-4','중복선택').replace('키보드-0','방향전환')
-                    self.__div[i] = str
-                
-                # 로드후 ui 적용.
-                print('로드후 ui 적용.')
-                if  len(self.__url_xy) > 0: # url 클릭 좌표
-                    print( 'self.__url_xy',self.__url_xy )
-                    self.__url_xy_ui.setText('( x : {0} , y : {1} )'.format( self.__url_xy.x , self.__url_xy.y ) )
+                    self.__div[i] = str     
 
-                if len(self.__url_path) >0 : # url 주소 매핑    
-                    self.__url_qe_ui.setText( self.__url_path )
-                
-                if len(self.__cvs_path) >0 : # 파일 패스
-                    self.__csv_lb_ui.setText( self.__cvs_path )
-
-                for i in self.__qt_div:
-                    div_nm = self.__div[i]
-                    self.__qt_div[i].setCurrentText( div_nm )  # 행동구분
-                    self.fnDivEvn( i , div_nm ) 
-
-                    if self.__click_xy.get(i) != None: #기본클릭 좌표 UI
-                        self.__geo_btn[i].setText( '(x:{0},y:{1})'.format(self.__click_xy[i].x , self.__click_xy[i].y) )       # 좌표 지정.
-                    
-                    if self.__click_xy_wait.get(i) != None: #기본클릭 후 대기시간
-                        self.__geo_xy_wait[i].setText( self.__click_xy_wait[i] )
-                    
-                    if self.__click_evn.get(i) != None:  # 데이터의 컬럼 데이터 매핑
-                        self.__col[i].setCurrentText( self.__click_evn[i] )
-
-                    if ( self.__key0_wait.get(i) != None ): # 키보드 대기시간.
-                        self.__key_wait[i].setText( self.__key0_wait[i] )
-                        
-
-                    try: #구간반복
-                        if self.__rep.get(i) != None: 
-                            if self.__rep[i].get(0) != None:
-                                self.__rep_st_qe[i].setText(self.__rep[i][0])
-                            if self.__rep[i].get(1) != None:
-                                self.__rep_ed_qe[i].setText(self.__rep[i][1])
-                            if self.__rep[i].get(2) != None:
-                                self.__rep_cnt_qe[i].setText(self.__rep[i][2])
-                    except Exception as e:
-                        print( 'error self.__rep.get(i) ' )
-
-                    if self.__click_rand.get(i) != None: #랜덤과 캡쳐 
-                        if self.__click_rand[i].get(0) != None: #0 번재 값이 있을경우
-                            self.__ran_btn0[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][0].x , self.__click_rand[i][0].y) )      # 좌표0
-                        if self.__click_rand[i].get(1) != None: #1 번재 값이 있을경우
-                            self.__ran_btn1[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][1].x , self.__click_rand[i][1].y) )      # 좌표1
-                        if self.__click_rand[i].get(2) != None: #2 번재 값이 있을경우
-                            self.__ran_btn2[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][2].x , self.__click_rand[i][2].y) )      # 좌표2
-                        if self.__click_rand[i].get(3) != None: #3 번재 값이 있을경우
-                            self.__ran_btn3[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][3].x , self.__click_rand[i][3].y) )      # 좌표3
-                        
-                        if self.__click_rand[i].get(11) != None: # 캡쳐 1번째
-                            self.__cap_bnt0[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][11].x , self.__click_rand[i][11].y) )      # 캡쳐 좌표1
-                        if self.__click_rand[i].get(12) != None: # 캡쳐 2번째
-                            self.__cap_bnt1[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][12].x , self.__click_rand[i][12].y) )      # 캡쳐 좌표2
-                        
-                        if self.__click_rand[i].get(15) != None: # 드래그앤 드랍
-                            self.__dnd_bnt0[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][15].x , self.__click_rand[i][15].y) )
-                        if self.__click_rand[i].get(16) != None: # 드래그앤 드랍
-                            self.__dnd_bnt1[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][16].x , self.__click_rand[i][16].y) )
+                self.fnAfterUiLoad('load') # 피클 파일 로드후 UI 반영
+               
                
         load_btn = QPushButton('Load')
         load_btn.clicked.connect( fn_load )
-        grid.addWidget( load_btn , 0 , 1 ,1,2 )
+        grid.addWidget( load_btn , 0 , 2 ,1,1 )
+
+         
 
         def fnStart():
             '''매크로 시작 버튼'''
@@ -687,21 +673,148 @@ class MyApp(QWidget):
             '''덤프 파일 정보 가져오기.'''
             _path = 'C:\\ncnc_class\\'
             __list = os.listdir( _path )    
-            list = ['']
+            list = []
             for i in __list:
                 if i.find( 'pickle' ) != -1 :
                     list.append(i.replace('.pickle',''))
             return list        
-        file_list = getfolelist()
+        file_list = getfolelist() #파일 리스트
         self.__load_cb_ui = QComboBox()
+        self.__load_cb_ui.addItem('') # 공백파일 
+        self.__load_cb_ui.addItem('asTEMP') # 임시파일이 우선 한다.
         for i in file_list:
-            self.__load_cb_ui.addItem(i)
+            if i != 'asTEMP': 
+                self.__load_cb_ui.addItem(i)
+
+
         grid.addWidget( self.__load_cb_ui , 1 , 4,1,2 )
         
         groupbox.setFixedHeight(70)
         groupbox.setLayout(grid)
         
         return groupbox    
+
+    def fnAfterUiLoad(self, str): # 로드후 UI 함수
+        ''''''
+        print('로드후 ui 적용.')
+        print('fnAfterUiLoad',str)
+        # 로드후 ui 적용.        
+
+        #
+        # url 클릭 좌표
+        if (str == 'load'):
+            if  len(self.__url_xy) > 0: 
+                self.__url_xy_ui.setText('( x : {0} , y : {1} )'.format( self.__url_xy.x , self.__url_xy.y ) )
+        elif (str == 'new'):
+            self.__url_xy_ui.setText('( x : {0} , y : {1} )'.format( 0 , 0 ) )
+
+        #
+        # url 주소 매핑  
+        if str == 'load': 
+            if len(self.__url_path) >0 : 
+                self.__url_qe_ui.setText( self.__url_path )
+        elif str == 'new':
+            self.__url_qe_ui.setText( '' )
+        
+        
+        if str == 'load':
+            if len(self.__cvs_path) >0 : # 파일 패스
+                self.__csv_lb_ui.setText( self.__cvs_path )
+        elif str == 'new':
+            self.__csv_lb_ui.setText( '' )
+
+        for i in self.__qt_div:
+            div_nm = self.__div[i]
+            self.__qt_div[i].setCurrentText( div_nm )  # 행동구분
+            self.fnDivEvn( i , div_nm ) 
+
+            
+            if str == 'load':
+                if self.__click_xy.get(i) != None: #기본클릭 좌표 UI
+                    self.__geo_btn[i].setText( '(x:{0},y:{1})'.format(self.__click_xy[i].x , self.__click_xy[i].y) )       # 좌표 지정.
+            elif str == 'new':
+                self.__geo_btn[i].setText( '좌표지정' )       # 좌표 지정.
+            
+            
+            if str == 'load':
+                if self.__click_xy_wait.get(i) != None: #기본클릭 후 대기시간
+                    self.__geo_xy_wait[i].setText( self.__click_xy_wait[i] )
+            elif str == 'new':
+                self.__geo_xy_wait[i].setText( '0.5' )
+            
+            
+            if str == 'load':
+                if self.__click_evn.get(i) != None:  # 데이터의 컬럼 데이터 매핑
+                    self.__col[i].setCurrentText( self.__click_evn[i] )
+            elif str == 'new':
+                self.__col[i].setCurrentText( '1' )
+
+            
+            if str == 'load':
+                if ( self.__key0_wait.get(i) != None ): # 키보드 대기시간.
+                    self.__key_wait[i].setText( self.__key0_wait[i] )
+            elif str == 'new':
+                self.__key_wait[i].setText( '1' )
+                
+
+            try: #구간반복
+                if self.__rep.get(i) != None:                     
+                    if str == 'load':
+                        if self.__rep[i].get(0) != None:
+                            self.__rep_st_qe[i].setText(self.__rep[i][0])
+                    elif str == 'new':
+                        self.__rep_st_qe[i].setText('0')
+                    
+                    if str == 'load':
+                        if self.__rep[i].get(1) != None:
+                            self.__rep_ed_qe[i].setText(self.__rep[i][1])
+                    elif str == 'new':
+                        self.__rep_ed_qe[i].setText('0')
+
+                    if str == 'load':
+                        if self.__rep[i].get(2) != None:
+                            self.__rep_cnt_qe[i].setText(self.__rep[i][2])
+                    elif str == 'new':
+                        self.__rep_cnt_qe[i].setText('1')
+            except Exception as e:
+                print( 'error self.__rep.get(i) ' )
+
+            if self.__click_rand.get(i) != None: #랜덤과 캡쳐                 
+                if str == 'load':
+                    if self.__click_rand[i].get(0) != None: #0 번재 값이 있을경우
+                        self.__ran_btn0[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][0].x , self.__click_rand[i][0].y) )      # 좌표0                                    
+                
+                    if self.__click_rand[i].get(1) != None: #1 번재 값이 있을경우
+                        self.__ran_btn1[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][1].x , self.__click_rand[i][1].y) )      # 좌표1
+                
+                    if self.__click_rand[i].get(2) != None: #2 번재 값이 있을경우
+                        self.__ran_btn2[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][2].x , self.__click_rand[i][2].y) )      # 좌표2
+                
+                    if self.__click_rand[i].get(3) != None: #3 번재 값이 있을경우
+                        self.__ran_btn3[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][3].x , self.__click_rand[i][3].y) )      # 좌표3
+                
+                    if self.__click_rand[i].get(11) != None: # 캡쳐 1번째
+                        self.__cap_bnt0[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][11].x , self.__click_rand[i][11].y) )      # 캡쳐 좌표1
+                
+                    if self.__click_rand[i].get(12) != None: # 캡쳐 2번째
+                        self.__cap_bnt1[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][12].x , self.__click_rand[i][12].y) )      # 캡쳐 좌표2
+
+                    if self.__click_rand[i].get(15) != None: # 드래그앤 드랍
+                        self.__dnd_bnt0[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][15].x , self.__click_rand[i][15].y) )                
+
+                    if self.__click_rand[i].get(16) != None: # 드래그앤 드랍
+                        self.__dnd_bnt1[i].setText( '(x:{0},y:{1})'.format(self.__click_rand[i][16].x , self.__click_rand[i][16].y) )           
+            
+            if str == 'new':
+                self.__ran_btn0[i].setText( '좌표0' )      # 좌표0
+                self.__ran_btn1[i].setText( '좌표1' )      # 좌표1
+                self.__ran_btn2[i].setText( '좌표2' )      # 좌표2
+                self.__ran_btn3[i].setText( '좌표3' )      # 좌표3             
+                self.__cap_bnt0[i].setText( '시작점' )     # 캡쳐 좌표1
+                self.__cap_bnt1[i].setText( '끝점' )      # 캡쳐 좌표2
+                self.__dnd_bnt0[i].setText( '시작점' )
+                self.__dnd_bnt1[i].setText( '끝점' )                          
+                
    
     def repeat(self):
         '''테스트 구간 시작구간 종료구간 설정'''
@@ -768,7 +881,7 @@ class MyApp(QWidget):
             file_name = 'ver3_'+name
         
         # 항목 추가 함수        
-        def add_item( item ):
+        def add_item( item_t ):
             try:
                 # 모든 항목 목록 가져오기
                 item_count = self.__load_cb_ui.count()
@@ -776,8 +889,8 @@ class MyApp(QWidget):
                 for i in range(item_count):
                     item = self.__load_cb_ui.itemText(i)
                     items.append(item)                        
-                if item not in items: #중복이 있으면 추가하지 않는다.
-                    self.__load_cb_ui.addItem(item)     
+                if item_t not in items: #중복이 있으면 추가하지 않는다.
+                    self.__load_cb_ui.addItem(item_t)     
             except Exception as e:
                 print( '항목 추가 오류',e )
 
@@ -944,7 +1057,8 @@ class MyApp(QWidget):
         self.__qt_div[i] = QComboBox()        
         self.__qt_div[i].setStyleSheet(combo_style)
         self.__qt_div[i].addItems(['끝','클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','방향전환','무시','캡쳐','구간반복','D&D','랜덤대기' ])
-        self.__qt_div[i].activated[str].connect( fnDiv )           
+        self.__qt_div[i].setCurrentText( self.__div[i] )  # 행동구분        
+        self.__qt_div[i].activated[str].connect( fnDiv )                           
         hbox.addWidget( self.__qt_div[i] )        
         # 행동구분 - end
 
