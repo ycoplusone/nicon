@@ -682,7 +682,12 @@ class MyApp(QWidget):
 
             # 파일 목록만 추출
             sorted_files = [ os.path.basename(f[0])  for f in file_info]
-            return sorted_files
+            list = []
+            for i in sorted_files:
+                if i.find( 'pickle' ) != -1 :
+                    list.append(i.replace('.pickle',''))
+            return list
+        
         file_list = get_files_sorted_by_mtime() #파일 리스트
         self.__load_cb_ui = QComboBox()
         self.__load_cb_ui.addItem('') # 공백파일 
