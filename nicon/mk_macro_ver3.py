@@ -24,13 +24,14 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 class Work(QThread):
     '''
-    24.11.2 랜덤선택 , 랜덤대기 생성.
-    24.11.3 콤보박스 리스트 길이 늘리기.
-    24.11.4 저장시 특수문자일경우 오류일경우 방지.
-    24.11.5 임시 파일로 자동 저장.
+    24.11.7 로드되는 피클 정렬순서 최신 순으로 변경
     24.11.6 0~5까지 무시 기본, new 버튼 , 로드할 파일 asTEMP 우선.
+    24.11.5 임시 파일로 자동 저장.
+    24.11.4 저장시 특수문자일경우 오류일경우 방지.
+    24.11.3 콤보박스 리스트 길이 늘리기.
+    24.11.2 랜덤선택 , 랜덤대기 생성.    
     '''
-    __version   = '24.11.5' # 버전
+    __version   = '24.11.7' # 버전
 
     __url_xy            = () # url 클릭 좌표
     __url_xy_wait       = 0.5 # 0.5 초 기본 대기 url 클릭후 대기
@@ -571,8 +572,7 @@ class MyApp(QWidget):
                 if  self.__file_nm == 'asTEMP': # asTEMP는 임시 파일명이기때문에 로드 명으로 하지 않느다.
                     self.__save_file_nm_ui.setText( '' ) # 로드한 파일명 저장이름에 등록
                 else:    
-                    self.__save_file_nm_ui.setText( self.__file_nm.replace('ver3_','') ) # 로드한 파일명 저장이름에 등록
-                
+                    self.__save_file_nm_ui.setText( self.__file_nm.replace('ver3_','') ) # 로드한 파일명 저장이름에 등록                
 
                 self.__load_cb_ui.setCurrentText('') # 로드파일 초기화
                 file_path = 'C:\\ncnc_class\\{}{}'.format( self.__file_nm ,'.pickle')                
@@ -669,16 +669,21 @@ class MyApp(QWidget):
         load_lb = QLabel('로드파일 : '  )        
         grid.addWidget( load_lb , 1 , 3,1,2 )        
 
-        def getfolelist():    
-            '''덤프 파일 정보 가져오기.'''
-            _path = 'C:\\ncnc_class\\'
-            __list = os.listdir( _path )    
-            list = []
-            for i in __list:
-                if i.find( 'pickle' ) != -1 :
-                    list.append(i.replace('.pickle',''))
-            return list        
-        file_list = getfolelist() #파일 리스트
+        def get_files_sorted_by_mtime():
+            directory = "C:\\ncnc_class\\"
+            files = os.listdir(directory)
+            files = [os.path.join(directory, f) for f in files]
+
+            # 파일 정보 (파일명, 수정 시간)을 튜플로 만들어 리스트에 저장
+            file_info = [(f, os.path.getmtime(f)) for f in files]
+
+            # 수정 시간 기준으로 내림차순 정렬 (최신 파일 먼저)
+            file_info.sort(key=lambda x: x[1], reverse=True)
+
+            # 파일 목록만 추출
+            sorted_files = [ os.path.basename(f[0])  for f in file_info]
+            return sorted_files
+        file_list = get_files_sorted_by_mtime() #파일 리스트
         self.__load_cb_ui = QComboBox()
         self.__load_cb_ui.addItem('') # 공백파일 
         self.__load_cb_ui.addItem('asTEMP') # 임시파일이 우선 한다.
