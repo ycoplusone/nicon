@@ -280,9 +280,13 @@ class Work(QThread):
                         for n in range(0 , rep2 ):                                    
                             for m in range(rep0 , rep1):                                        
                                 xy_wait     = self.fnArrayGet( self.__click_xy_wait , i )
+                                if xy_wait == None:
+                                    xy_wait = 0
                                 step_second += float(xy_wait)
                     elif (self.__div.get(i) in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','방향전환','무시','캡쳐','D&D','랜덤대기'] ) :
                         xy_wait     = self.fnArrayGet( self.__click_xy_wait , i )
+                        if xy_wait == None:
+                            xy_wait = 0
                         step_second += float(xy_wait)
             
             total_cnt       = len(self.__csv_data)
