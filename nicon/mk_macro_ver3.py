@@ -24,6 +24,8 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 class Work(QThread):
     '''
+    24.11.9 시작시 소요시간 산출.
+    24.11.8 new 버튼 선택시 저장파일 이름 초기화 기능 수정.
     24.11.7 로드되는 피클 정렬순서 최신 순으로 변경
     24.11.6 0~5까지 무시 기본, new 버튼 , 로드할 파일 asTEMP 우선.
     24.11.5 임시 파일로 자동 저장.
@@ -31,7 +33,7 @@ class Work(QThread):
     24.11.3 콤보박스 리스트 길이 늘리기.
     24.11.2 랜덤선택 , 랜덤대기 생성.    
     '''
-    __version   = '24.11.7' # 버전
+    __version   = '24.11.9' # 버전
 
     __url_xy            = () # url 클릭 좌표
     __url_xy_wait       = 0.5 # 0.5 초 기본 대기 url 클릭후 대기
@@ -77,6 +79,26 @@ class Work(QThread):
         self.__seq_start         = seq_start        # 시작구간
         self.__seq_end           = seq_end          # 종료구간
         self.__rep               = rep              # 구간반복
+
+    def add_time(self , add_second):
+        """
+        시간을 더하는 함수
+        Args:
+        add_second: 더할 초
+        Returns:
+        """
+        now = datetime.now(timezone('Asia/Seoul'))
+        hour    = int(now.strftime('%H'))
+        minute  = int(now.strftime('%M'))
+        second  = int(now.strftime('%S'))    
+
+        total_seconds = (hour * 3600) + (minute * 60) + second + add_second
+        new_hour = total_seconds // 3600
+        remaining_seconds = total_seconds % 3600
+        new_minute = remaining_seconds // 60
+        new_second = remaining_seconds % 60
+        str = f'{int(new_hour)}:{int(new_minute)}:{int(new_second)}'
+        return str
 
     def fndbclick(self , xy , wait_time):
         '''더블클릭'''
@@ -233,11 +255,53 @@ class Work(QThread):
             pyautogui.dragTo(   d2.x , d2.y   , duration= 0.3)
             time.sleep( float(xy_wait) )    #대기   
 
+    def FnCalTime(self):
+        '''소요시간 계산'''
+        step_second     = 0 #1회 소요 시간
+        total_cnt       = 0 #전체 소요 횟수
+        total_second    = 0 #전체 소요 시간
+        try:
+            if self.__seq_start == 0:
+                '''url 클릭은 시작구간이 0일경우에만 수행.'''
+                step_second = self.__url_xy_wait
+                step_second += self.__url_path_wait
+
+            for i in self.__div:     
+                if i in range( self.__seq_start , self.__seq_end ) : #전체 특정 구간반복 기능
+                    ''' 설정한 구간 에서만 수행하도록 '''                            
+                    if (self.__div.get(i) == '끝') :
+                        # 끝이닷.
+                        break
+                    elif ( self.__div.get(i) == '구간반복' ):
+                        rep         = self.fnArrayGet( self.__rep           , i )                           
+                        rep0       = int( rep[0] )
+                        rep1       = int( rep[1] ) + 1
+                        rep2       = int( rep[2] )
+                        for n in range(0 , rep2 ):                                    
+                            for m in range(rep0 , rep1):                                        
+                                xy_wait     = self.fnArrayGet( self.__click_xy_wait , i )
+                                step_second += float(xy_wait)
+                    elif (self.__div.get(i) in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','방향전환','무시','캡쳐','D&D','랜덤대기'] ) :
+                        xy_wait     = self.fnArrayGet( self.__click_xy_wait , i )
+                        step_second += float(xy_wait)
+            
+            total_cnt       = len(self.__csv_data)
+            total_second    = step_second * total_cnt
+            txt             = self.add_time(total_second) # 예상 종료시간
+
+            msg             = f'1회 소요시간 :{step_second}\n 전체 횟수 : {total_cnt}\n 전체소요시간 : {total_second}\n 완료예상시간 : {txt}'
+            print('소요시간 계산 - 시작','*'*50)
+            print( msg )
+            print('소요시간 계산 - 종료','*'*50)
+            w2ji.send_telegram_message( f'mk_macro_ver {self.__version} \n {msg} \n 시작되었습니다.' )
+        except Exception as e:
+            print('시간계산오류 : ',e)
 
     
     def run(self):
         '''매크로 시작'''
         try:
+            self.FnCalTime()
             for j in self.__csv_data:
                 if self.__power == True:
                     if self.__seq_start == 0:
@@ -732,6 +796,10 @@ class MyApp(QWidget):
                 self.__csv_lb_ui.setText( self.__cvs_path )
         elif str == 'new':
             self.__csv_lb_ui.setText( '' )
+
+
+        if str == 'new':
+            self.__save_file_nm_ui.setText('') #저장파일 이름 초기화
 
         for i in self.__qt_div:
             div_nm = self.__div[i]
