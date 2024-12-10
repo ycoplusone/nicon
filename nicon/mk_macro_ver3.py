@@ -289,7 +289,7 @@ class Work(QThread):
             total_second    = step_second * total_cnt
             txt             = self.add_time(total_second) # 예상 종료시간
 
-            msg             = f'1회 소요시간 :{step_second}\n 전체 횟수 : {total_cnt}\n 전체소요시간 : {total_second}\n 완료예상시간 : {txt}'
+            msg             = f'1회 소요시간 : {step_second}\n 전체 횟수 : {total_cnt}\n 전체소요시간 : {total_second}\n 완료예상시간 : {txt}'
             print('소요시간 계산 - 시작','*'*50)
             print( msg )
             print('소요시간 계산 - 종료','*'*50)
