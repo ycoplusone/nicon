@@ -24,6 +24,7 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 class Work(QThread):
     '''
+    24.12.1 소요시간 산출 개선
     24.11.9 시작시 소요시간 산출.
     24.11.8 new 버튼 선택시 저장파일 이름 초기화 기능 수정.
     24.11.7 로드되는 피클 정렬순서 최신 순으로 변경
@@ -33,7 +34,7 @@ class Work(QThread):
     24.11.3 콤보박스 리스트 길이 늘리기.
     24.11.2 랜덤선택 , 랜덤대기 생성.    
     '''
-    __version   = '24.11.9' # 버전
+    __version   = '24.12.1' # 버전
 
     __url_xy            = () # url 클릭 좌표
     __url_xy_wait       = 0.5 # 0.5 초 기본 대기 url 클릭후 대기
@@ -53,6 +54,7 @@ class Work(QThread):
     __csv_data          = [] # 데이터 파일 배열
     __seq_start         = 0        # 시작구간
     __seq_end           = 999      # 종료구간
+    
 
     __power = False
 
@@ -60,17 +62,17 @@ class Work(QThread):
         super().__init__()
         self.__power = True     # run 매소드 루프 플래그
 
-    def fn_param(self , url_xy,url_xy_wait,url_path,url_path_wait,cvs_path,div,click_xy,click_evn,click_rand,click_xy_wait,key0,key0_wait,key1,key1_wait,csv_data , seq_start , seq_end , rep):
+    def fn_param(self , url_xy,url_xy_wait,url_path,url_path_wait,cvs_path,div,click_xy,click_evn,click_rand,click_xy_wait,key0,key0_wait,key1,key1_wait,csv_data , seq_start , seq_end , rep , file_nm):
         self.__url_xy            = url_xy           # url 클릭 좌표
         self.__url_xy_wait       = url_xy_wait      # 0.5 초 기본 대기 url 클릭후 대기
-        self.__url_path          = url_path         #url 주소
+        self.__url_path          = url_path         # url 주소
         self.__url_path_wait     = url_path_wait    # 2초 기본 대기 url 주소 입력후 대기시간
         self.__cvs_path          = cvs_path         # cvs 파일 위치
-        self.__div               = div              #선택값    
-        self.__click_xy          = click_xy         #클릭    
-        self.__click_evn         = click_evn        #클릭   복사 컬럼 위치 선택후 붙여넣기
-        self.__click_rand        = click_rand       #랜덤클릭
-        self.__click_xy_wait     = click_xy_wait    #클릭 실행후 대기시간    
+        self.__div               = div              # 선택값    
+        self.__click_xy          = click_xy         # 클릭    
+        self.__click_evn         = click_evn        # 클릭   복사 컬럼 위치 선택후 붙여넣기
+        self.__click_rand        = click_rand       # 랜덤클릭
+        self.__click_xy_wait     = click_xy_wait    # 클릭 실행후 대기시간    
         self.__key0              = key0             # 키보드0 단일키 하나
         self.__key0_wait         = key0_wait        # 키보드0 대기
         self.__key1              = key1             # 키보드1 복합키 두개 - hot key 하기
@@ -79,6 +81,8 @@ class Work(QThread):
         self.__seq_start         = seq_start        # 시작구간
         self.__seq_end           = seq_end          # 종료구간
         self.__rep               = rep              # 구간반복
+        self.__file_nm           = file_nm          # 파일명
+
 
     def add_time(self , add_second):
         """
@@ -130,7 +134,6 @@ class Work(QThread):
         '''복사 타이핑'''
         for n in str:
             pyautogui.press(n)
-
     
     def fnkey(self , str , cnt):
         '''키 입력'''
@@ -254,65 +257,22 @@ class Work(QThread):
             #pyautogui.drag(     d1.x , d1.y   , duration= 0.25)
             pyautogui.dragTo(   d2.x , d2.y   , duration= 0.3)
             time.sleep( float(xy_wait) )    #대기   
-
-    def FnCalTime(self):
-        '''소요시간 계산'''
-        step_second     = 0 #1회 소요 시간
-        total_cnt       = 0 #전체 소요 횟수
-        total_second    = 0 #전체 소요 시간
-        try:
-            if self.__seq_start == 0:
-                '''url 클릭은 시작구간이 0일경우에만 수행.'''
-                step_second = self.__url_xy_wait
-                step_second += self.__url_path_wait
-
-            for i in self.__div:     
-                if i in range( self.__seq_start , self.__seq_end ) : #전체 특정 구간반복 기능
-                    ''' 설정한 구간 에서만 수행하도록 '''                            
-                    if (self.__div.get(i) == '끝') :
-                        # 끝이닷.
-                        break
-                    elif ( self.__div.get(i) == '구간반복' ):
-                        rep         = self.fnArrayGet( self.__rep           , i )                           
-                        rep0       = int( rep[0] )
-                        rep1       = int( rep[1] ) + 1
-                        rep2       = int( rep[2] )
-                        for n in range(0 , rep2 ):                                    
-                            for m in range(rep0 , rep1):                                        
-                                xy_wait     = self.fnArrayGet( self.__click_xy_wait , i )
-                                if xy_wait == None:
-                                    xy_wait = 0
-                                step_second += float(xy_wait)
-                    elif (self.__div.get(i) in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','방향전환','무시','캡쳐','D&D','랜덤대기'] ) :
-                        xy_wait     = self.fnArrayGet( self.__click_xy_wait , i )
-                        if xy_wait == None:
-                            xy_wait = 0
-                        step_second += float(xy_wait)
-            
-            total_cnt       = len(self.__csv_data)
-            total_second    = step_second * total_cnt
-            txt             = self.add_time(total_second) # 예상 종료시간
-
-            msg             = f'1회 소요시간 : {step_second}\n 전체 횟수 : {total_cnt}\n 전체소요시간 : {total_second}\n 완료예상시간 : {txt}'
-            print('소요시간 계산 - 시작','*'*50)
-            print( msg )
-            print('소요시간 계산 - 종료','*'*50)
-            w2ji.send_telegram_message( f'mk_macro_ver {self.__version} \n {msg} \n 시작되었습니다.' )
-        except Exception as e:
-            print('시간계산오류 : ',e)
-
     
     def run(self):
         '''매크로 시작'''
-        try:
-            self.FnCalTime()
+        try:            
+            _Msg_Flag   = True # 소요시간 관련 메시지 발송 체크 
+            asTime      = time.time() # 시작 시간
+            useTime     = 0 # 1회 소요 시간
+            totalCnt    = len(self.__csv_data) # 전체 횟수
+            totalTime   = 0 # 전체 소요 시간
+            predictTime = '' # 예상 종료 시간
             for j in self.__csv_data:
                 if self.__power == True:
                     if self.__seq_start == 0:
                         '''url 클릭은 시작구간이 0일경우에만 수행.'''
                         self.fnclick( self.__url_xy , self.__url_xy_wait ) #클릭
-                        self.fnUrl( self.__url_path , self.__url_path_wait ) #url 처리                    
-
+                        self.fnUrl( self.__url_path , self.__url_path_wait ) #url 처리    
                     _j = j            
                     print('*'*100)                                
                     print('처리 데이터 : ', _j)
@@ -321,6 +281,18 @@ class Work(QThread):
                         if i in range( self.__seq_start , self.__seq_end ) : #전체 특정 구간반복 기능
                             ''' 설정한 구간 에서만 수행하도록 '''                            
                             if (self.__div.get(i) == '끝') :
+                                if _Msg_Flag:
+                                    beTime      = time.time()
+                                    useTime     = beTime - asTime      # 1회 소요 시간
+                                    totalTime   = useTime * totalCnt   # 전체 소요 시간 산출
+                                    predictTime = self.add_time(totalTime)        # 예상 종료 시간 산출
+                                    msg         = f'1회 소요시간 : {round(useTime,2)}\n 전체 횟수 : {totalCnt}\n 전체소요시간 : {round(totalTime,2)}\n 완료예상시간 : {predictTime}\n 작업명:{self.__file_nm}'
+                                    print('소요시간 산출 - 시작','*'*20)
+                                    print(beTime , asTime , useTime)
+                                    print(msg)
+                                    print('소요시간 산출 - 종료','*'*20)
+                                    w2ji.send_telegram_message( f'Version {self.__version}\n {msg}\n 시작되었습니다.' )
+                                    _Msg_Flag   = False
                                 # 끝이닷.
                                 break
                             elif ( self.__div.get(i) == '구간반복' ):
@@ -344,7 +316,7 @@ class Work(QThread):
             self.__power = False
         
         if self.__power == True:
-            w2ji.send_telegram_message( f'mk_macro_ver {self.__version} 가 완료 되었습니다.' )
+            w2ji.send_telegram_message( f'Version {self.__version}\n 작업명:{self.__file_nm}\n 완료 되었습니다.' )
             pyautogui.alert('완료 되었습니다.')
             
         else :
@@ -685,7 +657,8 @@ class MyApp(QWidget):
         def fnStart():
             '''매크로 시작 버튼'''
             start_btn.setEnabled(False)
-            csv_data = self.readfile( self.__cvs_path )                        
+            csv_data = self.readfile( self.__cvs_path )   
+            file_name   = self.__save_file_nm_ui.text() # 파일명                    
             self.__work = Work()
             self.__work.fn_param( 
                 self.__url_xy
@@ -706,6 +679,7 @@ class MyApp(QWidget):
                 , self.__seq_start  # 시작구간
                 , self.__seq_end    # 종료구간
                 , self.__rep        # 구간반복
+                , file_name         # 파일명
             )
             self.__work.start()
         
