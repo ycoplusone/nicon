@@ -257,7 +257,6 @@ class Work(QThread):
             d1 = rand.get(15)
             d2 = rand.get(16)     
             pyautogui.moveTo( d1 )          # 마우스 이동     
-            #pyautogui.drag(     d1.x , d1.y   , duration= 0.25)
             pyautogui.dragTo(   d2.x , d2.y   , duration= 0.3)
             time.sleep( float(xy_wait) )    #대기   
     
@@ -269,7 +268,7 @@ class Work(QThread):
             useTime     = 0 # 1회 소요 시간
             totalCnt    = len(self.__csv_data) # 전체 횟수
             totalTime   = 0 # 전체 소요 시간
-            predictTime = '' # 예상 종료 시간
+            predictTime = '' # 예상 종료 시간            
             for j in self.__csv_data:
                 if self.__power == True:
                     if self.__seq_start == 0:
@@ -289,7 +288,7 @@ class Work(QThread):
                                     useTime     = beTime - asTime      # 1회 소요 시간
                                     totalTime   = useTime * totalCnt   # 전체 소요 시간 산출
                                     predictTime = self.add_time(totalTime)        # 예상 종료 시간 산출
-                                    msg         = f'1회 소요시간 : {round(useTime,2)}\n 전체 횟수 : {totalCnt}\n 전체소요시간 : {round(totalTime,2)}\n 완료예상시간 : {predictTime}\n 작업명:{self.__file_nm}'
+                                    msg         = f'1회 소요시간 : {round(useTime,2)}초 \n 전체횟수 : {totalCnt}건 \n 전체소요시간 : {round(totalTime,2)}초 \n 예상시간 : {predictTime}\n 작업명 : {self.__file_nm}'
                                     print('소요시간 산출 - 시작','*'*20)
                                     print(beTime , asTime , useTime)
                                     print(msg)
@@ -319,7 +318,7 @@ class Work(QThread):
             self.__power = False
         
         if self.__power == True:
-            w2ji.send_telegram_message( f'Version {self.__version}\n 작업명:{self.__file_nm}\n 완료 되었습니다.' )
+            w2ji.send_telegram_message( f'Version {self.__version}\n 예상시간 : {predictTime} \n 작업명 : {self.__file_nm}\n 완료되었습니다.' )
             pyautogui.alert('완료 되었습니다.')
             
         else :
