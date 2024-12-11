@@ -24,6 +24,7 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 class Work(QThread):
     '''
+    24.12.2 클릭 후 기본 대기 시간을 변수화 하여 적용 기존 0.5 -> 0.1
     24.12.1 소요시간 산출 개선
     24.11.9 시작시 소요시간 산출.
     24.11.8 new 버튼 선택시 저장파일 이름 초기화 기능 수정.
@@ -34,7 +35,7 @@ class Work(QThread):
     24.11.3 콤보박스 리스트 길이 늘리기.
     24.11.2 랜덤선택 , 랜덤대기 생성.    
     '''
-    __version   = '24.12.1' # 버전
+    __version   = '24.12.2' # 버전
 
     __url_xy            = () # url 클릭 좌표
     __url_xy_wait       = 0.5 # 0.5 초 기본 대기 url 클릭후 대기
@@ -54,6 +55,8 @@ class Work(QThread):
     __csv_data          = [] # 데이터 파일 배열
     __seq_start         = 0        # 시작구간
     __seq_end           = 999      # 종료구간
+
+    __waitTime          = 0.1   # 기본 대기 시간. 각 행동당 기본 대시 시간을 의미함.
     
 
     __power = False
@@ -123,7 +126,7 @@ class Work(QThread):
         pyperclip.copy( url )
         pyautogui.hotkey('ctrl', 'v')   
         pyautogui.hotkey('enter')         
-        time.sleep( (wait_time+4) )         
+        time.sleep( (wait_time+2.5) )         
     
     def fnpaste(self , str ):
         '''복사 붙여넣기'''        
@@ -166,62 +169,62 @@ class Work(QThread):
         print('\t 행번호 : ', i ,' , 작업구분 : ', step_name )    
         if ( step_name == '클릭') and ( self.__power == True ):
             for j in range(0, int(evn)): #반복 실행한다.
-                self.fnclick( xy , 0.5 ) #클릭
+                self.fnclick( xy , self.__waitTime ) #클릭
             time.sleep( float(xy_wait) ) #대기
 
         elif ( step_name == '붙여넣기') and ( self.__power == True ):
-            self.fnclick( xy , 0.5 ) #클릭
+            self.fnclick( xy , self.__waitTime ) #클릭
             n = int(evn)                    
             self.fnpaste( _j[n] ) # 붙여넣기
             time.sleep( float(xy_wait) ) #대기
 
         elif ( step_name == '글씨쓰기') and ( self.__power == True ):
-            self.fnclick( xy , 0.5 ) #클릭
+            self.fnclick( xy , self.__waitTime ) #클릭
             n = int(evn)                    
             self.fnwrite( _j[n] ) #타이핑
             time.sleep( float(xy_wait) ) #대기
         elif ( step_name == '선택하기') and ( self.__power == True ):
-            self.fnclick( xy , 0.5 ) #클릭
+            self.fnclick( xy , self.__waitTime ) #클릭
             r = random.randrange(0,3)
             r0 = rand.get(0)
             r1 = rand.get(1)
             r2 = rand.get(2)
             r3 = rand.get(3)
             if r == 0:
-                self.fnclick( r0 , 0.5 ) #클릭   
+                self.fnclick( r0 , self.__waitTime ) #클릭   
             elif r == 1:
-                self.fnclick( r1 , 0.5 ) #클릭   
+                self.fnclick( r1 , self.__waitTime ) #클릭   
             elif r == 2:
-                self.fnclick( r2 , 0.5 ) #클릭   
+                self.fnclick( r2 , self.__waitTime ) #클릭   
             elif r == 3:
-                self.fnclick( r3 , 0.5 ) #클릭   
+                self.fnclick( r3 , self.__waitTime ) #클릭   
             time.sleep( float(xy_wait) ) #대기
         elif ( step_name == '중복선택') and ( self.__power == True ):
-            self.fnclick( xy , 0.5 ) #클릭   
+            self.fnclick( xy , self.__waitTime ) #클릭   
             r0 = rand.get(0)
             r1 = rand.get(1)
             r2 = rand.get(2)
             r3 = rand.get(3)                                            
-            self.fnclick( r0 , 0.5 ) #클릭                           
-            self.fnclick( r1 , 0.5 ) #클릭   
-            self.fnclick( r2 , 0.5 ) #클릭                           
-            self.fnclick( r3 , 0.5 ) #클릭   
+            self.fnclick( r0 , self.__waitTime ) #클릭                           
+            self.fnclick( r1 , self.__waitTime ) #클릭   
+            self.fnclick( r2 , self.__waitTime ) #클릭                           
+            self.fnclick( r3 , self.__waitTime ) #클릭   
             time.sleep( float(xy_wait) ) #대기 
         elif ( step_name == '랜덤선택') and ( self.__power == True ):
-            self.fnclick( xy , 0.5 ) #클릭
+            self.fnclick( xy , self.__waitTime ) #클릭
             numbers = [0,1,2,3]
             n = random.sample(numbers,4)            
             r0 = rand.get(n[0])
             r1 = rand.get(n[1])
             r2 = rand.get(n[2])
             r3 = rand.get(n[3])
-            self.fnclick( r0 , 0.5 ) #클릭   
-            self.fnclick( r1 , 0.5 ) #클릭   
-            self.fnclick( r2 , 0.5 ) #클릭   
-            self.fnclick( r3 , 0.5 ) #클릭 
+            self.fnclick( r0 , self.__waitTime ) #클릭   
+            self.fnclick( r1 , self.__waitTime ) #클릭   
+            self.fnclick( r2 , self.__waitTime ) #클릭   
+            self.fnclick( r3 , self.__waitTime ) #클릭 
             time.sleep( float(xy_wait) ) #대기
         elif ( step_name == '방향전환') and ( self.__power == True ):
-            self.fnclick( xy , 0.1 ) #클릭                        
+            self.fnclick( xy , self.__waitTime ) #클릭                        
             self.fnkey( key0 , int(key0_wait) )                        
             time.sleep( float(xy_wait) ) #대기
 
