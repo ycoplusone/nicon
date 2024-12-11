@@ -288,7 +288,11 @@ class Work(QThread):
                                     useTime     = beTime - asTime      # 1회 소요 시간
                                     totalTime   = useTime * totalCnt   # 전체 소요 시간 산출
                                     predictTime = self.add_time(totalTime)        # 예상 종료 시간 산출
-                                    msg         = f'1회 소요시간 : {round(useTime,2)}초 \n 전체횟수 : {totalCnt}건 \n 전체소요시간 : {round(totalTime,2)}초 \n 예상시간 : {predictTime}\n 작업명 : {self.__file_nm}'
+                                    _second      = int(totalTime%60)         # 초에서 60으로 나눈 나머지
+                                    _minute      = int((totalTime//60)%60)   # 초를 분으로 환산하여 60으로 나눈 나머지
+                                    _hour        = int(totalTime//60//60)    # 초를 분으로 환산하고, 그 분을 시간으로 환산한 몫
+
+                                    msg         = f'1회 소요시간 : {round(useTime,2)}초 \n 전체횟수 : {totalCnt}건 \n 전체소요시간 : {_hour}:{_minute}:{_second} \n 예상시간 : {predictTime}\n 작업명 : {self.__file_nm}'
                                     print('소요시간 산출 - 시작','*'*20)
                                     print(beTime , asTime , useTime)
                                     print(msg)
