@@ -24,6 +24,7 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 class Work(QThread):
     '''
+    24.12.3 기본 대기 시간을 기존 0.5 -> 0.1 변경.
     24.12.2 클릭 후 기본 대기 시간을 변수화 하여 적용 기존 0.5 -> 0.1
     24.12.1 소요시간 산출 개선
     24.11.9 시작시 소요시간 산출.
@@ -35,7 +36,7 @@ class Work(QThread):
     24.11.3 콤보박스 리스트 길이 늘리기.
     24.11.2 랜덤선택 , 랜덤대기 생성.    
     '''
-    __version   = '24.12.2' # 버전
+    __version   = '24.12.3' # 버전
 
     __url_xy            = () # url 클릭 좌표
     __url_xy_wait       = 0.5 # 0.5 초 기본 대기 url 클릭후 대기
@@ -141,6 +142,7 @@ class Work(QThread):
     def fnkey(self , str , cnt):
         '''키 입력'''
         pyautogui.press( str , presses = cnt , interval=0.2)
+        
 
     def fnArrayGet(self , arr , pos):
         '''배열 검색후 리턴'''      
@@ -162,7 +164,7 @@ class Work(QThread):
         rand        = self.fnArrayGet( self.__click_rand    , i )
         xy_wait     = self.fnArrayGet( self.__click_xy_wait , i )
         key0        = self.fnArrayGet( self.__key0          , i )
-        key0_wait   = self.fnArrayGet( self.__key0_wait     , i )
+        key0_wait   = self.fnArrayGet( self.__key0_wait     , i )  #키 입력후 대기 아님 키 입력 횟수 이다.
         key1        = self.fnArrayGet( self.__key1          , i )
         key1_wait   = self.fnArrayGet( self.__key1_wait     , i )
         
@@ -227,6 +229,7 @@ class Work(QThread):
             self.fnclick( xy , self.__waitTime ) #클릭                        
             self.fnkey( key0 , int(key0_wait) )                        
             time.sleep( float(xy_wait) ) #대기
+            time.sleep( 0.5 )
 
         elif ( step_name == '무시') and ( self.__power == True ):
             '''행동 없음.'''
@@ -287,7 +290,7 @@ class Work(QThread):
                                     beTime      = time.time()
                                     useTime     = beTime - asTime      # 1회 소요 시간
                                     totalTime   = useTime * totalCnt   # 전체 소요 시간 산출
-                                    predictTime = self.add_time(totalTime)        # 예상 종료 시간 산출
+                                    predictTime = self.add_time( (totalTime-useTime) )        # 예상 종료 시간 산출
                                     _second      = int(totalTime%60)         # 초에서 60으로 나눈 나머지
                                     _minute      = int((totalTime//60)%60)   # 초를 분으로 환산하여 60으로 나눈 나머지
                                     _hour        = int(totalTime//60//60)    # 초를 분으로 환산하고, 그 분을 시간으로 환산한 몫
@@ -358,7 +361,7 @@ class MyApp(QWidget):
     __click_xy_wait     = {}  # 클릭 실행후 대기시간    
     __click_evn         = {}  # 클릭   복사 컬럼 위치 선택후 붙여넣기
     __key0              = {}  # 키보드0 단일키 하나
-    __key0_wait         = {}  # 키보드0 대기
+    __key0_wait         = {}  # 키보드0 키입력 횟수이다.
     __key1              = {}  # 키보드1 복합키 두개 - hot key 하기
     __key1_wait         = {}  # 키보드1 대기
     __rep               = {}  # 구간반복 배열
@@ -417,7 +420,7 @@ class MyApp(QWidget):
         self.__click_xy_wait     = {}  # 클릭 실행후 대기시간    
         self.__click_evn         = {}  # 클릭   복사 컬럼 위치 선택후 붙여넣기
         self.__key0              = {}  # 키보드0 단일키 하나
-        self.__key0_wait         = {}  # 키보드0 대기
+        self.__key0_wait         = {}  # 키보드0 입력 횟수
         self.__key1              = {}  # 키보드1 복합키 두개 - hot key 하기
         self.__key1_wait         = {}  # 키보드1 대기
         self.__rep               = {}  # 구간반복 배열
@@ -802,7 +805,7 @@ class MyApp(QWidget):
                 if self.__click_xy_wait.get(i) != None: #기본클릭 후 대기시간
                     self.__geo_xy_wait[i].setText( self.__click_xy_wait[i] )
             elif str == 'new':
-                self.__geo_xy_wait[i].setText( '0.5' )
+                self.__geo_xy_wait[i].setText( '0.1' )
             
             
             if str == 'load':
@@ -1239,7 +1242,7 @@ class MyApp(QWidget):
         # 클릭 의 대기시간 - begin
         self.__geo_xy_wait[i] = QLineEdit()     
         self.__geo_xy_wait[i].setStyleSheet( self.__lb_style )
-        self.__geo_xy_wait[i].setText('0.5')      
+        self.__geo_xy_wait[i].setText('0.1')      
         self.__geo_xy_wait[i].setFixedWidth(50)
         self.__geo_xy_wait[i].setVisible( False )
         self.__geo_xy_wait[i].textChanged.connect( fnGeo_xy_wait )
