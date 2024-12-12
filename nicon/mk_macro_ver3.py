@@ -276,8 +276,8 @@ class Work(QThread):
                 if self.__power == True:
                     if self.__seq_start == 0:
                         '''url 클릭은 시작구간이 0일경우에만 수행.'''
-                        self.fnclick( self.__url_xy , self.__url_xy_wait ) #클릭
-                        self.fnUrl( self.__url_path , self.__url_path_wait ) #url 처리    
+                        self.fnclick(   self.__url_xy   , self.__url_xy_wait    ) #클릭
+                        self.fnUrl(     self.__url_path , self.__url_path_wait  ) #url 처리    
                     _j = j            
                     print('*'*100)                                
                     print('처리 데이터 : ', _j)
@@ -295,7 +295,7 @@ class Work(QThread):
                                     _minute      = int((totalTime//60)%60)   # 초를 분으로 환산하여 60으로 나눈 나머지
                                     _hour        = int(totalTime//60//60)    # 초를 분으로 환산하고, 그 분을 시간으로 환산한 몫
 
-                                    msg         = f'1회 소요시간 [{round(useTime,2)}초] \n 전체횟수 [{totalCnt}건] \n 전체소요시간 [{_hour}:{_minute}:{_second}] \n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]'
+                                    msg         = f'1회 소요시간 [{round(useTime,2)}초]\n 전체횟수 [{totalCnt}건]\n 전체소요시간 [{_hour}:{_minute}:{_second}]\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]'
                                     print('소요시간 산출 - 시작','*'*20)
                                     print(beTime , asTime , useTime)
                                     print(msg)
@@ -325,7 +325,7 @@ class Work(QThread):
             self.__power = False
         
         if self.__power == True:
-            w2ji.send_telegram_message( f'Version {self.__version}\n 예상시간 [{predictTime}] \n 작업명 [{self.__file_nm}]\n 완료되었습니다.' )
+            w2ji.send_telegram_message( f'Version {self.__version}\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n 완료되었습니다.' )
             pyautogui.alert('완료 되었습니다.')
             
         else :
