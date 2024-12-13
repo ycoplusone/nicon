@@ -24,6 +24,7 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 class Work(QThread):
     '''
+    24.12.4 url 입력 기본대기 시간 2-> 1 , @ 대기시간 2.5 -> 1.5 변경
     24.12.3 기본 대기 시간을 기존 0.5 -> 0.1 변경.
     24.12.2 클릭 후 기본 대기 시간을 변수화 하여 적용 기존 0.5 -> 0.1
     24.12.1 소요시간 산출 개선
@@ -36,12 +37,12 @@ class Work(QThread):
     24.11.3 콤보박스 리스트 길이 늘리기.
     24.11.2 랜덤선택 , 랜덤대기 생성.    
     '''
-    __version   = '24.12.3' # 버전
+    __version   = '24.12.4' # 버전
 
     __url_xy            = () # url 클릭 좌표
     __url_xy_wait       = 0.5 # 0.5 초 기본 대기 url 클릭후 대기
     __url_path          = '' #url 주소
-    __url_path_wait     = 2 # 2초 기본 대기 url 주소 입력후 대기시간
+    __url_path_wait     = 1 # 2초 기본 대기 url 주소 입력후 대기시간
     __cvs_path          = '' # cvs 파일 위치
     __div               = {} #선택값    
     __click_xy          = {} #클릭    
@@ -127,7 +128,7 @@ class Work(QThread):
         pyperclip.copy( url )
         pyautogui.hotkey('ctrl', 'v')   
         pyautogui.hotkey('enter')         
-        time.sleep( (wait_time+2.5) )         
+        time.sleep( (wait_time+1.5) )         
     
     def fnpaste(self , str ):
         '''복사 붙여넣기'''        
@@ -327,11 +328,9 @@ class Work(QThread):
         if self.__power == True:
             w2ji.send_telegram_message( f'Version {self.__version}\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n 완료되었습니다.' )
             pyautogui.alert('완료 되었습니다.')
-            
+            self.__power = False            
         else :
             pyautogui.alert('정지 되었습니다.')
-                    
-  
         
 
     def stop(self):
@@ -761,7 +760,6 @@ class MyApp(QWidget):
         print('fnAfterUiLoad',str)
         # 로드후 ui 적용.        
 
-        #
         # url 클릭 좌표
         if (str == 'load'):
             if  len(self.__url_xy) > 0: 
@@ -880,7 +878,6 @@ class MyApp(QWidget):
                 self.__dnd_bnt0[i].setText( '시작점' )
                 self.__dnd_bnt1[i].setText( '끝점' )                          
                 
-   
     def repeat(self):
         '''테스트 구간 시작구간 종료구간 설정'''
         groupbox = QGroupBox('')
@@ -925,7 +922,7 @@ class MyApp(QWidget):
         groupbox.setLayout(grid)        
         # 시작구간 , 끝구간 지정. - end
         return groupbox        
-    
+
     def fnSave(self):
         '''통합 저장'''
         file_name = self.__save_file_nm_ui.text()        
