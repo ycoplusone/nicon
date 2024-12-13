@@ -19,7 +19,9 @@ import re
 import mouse        # 20241015 마우스 이벤트 pip install mouse
 import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
-
+'''
+매크로 작업 생성및 단일 수행 프로그램
+'''
 
 
 class Work(QThread):
@@ -301,7 +303,7 @@ class Work(QThread):
                                     print(beTime , asTime , useTime)
                                     print(msg)
                                     print('소요시간 산출 - 종료','*'*20)
-                                    w2ji.send_telegram_message( f'Version {self.__version}\n {msg}\n 시작되었습니다.' )
+                                    w2ji.send_telegram_message( f'Version {self.__version}\n {msg}\n 시작되었습니다.' , 'macro' )
                                     _Msg_Flag   = False
                                 # 끝이닷.
                                 break
@@ -326,7 +328,7 @@ class Work(QThread):
             self.__power = False
         
         if self.__power == True:
-            w2ji.send_telegram_message( f'Version {self.__version}\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n 완료되었습니다.' )
+            w2ji.send_telegram_message( f'Version {self.__version}\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n 완료되었습니다.' , 'macro' )
             pyautogui.alert('완료 되었습니다.')
             self.__power = False            
         else :
