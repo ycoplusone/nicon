@@ -74,7 +74,6 @@ def into_rename_barcode():
                 __img = cv2.imdecode(__n, cv2.IMREAD_COLOR)
                 __barcode = decode(__img)      
                 __rename_file_nm=dirname+'\\'+'{0}_{1}{2}'.format(__barcode,uniq,__exc)
-                #__rename_file_nm = dirname+'\\'+__barcode+'_'+str(uniq)+__exc
                 os.rename( ii , __rename_file_nm )
                 uniq +=1
 
@@ -102,11 +101,11 @@ def init_fold( _dbconn ):
                 default_fold_nm = base_dttm+(repr(cnt).zfill(2))
                 prod_fold       = base_dttm+(repr(cnt).zfill(2))
                 v_range = 0
-                # 15개씩 볼더 복사 
-                if len(file_names) >= 15:
-                    default_fold_nm = dirname+'\\'+default_fold_nm+'_15' 
-                    prod_fold       = prod_fold+'_15' 
-                    v_range = 15       
+                # 10개씩 볼더 복사 
+                if len(file_names) >= 10:
+                    default_fold_nm = dirname+'\\'+default_fold_nm+'_10' 
+                    prod_fold       = prod_fold+'_10' 
+                    v_range = 10       
                 else :
                     default_fold_nm = dirname+'\\'+default_fold_nm+'_'+repr( len(file_names) ).zfill(2)
                     prod_fold       = prod_fold+'_'+repr( len(file_names) ).zfill(2)
@@ -124,7 +123,8 @@ def init_fold( _dbconn ):
                     dd.insert_nicon_barcode(param)                    
                     shutil.move(file_names[0] , default_fold_nm )
                     del file_names[0]
-                    del file_nm[0]        
+                    del file_nm[0]    
+                        
                 cnt = cnt+ 1
     except Exception as e:
         print('init_fold : ',e)
@@ -142,17 +142,22 @@ def getFileList( _path ):
     list = [ _path+'\\'+X for X in __list ]
     return list
 
-def send_telegram_message( message ):
+def send_telegram_message( message , div='' ):
     '''텔러그램 판매 발송
     '''
     token = '6173895901:AAH54vZaLnXXZq9hngplJNeEJIDEzH2azbc' 
     '''
-    -1001813504824 : 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
+    -1001813504824 : 니콘방 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
+    -1002336115183 : 매크로 봇방
     '''
+    roomid = '-1001813504824'       # 니콘방
+    if div == 'macro':
+        roomid = '-1002336115183'   # 메클방
+
     base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
     try: 
         url = 'https://api.telegram.org/bot{}/sendMessage'.format(token)
-        data = {'chat_id': '-1001813504824', 'text': base_dttm+'\n'+message}
+        data = {'chat_id' : roomid , 'text' : base_dttm+'\n'+message}
         response = requests.post(url, data=data)
         time.sleep(0.5)
         print( 'send_telegram_message : ' , response.json() )               
