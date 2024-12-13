@@ -483,8 +483,7 @@ class MyApp(QWidget):
             file_lists.append( self.__load_cb_ui9.currentText() )       
             for list in file_lists:
                 if list != '':
-                    print('*'*50)                    
-                    print('시작 파일명 : ',list,'*'*50)                    
+                    print('[',list,']','시작','>'*50)                    
                     self.fn_load(list) # 데이터 로드
                     csv_data    = self.readfile( self.__cvs_path )
                     file_name   = list # 파일명
@@ -511,13 +510,12 @@ class MyApp(QWidget):
                         , file_name         # 파일명
                     )
                     self.__work.start()                                     
-                    #print('>>>'*10,'대기 시작',time.time())
                     self.__work.wait()
-                    print('종료 파일명 : ',list,'*'*50)                    
-                    #print('>>>'*10,'대기 종료',time.time())
+                    print('[',list,']','종료','>'*50)                                    
+
             
             pyautogui.alert('연속 실행이 완료 되었습니다.')
-            print('종료','='*50)
+            print('종료','>'*50)
             
        
         def fnStop():
