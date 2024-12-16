@@ -252,7 +252,10 @@ class Work(QThread):
             useTime     = 0 # 1회 소요 시간
             totalCnt    = len(self.__csv_data) # 전체 횟수
             totalTime   = 0 # 전체 소요 시간
-            predictTime = '' # 예상 종료 시간            
+            predictTime = '' # 예상 종료 시간 
+            _second     = ''          
+            _minute     = '' 
+            _hour       = ''
             for j in self.__csv_data:
                 if self.__power == True:
                     if self.__seq_start == 0:
@@ -281,7 +284,7 @@ class Work(QThread):
                                     print(beTime , asTime , useTime)
                                     print(msg)
                                     print('소요시간 산출 - 종료','*'*20)
-                                    w2ji.send_telegram_message( f'{self.__title_nm}\n {msg}\n 시작되었습니다.' , 'macro' )
+                                    w2ji.send_telegram_message( f'[{self.__title_nm}]\n {msg}\n ===== 시작 =====' , 'macro' )
                                     _Msg_Flag   = False
                                 # 끝이닷.
                                 break
@@ -305,15 +308,17 @@ class Work(QThread):
             print('정지 합니다. error 발생 : ',e)                                        
             self.__power = False
         
-        if self.__power == True:
-            w2ji.send_telegram_message( f'{self.__title_nm}\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n 완료되었습니다.' , 'macro' )
-            pyautogui.alert('완료 되었습니다.')
+        if self.__power == True: # 완료처리
+            w2ji.send_telegram_message( f'[{self.__title_nm}]\n 전체소요시간 [{_hour}:{_minute}:{_second}]\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n ===== 완료 =====' , 'macro' )            
+            if self.__title_nm == 'Soldier':
+                pyautogui.alert('========== 완료 ==========')
+
             self.__power = False            
         else :
-            pyautogui.alert('정지 되었습니다.')
+            print('정지 되었습니다')
         
 
     def stop(self):
         # 멀티쓰레드를 종료하는 메소드
-        print('stop ','*'*50)
+        print('stop ','*'*50)        
         self.__power = False
