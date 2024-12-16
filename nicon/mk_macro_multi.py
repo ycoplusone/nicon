@@ -209,9 +209,8 @@ class MyApp(QWidget):
                     self.__work.start()                                     
                     self.__work.wait()
                     print('[',list,']','종료','>'*50)                                    
-
             
-            pyautogui.alert('연속 실행이 완료 되었습니다.')
+            pyautogui.alert('===== 연속 실행이 완료 되었습니다 =====')
             print('종료','>'*50)
                 
             

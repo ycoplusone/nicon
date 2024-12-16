@@ -22,7 +22,7 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 '''
 매크로 작업 생성및 단일 수행 프로그램
-    25.0.1 work 클래스 통합작업
+    사과
     24.12.4 url 입력 기본대기 시간 2-> 1 , @ 대기시간 2.5 -> 1.5 변경
     24.12.3 기본 대기 시간을 기존 0.5 -> 0.1 변경.
     24.12.2 클릭 후 기본 대기 시간을 변수화 하여 적용 기존 0.5 -> 0.1
@@ -34,6 +34,7 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
     24.11.5 임시 파일로 자동 저장.
     24.11.4 저장시 특수문자일경우 오류일경우 방지.
     24.11.3 콤보박스 리스트 길이 늘리기.
+
     24.11.2 랜덤선택 , 랜덤대기 생성.    
 '''
 
@@ -203,10 +204,10 @@ class MyApp(QWidget):
 
     def keyboard_event(self , evt):
         try:
-            if ( evt.name == 'esc' ):   # esc키로 실행 정지 시킨다.
+            if ( evt.name == 'esc' ):           # esc키로 실행 정지 시킨다.
                 self.__start_btn.setEnabled(True)  
                 self.__work.stop()
-                self.__work.terminate() # 강제 종료
+                self.__work.terminate()         # 강제 종료                
         except Exception as e:
             print(f'keyboard_event => ')
 
@@ -404,6 +405,8 @@ class MyApp(QWidget):
                 , self.__step_wait_time # 대기 시간 문자열입니다.
             )
             self.__work.start()
+            #self.__work.wait()
+            #pyautogui.alert('완료 되었습니다')
         
         def fnStop():
             '''매크로 종료 버튼'''
