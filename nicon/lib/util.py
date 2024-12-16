@@ -151,14 +151,10 @@ def send_telegram_message( message , div='' ):
     -1002336115183 : 매크로 봇방
     '''
     try: 
-        roomid = '-1001813504824'       # 니콘방
-        if div == 'macro':
-            roomid = '-1002336115183'   # 메클방
-
         base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
     
         url = 'https://api.telegram.org/bot{}/sendMessage'.format(token)
-        data = {'chat_id' : roomid , 'text' : base_dttm+'\n'+message}
+        data = {'chat_id' : '-1001813504824' , 'text' : base_dttm+'\n'+message}
         response = requests.post(url, data=data)
         time.sleep(0.5)
         print( 'send_telegram_message : ' , response.json() )               
@@ -166,6 +162,27 @@ def send_telegram_message( message , div='' ):
         print( 'telegram_send', e )
     finally:
         pass
+
+def sendTelegramMsg( message ):
+    '''텔러그램 매크로 봇방
+    '''
+    token = '6173895901:AAH54vZaLnXXZq9hngplJNeEJIDEzH2azbc' 
+    '''
+    -1001813504824 : 니콘방 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
+    -1002336115183 : 매크로 봇방
+    '''
+    try: 
+        base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
+    
+        url = 'https://api.telegram.org/bot{}/sendMessage'.format(token)
+        data = {'chat_id' : '-1002336115183' , 'text' : base_dttm+'\n'+message}
+        response = requests.post(url, data=data)
+        time.sleep(0.5)
+        #print( 'sendTelegramMsg : ' , response.json() )               
+    except Exception as e:
+        print( 'sendTelegramMsg', e )
+    finally:
+        pass        
 
 def complete_fold(path , state = True):
     '''해당 path 의 이름 변경'''

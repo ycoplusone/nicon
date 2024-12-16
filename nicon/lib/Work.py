@@ -284,7 +284,7 @@ class Work(QThread):
                                     print(beTime , asTime , useTime)
                                     print(msg)
                                     print('소요시간 산출 - 종료','*'*20)
-                                    w2ji.send_telegram_message( f'[{self.__title_nm}]\n {msg}\n ===== 시작 =====' , 'macro' )
+                                    w2ji.sendTelegramMsg( f'[{self.__title_nm}]\n {msg}\n ===== 시작 =====' )
                                     _Msg_Flag   = False
                                 # 끝이닷.
                                 break
@@ -309,7 +309,7 @@ class Work(QThread):
             self.__power = False
         
         if self.__power == True: # 완료처리
-            w2ji.send_telegram_message( f'[{self.__title_nm}]\n 전체소요시간 [{_hour}:{_minute}:{_second}]\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n ===== 완료 =====' , 'macro' )            
+            w2ji.sendTelegramMsg( f'[{self.__title_nm}]\n 전체소요시간 [{_hour}:{_minute}:{_second}]\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n ===== 완료 ====='  )            
             if self.__title_nm == 'Soldier':
                 pyautogui.alert('========== 완료 ==========')
 
