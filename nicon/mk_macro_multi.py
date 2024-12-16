@@ -59,7 +59,7 @@ class Work(QThread):
         super().__init__()
         self.__power = True     # run 매소드 루프 플래그
 
-    def fn_param(self , url_xy,url_xy_wait,url_path,url_path_wait,cvs_path,div,click_xy,click_evn,click_rand,click_xy_wait,key0,key0_wait,key1,key1_wait,csv_data , seq_start , seq_end , rep , file_nm):
+    def fn_param(self , url_xy,url_xy_wait,url_path,url_path_wait,cvs_path,div,click_xy,click_evn,click_rand,click_xy_wait,key0,key0_wait,key1,key1_wait,csv_data , seq_start , seq_end , rep , file_nm , wait_time ):
         self.__url_xy            = url_xy           # url 클릭 좌표
         self.__url_xy_wait       = url_xy_wait      # 0.5 초 기본 대기 url 클릭후 대기
         self.__url_path          = url_path         # url 주소
@@ -79,6 +79,7 @@ class Work(QThread):
         self.__seq_end           = seq_end          # 종료구간
         self.__rep               = rep              # 구간반복
         self.__file_nm           = file_nm          # 파일명
+        self.__waitTime          = float(wait_time)        # 대기 시간
 
 
     def add_time(self , add_second):
@@ -356,10 +357,11 @@ class MyApp(QWidget):
     __key1              = {}  # 키보드1 복합키 두개 - hot key 하기
     __key1_wait         = {}  # 키보드1 대기
     __rep               = {}  # 구간반복 배열
+    __step_wait_time    = '0.1' # 단계별 대기 시간
 
     __seq_start         = 0     # 테스트 시작구간 
     __seq_end           = 9999  # 테스트 종료구간
-    __file_nm           = '' # 파일이름
+    __file_nm           = '' # 파일이름    
     # 전역변수 - end
     
     '''
@@ -508,6 +510,7 @@ class MyApp(QWidget):
                         , self.__seq_end    # 종료구간
                         , self.__rep        # 구간반복
                         , file_name         # 파일명
+                        , self.__step_wait_time # 대기 시간 문자열입니다.
                     )
                     self.__work.start()                                     
                     self.__work.wait()
@@ -658,11 +661,18 @@ class MyApp(QWidget):
             self.__key0_wait        = _load_data[0]['key0_wait']        # 키보드0 대기
             self.__key1             = _load_data[0]['key1']             # 키보드1 복합키 두개 - hot key 하기
             self.__key1_wait        = _load_data[0]['key1_wait']        # 키보드1 대기                 
+            
             try:
                 self.__rep          = _load_data[0]['rep']
             except Exception as e:
                 print('rep error',e)                     
             
+            try:
+                self.__step_wait_time = _load_data[0]['step_wait_time'] # 전체 단계 대기 시간 저장       
+            except Exception as e:
+                self.__step_wait_time = '0.1'
+                print('step_wait_time error',e)
+
             # 기존 자료 마이그레이션. 
             for i in self.__div:
                 str = self.__div.get(i)

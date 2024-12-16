@@ -69,7 +69,7 @@ class Work(QThread):
         super().__init__()
         self.__power = True     # run 매소드 루프 플래그
 
-    def fn_param(self , url_xy,url_xy_wait,url_path,url_path_wait,cvs_path,div,click_xy,click_evn,click_rand,click_xy_wait,key0,key0_wait,key1,key1_wait,csv_data , seq_start , seq_end , rep , file_nm):
+    def fn_param(self , url_xy,url_xy_wait,url_path,url_path_wait,cvs_path,div,click_xy,click_evn,click_rand,click_xy_wait,key0,key0_wait,key1,key1_wait,csv_data , seq_start , seq_end , rep , file_nm , wait_time):
         self.__url_xy            = url_xy           # url 클릭 좌표
         self.__url_xy_wait       = url_xy_wait      # 0.5 초 기본 대기 url 클릭후 대기
         self.__url_path          = url_path         # url 주소
@@ -89,6 +89,7 @@ class Work(QThread):
         self.__seq_end           = seq_end          # 종료구간
         self.__rep               = rep              # 구간반복
         self.__file_nm           = file_nm          # 파일명
+        self.__waitTime          = float(wait_time)        # 대기 시간
 
 
     def add_time(self , add_second):
@@ -366,6 +367,7 @@ class MyApp(QWidget):
     __key1              = {}  # 키보드1 복합키 두개 - hot key 하기
     __key1_wait         = {}  # 키보드1 대기
     __rep               = {}  # 구간반복 배열
+    __step_wait_time    = '0.1' # 단계별 대기 시간
 
     __seq_start         = 0     # 테스트 시작구간 
     __seq_end           = 9999  # 테스트 종료구간
@@ -404,7 +406,8 @@ class MyApp(QWidget):
     __rep_cnt_lb    = {} #구간반복
     __rep_cnt_qe    = {} #구간반복                                                   
     __dnd_bnt0      = {} # 드래그 & 드랍
-    __dnd_bnt1      = {} # 드래그 & 드랍     
+    __dnd_bnt1      = {} # 드래그 & 드랍   
+    __wait_time_cb  = '' # 대기시간 조정  
     # UI - END
 
     def init_param(self): # 파라미터 초기화
@@ -615,7 +618,7 @@ class MyApp(QWidget):
         grid.addWidget( save_btn , 0 , 1 ,1,1)
    
         def fn_load(): # 피클 데이터 로드
-            self.__file_nm = self.__load_cb_ui.currentText()                
+            self.__file_nm = self.__load_cb_ui.currentText()
             if self.__file_nm == '':
                 print('로드할수 없습니다.')
             else :
@@ -647,7 +650,12 @@ class MyApp(QWidget):
                 try:
                     self.__rep          = _load_data[0]['rep']
                 except Exception as e:
-                    print('rep error',e)                     
+                    print('rep error',e)       
+
+                try:
+                    self.__step_wait_time = _load_data[0]['step_wait_time'] # 전체 단계 대기 시간 저장       
+                except Exception as e:
+                    print('step_wait_time error',e)
                 
                 # 기존 자료 마이그레이션. 
                 for i in self.__div:
@@ -690,6 +698,7 @@ class MyApp(QWidget):
                 , self.__seq_end    # 종료구간
                 , self.__rep        # 구간반복
                 , file_name         # 파일명
+                , self.__step_wait_time # 대기 시간 문자열입니다.
             )
             self.__work.start()
         
@@ -718,7 +727,7 @@ class MyApp(QWidget):
         
         grid.addWidget( self.__save_file_nm_ui , 1 , 1,1,2 )
 
-        load_lb = QLabel('로드파일 : '  )        
+        load_lb = QLabel('     로드파일 : '  )        
         grid.addWidget( load_lb , 1 , 3,1,2 )        
 
         def get_files_sorted_by_mtime():
@@ -769,20 +778,25 @@ class MyApp(QWidget):
         elif (str == 'new'):
             self.__url_xy_ui.setText('( x : {0} , y : {1} )'.format( 0 , 0 ) )
 
-        #
+        
         # url 주소 매핑  
         if str == 'load': 
             if len(self.__url_path) >0 : 
-                self.__url_qe_ui.setText( self.__url_path )
+                self.__url_qe_ui.setText( self.__url_path )                        
         elif str == 'new':
             self.__url_qe_ui.setText( '' )
-        
         
         if str == 'load':
             if len(self.__cvs_path) >0 : # 파일 패스
                 self.__csv_lb_ui.setText( self.__cvs_path )
         elif str == 'new':
             self.__csv_lb_ui.setText( '' )
+        
+        if str == 'load':
+            self.__wait_time_cb.setCurrentText( self.__step_wait_time )
+        elif str == 'new':
+            self.__step_wait_time = '0.1'
+            self.__wait_time_cb.setCurrentText( self.__step_wait_time )
 
 
         if str == 'new':
@@ -902,24 +916,43 @@ class MyApp(QWidget):
                 self.__seq_end = 0
             else :
                 end_qe.setText( str(int(e)) )                    
-                self.__seq_end = int(e)            
+                self.__seq_end = int(e)     
+
+        def ChgWaitTime(): # 전체 대기 시간 조정
+            ''''''
+            str = self.__wait_time_cb.currentText()
+            self.__step_wait_time = str
+            
+
 
         # 시작구간 , 끝구간 지정. - START
-        start_lb    = QLabel('시작구간 : ')
+        start_lb    = QLabel('시작구간')
         start_qe    = QLineEdit('0')
+        start_qe.setFixedWidth(120)  # 가로 크기 지정
         start_qe.setStyleSheet( self.__lb_style )
         start_qe.setValidator(QIntValidator(0,999999,self))    # 100..999사이의 정수        
         start_qe.textChanged.connect( repeatEvent )
-        end_lb      = QLabel('종료구간 : ')
+        
+        end_lb      = QLabel('     종료구간')
         end_qe      = QLineEdit(  str(self.__max_obj)  )
+        end_qe.setFixedWidth(120)  # 가로 크기 지정
         end_qe.setStyleSheet( self.__lb_style )
         end_qe.setValidator(QIntValidator(0,999999,self))    # 100..999사이의 정수   
         end_qe.textChanged.connect( repeatEvent )
 
-        grid.addWidget( start_lb  , 0 , 0)
-        grid.addWidget( start_qe  , 0 , 1)        
-        grid.addWidget( end_lb  , 0 , 2)
-        grid.addWidget( end_qe  , 0 , 3)  
+        wait_lb      = QLabel('     대기시간')
+        self.__wait_time_cb = QComboBox()        
+        for num in range(1,21) :
+            f = str(num / 10)
+            self.__wait_time_cb.addItem( f )
+        self.__wait_time_cb.currentIndexChanged.connect( ChgWaitTime )
+                
+        grid.addWidget( start_lb    , 0 , 0)
+        grid.addWidget( start_qe    , 0 , 1)        
+        grid.addWidget( end_lb      , 0 , 2)
+        grid.addWidget( end_qe      , 0 , 3)  
+        grid.addWidget( wait_lb     , 0 , 4)  
+        grid.addWidget( self.__wait_time_cb   , 0 , 5)  
         groupbox.setFixedHeight(40)
         groupbox.setLayout(grid)        
         # 시작구간 , 끝구간 지정. - end
@@ -935,7 +968,6 @@ class MyApp(QWidget):
         else :
             QMessageBox.about(self,'About Title','파일명 "{0}" 저장합니다... '.format( file_name ) )
             self.fnSavePickle( file_name )
-
 
     def fnSavePickle( self , name ):
         '''피클 저장 부분'''
@@ -975,7 +1007,8 @@ class MyApp(QWidget):
                 , 'key0_wait'       : self.__key0_wait              # 키보드0 대기
                 , 'key1'            : self.__key1                   # 키보드1 복합키 두개 - hot key 하기
                 , 'key1_wait'       : self.__key1_wait              # 키보드1 대기    
-                , 'rep'             : self.__rep                    # 구간반복               
+                , 'rep'             : self.__rep                    # 구간반복     
+                , 'step_wait_time'  : self.__step_wait_time         # 전체 단계 대기 시간 저장          
             }
         )      
         with open('c:\\ncnc_class\\'+file_name+'.pickle',"wb") as f:
