@@ -150,12 +150,13 @@ def send_telegram_message( message , div='' ):
     -1001813504824 : 니콘방 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
     -1002336115183 : 매크로 봇방
     '''
-    roomid = '-1001813504824'       # 니콘방
-    if div == 'macro':
-        roomid = '-1002336115183'   # 메클방
-
-    base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
     try: 
+        roomid = '-1001813504824'       # 니콘방
+        if div == 'macro':
+            roomid = '-1002336115183'   # 메클방
+
+        base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
+    
         url = 'https://api.telegram.org/bot{}/sendMessage'.format(token)
         data = {'chat_id' : roomid , 'text' : base_dttm+'\n'+message}
         response = requests.post(url, data=data)
