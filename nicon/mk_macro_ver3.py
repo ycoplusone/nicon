@@ -652,6 +652,7 @@ class MyApp(QWidget):
 
         wait_lb      = QLabel('     대기시간')
         self.__wait_time_cb = QComboBox()        
+        self.__wait_time_cb.addItem( '0.01' )
         for num in range(1,21) :
             f = str(num / 10)
             self.__wait_time_cb.addItem( f )
