@@ -177,7 +177,7 @@ def sendTelegramMsg( message ):
         url = 'https://api.telegram.org/bot{}/sendMessage'.format(token)
         data = {'chat_id' : '-1002336115183' , 'text' : base_dttm+'\n'+message}
         response = requests.post(url, data=data)
-        time.sleep(0.5)
+        time.sleep(0.1)
         #print( 'sendTelegramMsg : ' , response.json() )               
     except Exception as e:
         print( 'sendTelegramMsg', e )

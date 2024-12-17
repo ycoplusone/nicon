@@ -39,7 +39,7 @@ class Work(QThread):
     __seq_start         = 0        # 시작구간
     __seq_end           = 999      # 종료구간
 
-    __waitTime          = 0.1   # 기본 대기 시간. 각 행동당 기본 대시 시간을 의미함.
+    __waitTime          = 0.01   # 기본 대기 시간. 각 행동당 기본 대시 시간을 의미함.
     
 
     __power = False
