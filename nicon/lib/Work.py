@@ -13,6 +13,8 @@ import random
 import os
 
 ''' 자동화 클래스
+1.0.2 붙여넣기 0.5초 고정 대기 시간 부여
+1.0.1 자동화 클랙스 분리
 '''
 
 
@@ -152,7 +154,8 @@ class Work(QThread):
             time.sleep( float(xy_wait) ) #대기
 
         elif ( step_name == '붙여넣기') and ( self.__power == True ):
-            self.fnclick( xy , self.__waitTime ) #클릭
+            #self.fnclick( xy , self.__waitTime ) #클릭
+            self.fnclick( xy , 0.5 ) #클릭
             n = int(evn)                    
             self.fnpaste( _j[n] ) # 붙여넣기
             time.sleep( float(xy_wait) ) #대기
