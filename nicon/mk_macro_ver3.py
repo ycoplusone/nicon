@@ -22,7 +22,8 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 '''
 매크로 작업 생성및 단일 수행 프로그램
-    사과
+    25.0.2 시작구간, 종료구간 초기화 오류 수정 , 대기시간 0.01 초기값 설정.
+    25.0.1 work 클래스 통합작업
     24.12.4 url 입력 기본대기 시간 2-> 1 , @ 대기시간 2.5 -> 1.5 변경
     24.12.3 기본 대기 시간을 기존 0.5 -> 0.1 변경.
     24.12.2 클릭 후 기본 대기 시간을 변수화 하여 적용 기존 0.5 -> 0.1
@@ -41,7 +42,7 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 
 class MyApp(QWidget):
-    __version   = '25.0.1'
+    __version   = '25.0.2'
     __title_nm  = 'Soldier'    
 
     __lb_style  = 'border-radius: 5px;border: 1px solid gray;'
@@ -67,7 +68,7 @@ class MyApp(QWidget):
     __key1              = {}  # 키보드1 복합키 두개 - hot key 하기
     __key1_wait         = {}  # 키보드1 대기
     __rep               = {}  # 구간반복 배열
-    __step_wait_time    = '0.1' # 단계별 대기 시간
+    __step_wait_time    = '0.01' # 단계별 대기 시간
 
     __seq_start         = 0     # 테스트 시작구간 
     __seq_end           = 9999  # 테스트 종료구간
@@ -109,6 +110,9 @@ class MyApp(QWidget):
     __dnd_bnt0      = {} # 드래그 & 드랍
     __dnd_bnt1      = {} # 드래그 & 드랍   
     __wait_time_cb  = '' # 대기시간 조정  
+
+    __start_qe      = '' # 전체구간반복 시작
+    __end_qe        = '' # 전체구간반복 종료
     # UI - END
 
     def init_param(self): # 파라미터 초기화
@@ -502,13 +506,16 @@ class MyApp(QWidget):
         if str == 'load':
             self.__wait_time_cb.setCurrentText( self.__step_wait_time )
         elif str == 'new':
-            self.__step_wait_time = '0.1'
+            self.__step_wait_time = '0.01'
             self.__wait_time_cb.setCurrentText( self.__step_wait_time )
 
 
         if str == 'new':
             self.__save_file_nm_ui.setText('') #저장파일 이름 초기화
-
+            self.__start_qe.setText('0')       # 전체 구간반복 시작 초기화            
+            #print(self.__max_obj, type(self.__max_obj) , f'{self.__max_obj}', type(f'{self.__max_obj}'))
+            self.__end_qe.setText( f'{self.__max_obj}' )  # 전체 구간반복 종료 초기화
+            
         for i in self.__qt_div:
             div_nm = self.__div[i]
             self.__qt_div[i].setCurrentText( div_nm )  # 행동구분
@@ -612,20 +619,20 @@ class MyApp(QWidget):
 
         def repeatEvent():
             '''키이벤트'''
-            s = start_qe.text()
-            e = end_qe.text()
+            s = self.__start_qe.text()
+            e = self.__end_qe.text()
             if s == '':
-                start_qe.setText( '0' )
+                self.__start_qe.setText( '0' )
                 self.__seq_start = 0
             else :
-                start_qe.setText( str(int(s)) )    
+                self.__start_qe.setText( str(int(s)) )    
                 self.__seq_start = int(s)
 
             if e == '':
-                end_qe.setText( '0' )
+                self.__end_qe.setText( '0' )
                 self.__seq_end = 0
             else :
-                end_qe.setText( str(int(e)) )                    
+                self.__end_qe.setText( str(int(e)) )                    
                 self.__seq_end = int(e)     
 
         def ChgWaitTime(): # 전체 대기 시간 조정
@@ -637,18 +644,18 @@ class MyApp(QWidget):
 
         # 시작구간 , 끝구간 지정. - START
         start_lb    = QLabel('시작구간')
-        start_qe    = QLineEdit('0')
-        start_qe.setFixedWidth(120)  # 가로 크기 지정
-        start_qe.setStyleSheet( self.__lb_style )
-        start_qe.setValidator(QIntValidator(0,999999,self))    # 100..999사이의 정수        
-        start_qe.textChanged.connect( repeatEvent )
+        self.__start_qe    = QLineEdit('0')
+        self.__start_qe.setFixedWidth(120)  # 가로 크기 지정
+        self.__start_qe.setStyleSheet( self.__lb_style )
+        self.__start_qe.setValidator(QIntValidator(0,999999,self))    # 100..999사이의 정수        
+        self.__start_qe.textChanged.connect( repeatEvent )
         
         end_lb      = QLabel('     종료구간')
-        end_qe      = QLineEdit(  str(self.__max_obj)  )
-        end_qe.setFixedWidth(120)  # 가로 크기 지정
-        end_qe.setStyleSheet( self.__lb_style )
-        end_qe.setValidator(QIntValidator(0,999999,self))    # 100..999사이의 정수   
-        end_qe.textChanged.connect( repeatEvent )
+        self.__end_qe      = QLineEdit(  str(self.__max_obj)  )
+        self.__end_qe.setFixedWidth(120)  # 가로 크기 지정
+        self.__end_qe.setStyleSheet( self.__lb_style )
+        self.__end_qe.setValidator(QIntValidator(0,999999,self))    # 100..999사이의 정수   
+        self.__end_qe.textChanged.connect( repeatEvent )
 
         wait_lb      = QLabel('     대기시간')
         self.__wait_time_cb = QComboBox()        
@@ -659,9 +666,9 @@ class MyApp(QWidget):
         self.__wait_time_cb.currentIndexChanged.connect( ChgWaitTime )
                 
         grid.addWidget( start_lb    , 0 , 0)
-        grid.addWidget( start_qe    , 0 , 1)        
+        grid.addWidget( self.__start_qe    , 0 , 1)        
         grid.addWidget( end_lb      , 0 , 2)
-        grid.addWidget( end_qe      , 0 , 3)  
+        grid.addWidget( self.__end_qe      , 0 , 3)  
         grid.addWidget( wait_lb     , 0 , 4)  
         grid.addWidget( self.__wait_time_cb   , 0 , 5)  
         groupbox.setFixedHeight(40)
