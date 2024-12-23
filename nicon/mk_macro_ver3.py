@@ -22,6 +22,7 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 '''
 매크로 작업 생성및 단일 수행 프로그램
+    25.0.3 fnSave 에 try catch 구문 추가
     25.0.2 시작구간, 종료구간 초기화 오류 수정 , 대기시간 0.01 초기값 설정.
     25.0.1 work 클래스 통합작업
     24.12.4 url 입력 기본대기 시간 2-> 1 , @ 대기시간 2.5 -> 1.5 변경
@@ -42,7 +43,7 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 
 class MyApp(QWidget):
-    __version   = '25.0.2'
+    __version   = '25.0.3'
     __title_nm  = 'Soldier'    
 
     __lb_style  = 'border-radius: 5px;border: 1px solid gray;'
@@ -678,14 +679,18 @@ class MyApp(QWidget):
 
     def fnSave(self):
         '''통합 저장'''
-        file_name = self.__save_file_nm_ui.text()        
-        file_name = re.sub('[\/:*?"<>|]','',file_name)
-        file_name = file_name.replace(' ','').replace('ver3_','')   
-        if file_name == '':
-            QMessageBox.about(self,'About Title','파일이름이 없습니다... ')
-        else :
-            QMessageBox.about(self,'About Title','파일명 "{0}" 저장합니다... '.format( file_name ) )
-            self.fnSavePickle( file_name )
+        try:
+            file_name = self.__save_file_nm_ui.text()        
+            file_name = re.sub('[\/:*?"<>|]','',file_name)
+            file_name = file_name.replace(' ','').replace('ver3_','')   
+            if file_name == '':
+                QMessageBox.about(self,'About Title','파일이름이 없습니다... ')
+            else :
+                QMessageBox.about(self,f'About Title','파일명 "{file_name}" 저장합니다... ' )
+                self.fnSavePickle( file_name )
+        except Exception as e:
+            QMessageBox.about(self,'About Title','저장 중 이상이 발생하였습니다.')
+            
 
     def fnSavePickle( self , name ):
         '''피클 저장 부분'''
