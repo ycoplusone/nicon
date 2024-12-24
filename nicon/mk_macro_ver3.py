@@ -686,7 +686,7 @@ class MyApp(QWidget):
             if file_name == '':
                 QMessageBox.about(self,'About Title','파일이름이 없습니다... ')
             else :
-                QMessageBox.about(self,f'About Title','파일명 "{file_name}" 저장합니다... ' )
+                QMessageBox.about(self,'About Title',f'파일명 {file_name} 저장합니다... ' )
                 self.fnSavePickle( file_name )
         except Exception as e:
             QMessageBox.about(self,'About Title','저장 중 이상이 발생하였습니다.')
