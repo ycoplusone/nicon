@@ -108,7 +108,7 @@ class Work(QThread):
         pyperclip.copy( url )
         pyautogui.hotkey('ctrl', 'v')   
         pyautogui.hotkey('enter')         
-        time.sleep( (wait_time+1.5) )         
+        time.sleep( (wait_time) )         
     
     def fnpaste(self , str ):
         '''복사 붙여넣기'''        
@@ -155,7 +155,7 @@ class Work(QThread):
 
         elif ( step_name == '붙여넣기') and ( self.__power == True ):
             #self.fnclick( xy , self.__waitTime ) #클릭
-            self.fnclick( xy , 0.5 ) #클릭
+            self.fnclick( xy , 0.2 ) #클릭
             n = int(evn)                    
             self.fnpaste( _j[n] ) # 붙여넣기
             time.sleep( float(xy_wait) ) #대기
