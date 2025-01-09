@@ -101,11 +101,11 @@ def init_fold( _dbconn ):
                 default_fold_nm = base_dttm+(repr(cnt).zfill(2))
                 prod_fold       = base_dttm+(repr(cnt).zfill(2))
                 v_range = 0
-                # 10개씩 볼더 복사 
-                if len(file_names) >= 10:
-                    default_fold_nm = dirname+'\\'+default_fold_nm+'_10' 
-                    prod_fold       = prod_fold+'_10' 
-                    v_range = 10       
+                # 5개씩 볼더 복사 
+                if len(file_names) >= 5:
+                    default_fold_nm = dirname+'\\'+default_fold_nm+'_5' 
+                    prod_fold       = prod_fold+'_5' 
+                    v_range = 5       
                 else :
                     default_fold_nm = dirname+'\\'+default_fold_nm+'_'+repr( len(file_names) ).zfill(2)
                     prod_fold       = prod_fold+'_'+repr( len(file_names) ).zfill(2)
@@ -195,3 +195,31 @@ def complete_fold(path , state = True):
 
     os.rename( path , __path)
     return __path
+
+
+def getFileCnt():
+    '''잔여파일 개수 확인.'''
+    rt = []
+    path1 = 'c:\\ncnc'    
+    __list = os.listdir( path1 )
+    # 1차 하위 폴더 리스트
+    subFolds = [ X for X in __list if os.path.isdir(path1+'\\'+X)] 
+    for fold in subFolds:
+        cnt = 0
+        # 2차 폴더 패스
+        path2 = os.path.join(path1 , fold)
+        __list2 = os.listdir( path2 )
+        subFolds2 = [ X for X in __list2 if X[-4:-1] != '(완료']   
+        for ff in subFolds2:
+            path3 = os.path.join(path2, ff)
+            __list3 = os.listdir( path3 )
+            cnt += len(__list3)
+        
+        if cnt >0:
+            rt.append( [fold , cnt] )
+    
+    txt = ''
+    for i in rt:
+        txt += f'{i[0]} : {i[1]}개 \n'
+    
+    send_telegram_message( txt )
