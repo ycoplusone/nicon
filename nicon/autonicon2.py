@@ -1,4 +1,8 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from webdriver_manager.chrome import ChromeDriverManager
+
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -98,18 +102,21 @@ def fnLoging():
     driver.switch_to.window( tabs[1] )        
     print('창 이동', driver.current_window_handle )     
 
-    fnClick('/html/body/div[1]/div[2]/div/div[1]/form/ul/li/div/div[2]/div[1]/input') #id    
+    #fnClick('/html/body/div[1]/div[2]/div/div[1]/form/ul/li/div/div[2]/div[1]/input') #id    
+    fnClick('/html/body/div[1]/div[2]/div/div[1]/form/ul/li/div/div[1]/div/div[1]/input') #id    
     fnCopyNpaste( __id )   
-    fnClick('/html/body/div[1]/div[2]/div/div[1]/form/ul/li/div/div[2]/div[2]/input') #ps
+    #fnClick('/html/body/div[1]/div[2]/div/div[1]/form/ul/li/div/div[2]/div[2]/input') #ps
+    fnClick('/html/body/div[1]/div[2]/div/div[1]/form/ul/li/div/div[1]/div/div[2]/input') #ps    
     fnCopyNpaste( __ps )    
-    fnClick('/html/body/div[1]/div[2]/div/div[1]/form/ul/li/div/div[8]/button/span') #확인
-    time.sleep(1.5)
+    #fnClick('/html/body/div[1]/div[2]/div/div[1]/form/ul/li/div/div[8]/button/span') #확인
+    fnClick('/html/body/div[1]/div[2]/div/div[1]/form/ul/li/div/div[7]/button') #확인
+    time.sleep(30)
     
     driver.switch_to.window( tabs[0] )           
     print('창 이동', driver.current_window_handle )       
-    time.sleep(1.5)
+    time.sleep(2)
     driver.get('https://ncnc.app/sell/wait-confirmed')  
-    time.sleep(0.5)
+    time.sleep(1)
 
     #로그인 클릭
     '''
@@ -156,7 +163,7 @@ def fnDiv01( str = '카' ): #str = '카'
         print('ERROR fnDiv01',e)
         return _state
 
-def fnDiv02( _str = '투썸플레이스' ): # _str = '투썸플레이스'
+def fnDiv02( _str = '커피빈' ): # _str = '투썸플레이스'
     '''중분류 찾기(카테고리 찾기)'''    
     _state = False
     try:
@@ -170,7 +177,7 @@ def fnDiv02( _str = '투썸플레이스' ): # _str = '투썸플레이스'
         print('ERROR fnDiv02',e)
         return _state
 
-def fnDiv03( _str = '아메리카노 L' ): # _str = '아메리카노 L'
+def fnDiv03( _str = '아이스커피S' ): # _str = '아메리카노 L'
     '''하분류 찾기(상품 차지)'''
     _state = False
     global driver
@@ -223,8 +230,9 @@ def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
     try:
         for file in _files:
             driver.find_element(By.CSS_SELECTOR , "input[type='file']").send_keys(file) #파일 등록
-    
-        fnClick('//*[@id="app"]/div/div[2]/div/section/div/div/div/section/button') # 판매 등록
+        
+        time.sleep(1)            
+        fnClick('//*[@id="app"]/div/div[2]/div/section/div/div/div/section/button') # 판매 등록        
         time.sleep(1)    
         alert_txt = fnReadAlert() # 알림창 읽기
         #if alert_txt != '문구없음':
@@ -249,10 +257,16 @@ def fnSale( _nm = '' , _amt = '' , _fold_nm = '' , _files = [] ):
 
 def fnInit():
     '''크룸 초기화'''
-    options = webdriver.ChromeOptions()
+    options = ChromeOptions() #webdriver.ChromeOptions()
     #options.add_argument('headless')
     options.add_argument('window-size=1024x768')    
-    _rt = webdriver.Chrome('chromedriver.exe' , options=options) # http://chromedriver.chromium.org/ 다운로드 크롬 버젼 확인해야함.
+
+    # 크롬 드라이버 최신 버전 설정
+    #service = ChromeService(executable_path=ChromeDriverManager().install())
+    # chrome driver
+    #_rt = webdriver.Chrome('chromedriver.exe',service=service, options=options) # <- options로 변경    
+
+    _rt = webdriver.Chrome( options=options) # http://chromedriver.chromium.org/ 다운로드 크롬 버젼 확인해야함.
     _rt.get('https://ncnc.app/sell/wait-confirmed')
     _rt.implicitly_wait(5)  
     time.sleep(1)  
@@ -270,6 +284,8 @@ if __name__ == "__main__":
     w2ji.into_rename_barcode() #파일명 바코드 명으로 변경작업 바코드 생성 못하면   None으로 치환된다.
 
     w2ji.init_fold(_dbconn) #폴더내 파일 정리.
+
+    w2ji.getFileCnt() #파일 
     
     driver = fnInit() #초기화    
     time.sleep(1)
