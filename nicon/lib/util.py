@@ -220,6 +220,6 @@ def getFileCnt():
     
     txt = ''
     for i in rt:
-        txt += f'{i[0]} : {i[1]}개 \n'
+        txt += f'{i[0]} \n=== 잔여 갯수[ {i[1]}개 ] ===\n--------------------\n\n'
     
     send_telegram_message( txt )
