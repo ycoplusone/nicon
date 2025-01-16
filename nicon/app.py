@@ -69,7 +69,7 @@ def getNicon():
         __header = {   
         'accept' : 'application/json, text/plain, */*'            
         , 'accept-language' : 'ko,en;q=0.9'
-        , 'authorization' : 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjAwNjM3LCJ0eXBlcyI6Imtha2FvLG5hdmVyIiwiYmFua0lkIjo0LCJpYXQiOjE3MTI1NTE0MjEsImV4cCI6MTc3NTYyMzQyMX0.g0FNc3Di7JQjlUy1rFvUHSc-hUDBGeogWFgq6P9Nhak'                                 
+        , 'authorization' : "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjAwNjM3LCJ0eXBlcyI6Imtha2FvLG5hdmVyIiwiYmFua0lkIjo0LCJpYXQiOjE3MTI1NTE0MjEsImV4cCI6MTc3NTYyMzQyMX0.g0FNc3Di7JQjlUy1rFvUHSc-hUDBGeogWFgq6P9Nhak"
         , 'origin' : 'https://ncnc.app'
         , 'priority' : 'u=1, i'
         , 'referer' : 'https://ncnc.app/'
