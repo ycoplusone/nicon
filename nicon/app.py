@@ -65,14 +65,29 @@ def getNicon():
         s_time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')        
         dd = dbcon.DbConn()    
         __lists = dd.get_job_list()
+
+        __header = {   
+        'accept' : 'application/json, text/plain, */*'            
+        , 'accept-language' : 'ko,en;q=0.9'
+        , 'authorization' : 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjAwNjM3LCJ0eXBlcyI6Imtha2FvLG5hdmVyIiwiYmFua0lkIjo0LCJpYXQiOjE3MTI1NTE0MjEsImV4cCI6MTc3NTYyMzQyMX0.g0FNc3Di7JQjlUy1rFvUHSc-hUDBGeogWFgq6P9Nhak'                                 
+        , 'origin' : 'https://ncnc.app'
+        , 'priority' : 'u=1, i'
+        , 'referer' : 'https://ncnc.app/'
+        , 'sec-ch-ua-mobile' : '?0'
+        , 'sec-fetch-dest' : 'empty'
+        , 'sec-fetch-mode' : 'cors'
+        , 'sec-fetch-site' : 'same-site'
+        }                            
                            
         for ii in __lists:
             category_id = ii[0] #카테고리 id
             category_nm = ii[2] #카테리고리명
             __details = dd.get_nicon_job_detail( {'category_id':category_id } )         # 검증 세부 레스트
-            url = 'https://api2.ncnc.app/con-items?forSeller=1&conCategory2Id='+category_id
-            response = requests.get(url)
-            
+            url = f'https://api2.ncnc.app/con-items?conCategory2Id={category_id}&forSeller=1'
+
+
+            response = requests.get(url , headers = __header)
+           
             if response.status_code == 200:
                 txt = response.json()
                 lists = txt['conItems']
@@ -87,7 +102,7 @@ def getNicon():
                             refuse  = ll['isRefuse']
                             block   = ll['isBlock']
                             param = {'category_id':category_id ,'category_nm' : category_nm ,'id': id , 'name':name , 'amount': amount , 'refuse' : refuse , 'block': block , 'seq':_seq }
-                            
+                            print( param )
                             
                             res = dd.get_prod_chg(param)
                             sent_text = ''
@@ -136,12 +151,3 @@ def fnRewindSec():
 if __name__ == "__main__":    
     getNicon() # 데이터 수집
 
-
-    
-
-
-
-
-    
-        
-        
