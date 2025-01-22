@@ -270,8 +270,7 @@ if __name__ == "__main__":
     w2ji.base_fold_create( _dbconn ) #기초폴더 생성    
     w2ji.into_rename_barcode() #파일명 바코드 명으로 변경작업 바코드 생성 못하면   None으로 치환된다.
     w2ji.init_fold( _dbconn ) #폴더내 파일 정리.
-    w2ji.getFileCnt( _dbconn ) #파일 잔여 개수 확인 후 텔레그램 발송
-
+    w2ji.getFileCnt( _dbconn ) #파일 잔여 개수 확인 후 텔레그램 발송    
 
 
     _nicon.fnInit() #초기화    
@@ -347,5 +346,7 @@ if __name__ == "__main__":
             time.sleep(60) # 일회 순회 후 대기 시간
         except Exception as e:
             print('error : ' , e)
-            #w2ji.send_telegram_message(  'NICON 재시작해 주세요.......... ' )                    
+            w2ji.send_telegram_message(  'NICON 재시작해 주세요.......... ' )  
+            quit()
+            
 
