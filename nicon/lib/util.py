@@ -50,7 +50,8 @@ def base_fold_create( _dbconn ):
         try :
             os.mkdir(base_root+'\\'+i['fold_nm'])
         except Exception as e:
-            print( 'base_fold_create' , e ) 
+            '''이미 만들어 져있으면 오류가 발생'''
+            #print( 'base_fold_create' , e ) 
 
 def into_rename_barcode():
     '''파일명 바코드로 변환'''
@@ -197,11 +198,13 @@ def complete_fold(path , state = True):
     return __path
 
 
-def getFileCnt():
+def getFileCnt( _dbconn ):
     '''잔여파일 개수 확인.'''
     rt = []
     path1 = 'c:\\ncnc'    
     __list = os.listdir( path1 )
+    _dbconn.update_nicon_job_list_qty() # 초기화
+    
     # 1차 하위 폴더 리스트
     subFolds = [ X for X in __list if os.path.isdir(path1+'\\'+X)] 
     for fold in subFolds:
@@ -213,10 +216,12 @@ def getFileCnt():
         for ff in subFolds2:
             path3 = os.path.join(path2, ff)
             __list3 = os.listdir( path3 )
-            cnt += len(__list3)
-        
+            cnt += len(__list3)        
+
         if cnt >0:
             rt.append( [fold , cnt] )
+            param = {'qty': cnt , 'path':fold }
+            _dbconn.update_nicon_job_list( param )
     
     txt = ''
     for i in rt:

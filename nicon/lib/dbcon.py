@@ -21,6 +21,74 @@ class DbConn(object):
         '''        
         '''
         self.__conn = pymysql.connect(host = self.__url , user = self.__id , password = self.__ps , db= self.__db , charset= self.__charset  )
+    
+    def update_nicon_job_list_qty(self):
+        '''nicon_job_list qty 컬럼 초기화 '''
+        try :
+            cur = self.__conn.cursor()                        
+            query = (
+            " update nicon_job_list set qty = 0  "
+            )            
+            #query = query.format( **param )                      
+            cur.execute( query )
+            self.__conn.commit()                      
+        except Exception as e:
+            print( 'update_nicon_job_list_qty error', e )
+        finally:
+            pass        
+
+    def update_nicon_job_list(self ,  param):
+        '''nicon_job_list qty 컬럼 갱신 '''
+        try :
+            cur = self.__conn.cursor()                        
+            query = (
+            " update nicon_job_list   "
+            " set qty = {qty}  "
+            " where concat( category_nm,'_' , replace(replace(replace(replace( replace( replace( replace( replace(prod_nm,'/','') ,':','') ,'*','') , '?','') ,'',''),'<',''),'>',''),'|','') ) = '{path}' "
+            )                        
+            query = query.format( **param )                      
+            cur.execute( query )
+            self.__conn.commit()                      
+        except Exception as e:
+            print( 'update_nicon_job_list error', e )
+        finally:
+            pass        
+
+    def select_nicon_job_list(self , param):
+        ''' 개별 상품의 잔여 건수 '''
+        try :
+            _lists = []
+            query = (
+                " select "
+                " max(qty) qty "
+                " from nicon_job_list  a "
+                " where concat( category_nm,'_' , replace(replace(replace(replace( replace( replace( replace( replace(prod_nm,'/','') ,':','') ,'*','') , '?','') ,'',''),'<',''),'>',''),'|','') ) = '{path}' "
+            )
+            query = query.format( **param ) 
+            print( query )
+            cur = self.__conn.cursor(  pymysql.cursors.DictCursor)                 
+            cur.execute( query )            
+            return cur.fetchall()         
+        except Exception as e:
+            print( 'get_nicon_job => ' , e )  
+
+    def update_nicon_job_list_2(self , param):
+        '''update_nicon_job_list_2 qty 컬럼 갱신 '''
+        try :
+            cur = self.__conn.cursor()                        
+            query = (
+            " update nicon_job_list   "
+            " set qty = case when (qty - {qty}) <= 0 then 0 else (qty - {qty}) end   "
+            " where concat( category_nm,'_' , replace(replace(replace(replace( replace( replace( replace( replace(prod_nm,'/','') ,':','') ,'*','') , '?','') ,'',''),'<',''),'>',''),'|','') ) = '{path}' "
+            )                        
+            query = query.format( **param )                      
+            cur.execute( query )
+            self.__conn.commit()                      
+        except Exception as e:
+            print( 'update_nicon_job_list error', e )
+        finally:
+            pass         
+
 
     def get_job_list(self):        
         try :
@@ -62,6 +130,31 @@ class DbConn(object):
             return _lists            
         except Exception as e:
             print( 'get_job_list error' , e )   
+    
+    def get_nicon_job_list(self):
+        '''니콘 데이터 스집 리스트를 가져온다.'''
+        try :
+            _lists = []
+            query = (
+                " select "
+                " SUBSTR(c.div_nm,1,1) div_nm "
+                " , a.category_id "
+                " , max( a.category_nm ) category_nm "
+                " , group_concat(a.prod_nm order by a.prod_nm separator '^' ) prod_nm "
+                " from nicon_job_list  a "
+                " join nicon_info b on ( a.category_id  = b.category_id and a.prod_nm = b.name  ) "
+                " join nicon_category_info c on ( a.category_id = c.category_id  ) "
+                " where upper(a.use_yn) = 'Y' "
+                " and a.send_type like '%V%' "
+                " and b.refuse  = 1  "
+                " group by SUBSTR(c.div_nm,1,1) , a.category_id  "
+                " order by lpad(a.category_id,6,0) "
+            )
+            cur = self.__conn.cursor(  pymysql.cursors.DictCursor)            
+            cur.execute( query )            
+            return cur.fetchall()         
+        except Exception as e:
+            print( 'get_nicon_job => ' , e )        
 
 
     
@@ -204,15 +297,6 @@ class DbConn(object):
 
             __dblists =  cur.fetchall()    
             return (__dblists[0]['last_date']) 
-            '''
-            for i in __dblists:
-                #print(i)
-                m_list = []                
-                m_list.append( i['last_date']
-
-                _lists.append(m_list)
-            return _lists 
-            '''
         except Exception as e:
             print( 'getNiconState error' , e )  
 
@@ -279,13 +363,16 @@ class DbConn(object):
                 " , b.amount "
                 " , b.cat_seq "
                 " , b.prod_seq "               
+                " , a.qty "
                 " from ( "
                 " 	SELECT " 
                 " 	category_id  , prod_nm   "
                 "   , replace(replace(replace(replace( replace( replace( replace( replace(prod_nm,'/','') ,':','') ,'*','') , '?','') ,'',''),'<',''),'>',''),'|','') prod_nm2 "
+                "   , qty "
                 " 	from nicon_job_list njl  "
                 " 	where use_yn = 'Y' "
                 " 	and send_type like '%V%' "
+                "   and qty > 0 "
                 " 	group by category_id  , prod_nm "
                 " ) a "
                 " join ( "
@@ -293,7 +380,6 @@ class DbConn(object):
                 "	a.category_id  , a.name prod_nm , a.amount , b.cat_seq , a.seq prod_seq    "
                 "	from nicon_info a "
                 "	left outer join nicon_category_info b on ( a.category_id = b.category_id  ) "
-                "	where a.refuse = 0 "
                 " ) b on (a.category_id = b.category_id and a.prod_nm = b.prod_nm)   "
                 " join nicon_category_info c on ( a.category_id = c.category_id  ) "
                 " order by  case when a.category_id  in (137, 180) then 0 else 99 end ,  3,6 desc "
