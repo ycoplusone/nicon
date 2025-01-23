@@ -17,14 +17,15 @@ import lib.dbcon as dbcon
 import pyautogui
 
 '''
+3.0.2 니콘 내콘 수행 이력 텔러그램 발송 추가
 3.0.1 니콘 내콘 데이터 수집및 판매기.
 '''
 
 
 class nicon():
     '''니콘 클래스'''
-    __version   = '3.0.1'
-    __comment  = '니콘 내콘 데이터 수집및 판매기.'   
+    __version   = '3.0.2'
+    __comment  = '니콘 내콘 수행 이력 텔러그램 발송 추가'   
 
     # 변수 시작 ****************************************************
     __driver = None # 크롬 드라이버
@@ -180,7 +181,7 @@ class nicon():
             while( flag ):            
                 _ttt       = "/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[{}]/div[1]/div[1]".format(item_seq)
                 item_state = "/html/body/div[1]/div/div[2]/div/section/div/div/div/section/div[3]/a[{}]/div[2]".format(item_seq)
-                print( '_ttt : ',_ttt,' / flag : ',flag )
+                #print( '_ttt : ',_ttt,' / flag : ',flag )
                 # 상품 리스트 가져오기
                 titles = WebDriverWait( self.__driver, 1).until(EC.presence_of_all_elements_located((By.XPATH, _ttt )))
                 #복수개(3개)의 앨리먼트가 추출 됨 (3개중 마지막)
@@ -200,10 +201,10 @@ class nicon():
 
             if (_sale_type == '매입보류') or (_sale_type=='') :
                 #w2ji.send_telegram_message( _str+' : '+ '매입보류' )
-                print( f'{_str} : 매입보류' )
+                #print( f'{_str} : 매입보류' )
                 _state = False
             else :
-                print( f'{_str} : 매입중' )
+                #print( f'{_str} : 매입중' )
                 self.fnClick( _ttt ) # 두번째 아이콘 클릭
                 _state = True
             
@@ -265,6 +266,8 @@ if __name__ == "__main__":
     _lastupdate = '' # 업데이트 시간 저장
     _dbconn     = dbcon.DbConn() #db연결    
     _nicon      = nicon() #니콘 클래스 생성
+    _check_time = w2ji.getNowDate()                   # 현재 시간
+    _total_cnt  = 0         #총 실행수
 
     print('기본폴더 생성','-'*10)
     w2ji.base_fold_create( _dbconn ) #기초폴더 생성    
@@ -313,28 +316,28 @@ if __name__ == "__main__":
                     try:
                         
                         if _stat_flag:
-                            print(f'1단계 : {div01_str}' )
+                            #print(f'1단계 : {div01_str}' )
                             _stat_flag = _nicon.fnDiv01( div01_str )   # 대분류 첫글짜 매개변수
                             time.sleep(0.5)
                         else:
                             break
                         
                         if _stat_flag:
-                            print(f'2단계 : {div02_str}' )
+                            #print(f'2단계 : {div02_str}' )
                             _stat_flag = _nicon.fnDiv02( div02_str )   # 중분류명 매개변수
                             time.sleep(0.5)
                         else:
                             break
                         
                         if _stat_flag:
-                            print(f'3단계 : {div03_str}' )
+                            #print(f'3단계 : {div03_str}' )
                             _stat_flag = _nicon.fnDiv03( div03_str )   # 상품명 매개변수
                             time.sleep(0.5)
                         else:
                             break
                         
                         if _stat_flag:
-                            print(f'4단계 : {_fold_nm}' )
+                            #print(f'4단계 : {_fold_nm}' )
                             files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
                             _nicon.fnSale(fold_nm , _fold_nm, files , _dbconn ) # 판매                                    
                         else:
@@ -343,7 +346,12 @@ if __name__ == "__main__":
                     except Exception as e:
                         print( '판매 작업중 오류',e )
             
-            time.sleep(60) # 일회 순회 후 대기 시간
+            _total_cnt += 1
+            if ( w2ji.get1HourOver( _check_time ) ): # 마지막 메세지 발송후 1시간 이상 되면 다시 텔레그램 메세지를 발송한다.
+                _check_time = w2ji.getNowDate() # 메세지 발송 시간을 다시 등록한다.
+                w2ji.send_telegram_message(  f'NICON {_total_cnt}번재 실행중.' )      
+            
+            time.sleep(600) # 일회 순회 후 대기 시간
         except Exception as e:
             print('error : ' , e)
             w2ji.send_telegram_message(  'NICON 재시작해 주세요.......... ' )  
