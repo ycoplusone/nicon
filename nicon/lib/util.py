@@ -28,6 +28,20 @@ def getNow():
     '''현재시간 '''
     return datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
 
+def getNowDate():
+    '''현재 시간 datetime type 으로 리턴'''
+    return datetime.now() 
+
+def get1HourOver( _v_datetime : datetime ):
+    '''1시간 이상 초과 확인'''
+    _rt = False
+    time_difference = getNowDate() - _v_datetime
+    if ( ( time_difference.seconds // 3600 ) >= 1): # 마지막 메세지 발송후 1시간 이상 True를 리턴한다.
+        _rt = True
+
+    return _rt
+
+
 def decode(im):
     '''Find barcodes and QR codes
     바코드 탐지하는 엔진 (바코드 및 QR코드 탐지)
@@ -158,7 +172,7 @@ def send_telegram_message( message , div='' ):
         data = {'chat_id' : '-1001813504824' , 'text' : base_dttm+'\n'+message}
         response = requests.post(url, data=data)
         time.sleep(0.5)
-        print( 'send_telegram_message : ' , response.json() )               
+        #print( 'send_telegram_message : ' , response.json() )               
     except Exception as e:
         print( 'telegram_send', e )
     finally:
@@ -228,3 +242,4 @@ def getFileCnt( _dbconn ):
         txt += f'{i[0]} \n=== 잔여 갯수[ {i[1]}개 ] ===\n--------------------\n\n'
     
     send_telegram_message( txt )
+
