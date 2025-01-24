@@ -291,8 +291,9 @@ if __name__ == "__main__":
             _tmp = _dbconn.getNiconState()                           
             _lastupdate = _tmp
             __lists    = _dbconn.get_nicon_upload_list() # 판매 상품 갯수가 있는 상품을 전체 순회 한다. 판매중 판매보류 여부 상관 없다.
+            
+            print('*'*80)
             print('시작 : ',w2ji.getNow() , '\t 상품 갯수 : ', len( __lists ))                
-            _dbconn.insert_nicon_client_log() #로그 등록
 
             for list in __lists:                    
                 div01_str = list['div_nm']
@@ -300,7 +301,6 @@ if __name__ == "__main__":
                 div03_str = list['prod_nm']
                 fold_nm   = list['fold_nm']
                 amt       = str( list['amount'] )
-                #qty       = str( list['qty'] )
 
                 prod_fold_list = w2ji.getfolelist( fold_nm ) # 상품 폴더 리스트의 하위 폴더 리스트 생성.
                 _stat_flag = True
@@ -308,7 +308,8 @@ if __name__ == "__main__":
                     
                     cnt = _dbconn.select_nicon_job_list( { 'path':fold_nm} )[0]['qty'] # 현재 상품 잔여 건수
 
-                    print( f'{fold_nm} 의 잔여 상품수가 {cnt}입니다.' )
+                    print('*'*80)
+                    print( f'{fold_nm} 의 잔여 상품수 [{cnt}] 입니다.' )
                     
                     if cnt <= 0 : #잔여 판매수가 0건이면 수행을 중단한다.
                         _stat_flag = False                            
@@ -347,15 +348,16 @@ if __name__ == "__main__":
                     except Exception as e:
                         print( '판매 작업중 오류',e )
             
+            print('*'*80)
+            print( w2ji.getNow() )                
             _total_cnt += 1
-            if ( w2ji.get1HourOver( _check_time ) ): # 마지막 메세지 발송후 1시간 이상 되면 다시 텔레그램 메세지를 발송한다.
-                _check_time = w2ji.getNowDate() # 메세지 발송 시간을 다시 등록한다.
+            if ( w2ji.get1HourOver( _check_time ) ):    # 마지막 메세지 발송후 1시간 이상 되면 다시 텔레그램 메세지를 발송한다.
+                _check_time = w2ji.getNowDate()         # 메세지 발송 시간을 다시 등록한다.
                 w2ji.send_telegram_message(  f'NICON {_total_cnt}번재 실행중.' )      
             
             time.sleep(600) # 일회 순회 후 대기 시간
         except Exception as e:
-            print('error : ' , e)
-            w2ji.send_telegram_message(  'NICON 재시작해 주세요.......... ' )  
+            w2ji.send_telegram_message(  f'NICON 재시작해 주세요. \n {e}' )  
             quit()
             
 
