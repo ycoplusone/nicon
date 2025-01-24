@@ -65,7 +65,6 @@ class DbConn(object):
                 " where concat( category_nm,'_' , replace(replace(replace(replace( replace( replace( replace( replace(prod_nm,'/','') ,':','') ,'*','') , '?','') ,'',''),'<',''),'>',''),'|','') ) = '{path}' "
             )
             query = query.format( **param ) 
-            print( query )
             cur = self.__conn.cursor(  pymysql.cursors.DictCursor)                 
             cur.execute( query )            
             return cur.fetchall()         
@@ -484,21 +483,6 @@ class DbConn(object):
             print( 'upsert_nicon_sale_info', e ,'\n',query ,'\n',param )
         finally:
             pass            
-
-    def insert_nicon_client_log(self ):
-        '''insert_nicon_client_log'''
-        try :
-            cur = self.__conn.cursor()                        
-            query = (
-            " insert nicon_client_log(reg_date , send_time) values( now() , now() )  "
-            )
-            #query = query.format( **param )                      
-            cur.execute( query )
-            self.__conn.commit()
-        except Exception as e:
-            print( 'insert_nicon_client_log', e )
-        finally:
-            pass     
 
     def update_nicon_client_log(self ,param ):
         '''update_nicon_client_log '''
