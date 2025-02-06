@@ -8,8 +8,12 @@ import time
 from datetime import datetime
 from pytz import timezone
 import subprocess
+import pyautogui
+
+import zzBarcodeExtraction # 바코드 추출 
 
 '''
+1.0.1 바코드 리더 프로그램 연결( 바코드 추출 )
 1.0.0 zmain 프로그램 생성
 '''
 class WorkCmd(QThread):
@@ -28,9 +32,10 @@ class WorkCmd(QThread):
         subprocess.call( self.__msg )
         nt = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
         print(f'{nt}','='*50)
+        
 
 class MyApp(QWidget):    
-    __version   = '1.0.0'
+    __version   = '1.0.1'
     __title_nm  = 'Main UI'    
 
     __lb_style  = 'border-radius: 5px;border: 1px solid gray;'
@@ -39,9 +44,11 @@ class MyApp(QWidget):
 
     __x         = 1024      # ui 시작 좌표
 
+    __flag      = True # 다중 실행 방지 변수
     
     # 전역변수 - begin
     __workcmd       = '' # 쓰레드
+    __EXbar         = None #바코드 추출
     __processes     = []
     # 전역변수 - end    
     
@@ -72,7 +79,9 @@ class MyApp(QWidget):
 
     def init_param(self): # 파라미터 초기화
         ''' 파라미터 초기화 '''
-        self.__workcmd = WorkCmd()
+        self.__workcmd  = WorkCmd()
+        self.__EXbar    = zzBarcodeExtraction.BarcodeExtraction()
+        
 
     def closeEvent(self, event): # 종료 이벤트 
         ''' 종료'''
@@ -85,7 +94,9 @@ class MyApp(QWidget):
         ''' 두번째 줄'''
         groupbox    = QGroupBox('Menu')
         box         = QGridLayout()
-        box.setSpacing(5)
+        box.setSpacing(5)  
+
+        '''
         self.__btnUI[0] = QPushButton('Soldier')
         self.__btnUI[0].setStyleSheet( self.__btn_style )     
         self.__btnUI[0].clicked.connect( lambda : self.test( 'python mk_macro_ver3.py' )  )
@@ -97,10 +108,15 @@ class MyApp(QWidget):
         self.__btnUI[2] = QPushButton('Mini')
         self.__btnUI[2].setStyleSheet( self.__btn_style )
         self.__btnUI[2].clicked.connect( lambda : self.test( 'python mini.py' )  )
+        '''
+        self.__btnUI[0] = QPushButton('바코드 추출')
+        self.__btnUI[0].setStyleSheet( self.__btn_style )             
+        self.__btnUI[0].clicked.connect( lambda : self.__EXbar.main()  )
+        
         
         box.addWidget( self.__btnUI[0] , 0,0 )
-        box.addWidget( self.__btnUI[1] , 1,0 )
-        box.addWidget( self.__btnUI[2] , 2,0 )
+        #box.addWidget( self.__btnUI[1] , 1,0 )
+        #box.addWidget( self.__btnUI[2] , 2,0 )
 
         groupbox.setLayout( box )        
         return groupbox    
