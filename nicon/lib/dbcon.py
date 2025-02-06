@@ -65,6 +65,7 @@ class DbConn(object):
                 " where concat( category_nm,'_' , replace(replace(replace(replace( replace( replace( replace( replace(prod_nm,'/','') ,':','') ,'*','') , '?','') ,'',''),'<',''),'>',''),'|','') ) = '{path}' "
             )
             query = query.format( **param ) 
+            
             cur = self.__conn.cursor(  pymysql.cursors.DictCursor)                 
             cur.execute( query )            
             return cur.fetchall()         
@@ -108,7 +109,7 @@ class DbConn(object):
             cur.execute( query  )
             __dblists = cur.fetchall()
             
-            print('get_job_list', len( __dblists ) )
+            #print('get_job_list', len( __dblists ) )
             for i in __dblists:
                 m_list = []
                 s_list = []
@@ -366,7 +367,7 @@ class DbConn(object):
                 " from ( "
                 " 	SELECT " 
                 " 	category_id  , prod_nm   "
-                "   , replace(replace(replace(replace( replace( replace( replace( replace(prod_nm,'/','') ,':','') ,'*','') , '?','') ,'',''),'<',''),'>',''),'|','') prod_nm2 "
+                "   , replace(replace(replace(replace(replace( replace( replace( replace( replace(prod_nm,'/','') ,':','') ,'*','') , '?','') ,'',''),'<',''),'>',''),'|',''),'&amp;','&') prod_nm2  "
                 "   , qty "
                 " 	from nicon_job_list njl  "
                 " 	where use_yn = 'Y' "
@@ -374,7 +375,7 @@ class DbConn(object):
                 "   and qty > 0 "
                 " 	group by category_id  , prod_nm "
                 " ) a "
-                " join ( "
+                " left outer join ( "
                 "	select "
                 "	a.category_id  , a.name prod_nm , a.amount , b.cat_seq , a.seq prod_seq    "
                 "	from nicon_info a "
@@ -483,6 +484,21 @@ class DbConn(object):
             print( 'upsert_nicon_sale_info', e ,'\n',query ,'\n',param )
         finally:
             pass            
+
+    def insert_nicon_client_log(self ):
+        '''insert_nicon_client_log'''
+        try :
+            cur = self.__conn.cursor()                        
+            query = (
+            " insert nicon_client_log(reg_date , send_time) values( now() , now() )  "
+            )
+            #query = query.format( **param )                      
+            cur.execute( query )
+            self.__conn.commit()
+        except Exception as e:
+            print( 'insert_nicon_client_log', e )
+        finally:
+            pass     
 
     def update_nicon_client_log(self ,param ):
         '''update_nicon_client_log '''
