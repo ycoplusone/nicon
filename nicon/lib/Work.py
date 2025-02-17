@@ -308,13 +308,11 @@ class Work(QThread):
             capcha_number = recognize_numbers(file_name) 
             capcha_number = re.findall(r"\d+", capcha_number)[0] # 숫자만 산출하는 정규식
             new_file_name   = f"c:\\ncnc_class\\recapcha\\{file_nm}_{capcha_number}.png" # 새로 변경할 파일 이름
-            # 파일 이름 변환.
-            os.rename(file_name ,new_file_name ) 
             
-            self.fnclick( xy , self.__waitTime ) #클릭
-                        
-            ## 붙여넣기
-            self.fnpaste( capcha_number ) # 붙여넣기
+            os.rename(file_name ,new_file_name )  # 파일 이름 변환.            
+            self.fnclick( xy , self.__waitTime ) #클릭            
+            self.fnpaste( capcha_number )              ## 붙여넣기
+            time.sleep( float(xy_wait) ) #대기
 
             
 
