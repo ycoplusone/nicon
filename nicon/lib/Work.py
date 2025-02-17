@@ -12,8 +12,8 @@ import time
 import random
 import os
 import base64
-import openai
-from dotenv import load_dotenv      # pip install python-dotenv , pip install dotenv 
+import openai                       # pip install openai == 0.28.0
+from dotenv import load_dotenv      # pip install python-dotenv == 1.0.0 , pip install dotenv 
 
 ''' 자동화 클래스
 1.0.3 ctrl+a,ctrl+c,ctrl+v 추가 , '자방[숫자]' 기능 추가 작업
