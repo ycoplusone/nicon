@@ -16,6 +16,7 @@ import openai                       # pip install openai == 0.28.0
 from dotenv import load_dotenv      # pip install python-dotenv == 1.0.0 , pip install dotenv 
 
 ''' 자동화 클래스
+1.0.4 자방[문자] , 자방[혼합] 추가
 1.0.3 ctrl+a,ctrl+c,ctrl+v 추가 , '자방[숫자]' 기능 추가 작업
 1.0.2 붙여넣기 0.5초 고정 대기 시간 부여
 1.0.1 자동화 클랙스 분리
@@ -259,10 +260,17 @@ class Work(QThread):
             pyautogui.dragTo(   d2.x , d2.y   , duration= 0.3)
             time.sleep( float(xy_wait) )    #대기   
         
-        elif( step_name == '자방[숫자]') and ( self.__power == True ) :
+        elif( (step_name == '자방[숫자]') or (step_name == '자방[문자]') or (step_name == '자방[혼합]') ) and ( self.__power == True ) :
             '''자동등록방지[숫자] 인식 구간.'''
             # 캡쳐후 해당 부분 챗GPT에 인식후 복사하는 방식.
             # 캡쳐후 인식한 숫자를 파일에 같이 넣어 이후 신뢰도를 확인한다.
+            
+            ask_txt = '숫자만 읽어줘'
+            if step_name == '자방[문자]':
+                ask_txt = '문자만 읽어줘'
+            elif step_name == '자방[혼합]':
+                ask_txt = '문자와 숫자만 읽어줘'
+
             r11 = rand.get(11)
             r12 = rand.get(12)
             capture_width   = r12.x - r11.x
@@ -296,7 +304,7 @@ class Work(QThread):
                     messages=[
                         {"role": "system", "content": "당신은 이미지에서 숫자를 정확하게 인식하는 AI입니다."},
                         {"role": "user", "content": [
-                            {"type": "text", "text": "숫자만 읽어줘"},
+                            {"type": "text", "text": ask_txt},
                             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                         ]}
                     ],
@@ -306,7 +314,9 @@ class Work(QThread):
                 return response["choices"][0]["message"]["content"]
             
             capcha_number = recognize_numbers(file_name) 
-            capcha_number = re.findall(r"\d+", capcha_number)[0] # 숫자만 산출하는 정규식
+            if step_name == '자방[숫자]':
+                capcha_number = re.findall(r"\d+", capcha_number)[0] # 숫자만 산출하는 정규식            
+
             new_file_name   = f"c:\\ncnc_class\\recapcha\\{file_nm}_{capcha_number}.png" # 새로 변경할 파일 이름
             
             os.rename(file_name ,new_file_name )  # 파일 이름 변환.            
