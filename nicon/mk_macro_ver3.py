@@ -23,6 +23,7 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 '''
 매크로 작업 생성및 단일 수행 프로그램
+    25.0.5 '자방[문자]' , '자방[혼합]' 인식 추가.
     25.0.4 '자방[숫자]' 자동방지숫자 인식 추가.
     25.0.3 fnSave 에 try catch 구문 추가
     25.0.2 시작구간, 종료구간 초기화 오류 수정 , 대기시간 0.01 초기값 설정.
@@ -798,13 +799,12 @@ class MyApp(QWidget):
             self.__rep_ed_qe[i].setVisible(  True )  # 구간반복
             self.__rep_cnt_lb[i].setVisible( True )  # 구간반복
             self.__rep_cnt_qe[i].setVisible( True )  # 구간반복   
-        elif str == '자방[숫자]':
-            ''''''
+        elif (str == '자방[숫자]') or ( str == '자방[문자]' ) or ( str == '자방[혼합]' ):
             self.__geo_xy_wait[i].setVisible( True )  
             self.__cap_bnt0[i].setVisible( True )
             self.__cap_bnt1[i].setVisible( True )     
             self.__geo_btn[i].setVisible( True )                
-            #self.__col[i].setVisible(True)                   
+               
 
     def body(self): # 몸체
         '''몸체부분'''
@@ -885,7 +885,7 @@ class MyApp(QWidget):
         combo_style = 'QAbstractItemView {min-height: 180px;}' # 콤보박스 리스트 길이 스타일        
         self.__qt_div[i] = QComboBox()        
         self.__qt_div[i].setStyleSheet(combo_style)
-        self.__qt_div[i].addItems(['끝','클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','방향전환','무시','캡쳐','구간반복','D&D','랜덤대기','자방[숫자]' ])
+        self.__qt_div[i].addItems(['끝','클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','방향전환','무시','캡쳐','구간반복','D&D','랜덤대기','자방[숫자]','자방[문자]','자방[혼합]' ])
         self.__qt_div[i].setCurrentText( self.__div[i] )  # 행동구분        
         self.__qt_div[i].activated[str].connect( fnDiv )                           
         hbox.addWidget( self.__qt_div[i] )        
