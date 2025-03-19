@@ -384,7 +384,7 @@ class Work(QThread):
                                         self.fnMain( self.__div.get(m) , m , _j ) 
                                 print(i,'구간반복 - 종료','='*15)
                                         
-                            elif (self.__div.get(i) in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','방향전환','무시','캡쳐','D&D','랜덤대기','자방[숫자]'] ) :
+                            elif (self.__div.get(i) in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','방향전환','무시','캡쳐','D&D','랜덤대기','자방[숫자]','자방[문자]','자방[혼합]'] ) :
                                 self.fnMain( self.__div.get(i) , i , _j )                            
 
         except Exception as e:
