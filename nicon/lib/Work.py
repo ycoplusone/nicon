@@ -16,7 +16,8 @@ import openai                       # pip install openai == 0.28.0
 from dotenv import load_dotenv      # pip install python-dotenv == 1.0.0 , pip install dotenv 
 
 ''' 자동화 클래스
-1.0.4 자방[문자] , 자방[혼합] 추가
+1.0.5 자방[문자] , 자방[혼합] re 정규식 추가.
+1.0.4 자방[문자] , 자방[혼합] 추가.
 1.0.3 ctrl+a,ctrl+c,ctrl+v 추가 , '자방[숫자]' 기능 추가 작업
 1.0.2 붙여넣기 0.5초 고정 대기 시간 부여
 1.0.1 자동화 클랙스 분리
@@ -315,7 +316,11 @@ class Work(QThread):
             
             capcha_number = recognize_numbers(file_name) 
             if step_name == '자방[숫자]':
-                capcha_number = re.findall(r"\d+", capcha_number)[0] # 숫자만 산출하는 정규식            
+                capcha_number = re.findall(r"\d+", capcha_number)[0] # 숫자만 산출하는 정규식     
+            elif step_name == '자방[문자]':
+                capcha_number = re.findall(r'[a-zA-Z]+', capcha_number)[0] # 문자만 산출하는 정규식
+            elif step_name == '자방[혼합]':
+                capcha_number = re.findall(r'[a-zA-Z0-9]+', capcha_number)[0] # 숫자와 문자만 산출하는 정규식       
 
             new_file_name   = f"c:\\ncnc_class\\recapcha\\{file_nm}_{capcha_number}.png" # 새로 변경할 파일 이름
             
