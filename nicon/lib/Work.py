@@ -16,6 +16,7 @@ import openai                       # pip install openai == 0.28.0
 from dotenv import load_dotenv      # pip install python-dotenv == 1.0.0 , pip install dotenv 
 
 ''' 자동화 클래스
+1.0.6 re.findall 대신 re.sub로 변경 , openai 질의 양식 변경
 1.0.5 자방[문자] , 자방[혼합] re 정규식 추가.
 1.0.4 자방[문자] , 자방[혼합] 추가.
 1.0.3 ctrl+a,ctrl+c,ctrl+v 추가 , '자방[숫자]' 기능 추가 작업
@@ -266,11 +267,18 @@ class Work(QThread):
             # 캡쳐후 해당 부분 챗GPT에 인식후 복사하는 방식.
             # 캡쳐후 인식한 숫자를 파일에 같이 넣어 이후 신뢰도를 확인한다.
             
-            ask_txt = '숫자만 읽어줘'
-            if step_name == '자방[문자]':
-                ask_txt = '문자만 읽어줘'
+            ask_txt = '이 이미지에서 숫자만 읽어줘.'
+            system_txt = '당신은 이미지에서 숫자를 정확하게 인식하는 AI입니다.'
+            
+            if step_name == '자방[숫자]':
+                ask_txt = '이 이미지에서 숫자만 읽어줘.'
+                system_txt = '당신은 이미지에서 숫자를 정확하게 인식하는 AI입니다.'
+            elif step_name == '자방[문자]':
+                ask_txt = '이 이미지에서 문자만 읽어줘.'
+                system_txt = '당신은 이미지에서 문자를 정확하게 인식하는 AI입니다.'
             elif step_name == '자방[혼합]':
-                ask_txt = '문자와 숫자만 읽어줘'
+                ask_txt = '이 이미지에서 문자와 숫자만 읽어줘.'
+                system_txt = '당신은 이미지에서 문자와 숫자를 정확하게 인식하는 AI입니다.'
 
             r11 = rand.get(11)
             r12 = rand.get(12)
@@ -303,7 +311,7 @@ class Work(QThread):
                 response = openai.ChatCompletion.create(
                     model="gpt-4o",  # GPT-4-Vision 모델 사용
                     messages=[
-                        {"role": "system", "content": "당신은 이미지에서 숫자를 정확하게 인식하는 AI입니다."},
+                        {"role": "system", "content": system_txt },
                         {"role": "user", "content": [
                             {"type": "text", "text": ask_txt},
                             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
@@ -316,11 +324,11 @@ class Work(QThread):
             
             capcha_number = recognize_numbers(file_name) 
             if step_name == '자방[숫자]':
-                capcha_number = re.findall(r"\d+", capcha_number)[0] # 숫자만 산출하는 정규식     
+                capcha_number = re.sub(r'[^0-9]', '', capcha_number) # 숫자만 산출하는 정규식     
             elif step_name == '자방[문자]':
-                capcha_number = re.findall(r'[a-zA-Z]+', capcha_number)[0] # 문자만 산출하는 정규식
+                capcha_number = re.sub(r'[^a-zA-Z]', '', capcha_number) # 문자만 산출하는 정규식
             elif step_name == '자방[혼합]':
-                capcha_number = re.findall(r'[a-zA-Z0-9]+', capcha_number)[0] # 숫자와 문자만 산출하는 정규식       
+                capcha_number = re.sub(r'[^a-zA-Z0-9]', '', capcha_number) # 숫자와 문자만 산출하는 정규식       
 
             new_file_name   = f"c:\\ncnc_class\\recapcha\\{file_nm}_{capcha_number}.png" # 새로 변경할 파일 이름
             
