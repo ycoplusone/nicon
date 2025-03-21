@@ -16,6 +16,7 @@ import openai                       # pip install openai == 0.28.0
 from dotenv import load_dotenv      # pip install python-dotenv == 1.0.0 , pip install dotenv 
 
 ''' 자동화 클래스
+1.0.7 자방 부분 붙여넣기에서 쓰기로 변경
 1.0.6 re.findall 대신 re.sub로 변경 , openai 질의 양식 변경
 1.0.5 자방[문자] , 자방[혼합] re 정규식 추가.
 1.0.4 자방[문자] , 자방[혼합] 추가.
@@ -334,7 +335,8 @@ class Work(QThread):
             
             os.rename(file_name ,new_file_name )  # 파일 이름 변환.            
             self.fnclick( xy , self.__waitTime ) #클릭            
-            self.fnpaste( capcha_number )              ## 붙여넣기
+            #self.fnpaste( capcha_number )              ## 붙여넣기
+            self.fnwrite( capcha_number )             ## 타이핑
             time.sleep( float(xy_wait) ) #대기
 
             
