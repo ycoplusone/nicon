@@ -178,7 +178,7 @@ class WorkSoldier(QThread):
         
         elif( (step_name == '자방[숫자]') or (step_name == '자방[문자]') or (step_name == '자방[혼합]') ) and ( self.__power == True ) :
             '''자동등록방지[숫자] 인식 구간.'''
-            self.__core.fnReadCapture( step_name , xy  , str(_j[0]) , rand , float(xy_wait) ) # 캡쳐후 인식한 숫자를 파일에 같이 넣어 이후 신뢰도를 확인한다.
+            self.__core.fnReadCapture( step_name , xy  , str(_j[0]) , rand ,self.__waitTime, float(xy_wait) ) # 캡쳐후 인식한 숫자를 파일에 같이 넣어 이후 신뢰도를 확인한다.
         
     
     def run(self):

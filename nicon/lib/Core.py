@@ -144,7 +144,7 @@ class Core:
 
 
 
-    def fnReadCapture(self , step_name:str , xy  , txt:str , rand , wait_sec:float ):
+    def fnReadCapture(self , step_name:str , xy  , txt:str , rand ,waitTime : float , wait_sec:float ):
         '''자동등록방지[숫자] 인식 구간.'''
         # 캡쳐후 해당 부분 챗GPT에 인식후 복사하는 방식.
         # 캡쳐후 인식한 숫자를 파일에 같이 넣어 이후 신뢰도를 확인한다.
@@ -215,6 +215,6 @@ class Core:
         new_file_name   = f"c:\\ncnc_class\\recapcha\\{file_nm}_{capcha_number}.png" # 새로 변경할 파일 이름
         
         os.rename(file_name ,new_file_name )     # 파일 이름 변환.            
-        self.fnclick( xy , self.__waitTime )    #클릭            
+        self.fnclick( xy , waitTime )    #클릭            
         self.fnwrite( capcha_number )             ## 타이핑
         time.sleep( wait_sec ) #대기        
