@@ -216,5 +216,5 @@ class Core:
         
         os.rename(file_name ,new_file_name )     # 파일 이름 변환.            
         self.fnclick( xy , waitTime )    #클릭            
-        self.fnwrite( capcha_number )             ## 타이핑
+        self.fnwrite( capcha_number , 0.1 )             ## 타이핑
         time.sleep( wait_sec ) #대기        
