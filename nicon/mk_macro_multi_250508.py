@@ -38,27 +38,9 @@ class MyApp(QWidget):
     __x         = 1024
     __work      = work.WorkArmy()
     __max_obj   = 451
-
-    
-    # 전역변수 - begin
-    # __url_xy            = ()  # url 클릭 좌표
-    # __url_xy_wait       = 0.5 # 0.5 초 기본 대기 url 클릭후 대기
-    # __url_path          = ''  # url 주소
-    # __url_path_wait     = 2   # 2초 기본 대기 url 주소 입력후 대기시간
-    # __cvs_path          = ''  # cvs 파일 위치
-    # __div               = {}  # 선택값        
-    # __click_xy          = {}  # 클릭좌표    
-    # __click_rand        = {}  # 클릭 랜덤클릭
-    # __click_xy_wait     = {}  # 클릭 실행후 대기시간    
-    # __click_evn         = {}  # 클릭   복사 컬럼 위치 선택후 붙여넣기
-    # __key0              = {}  # 키보드0 단일키 하나
-    # __key0_wait         = {}  # 키보드0 키입력 횟수이다.
-    # __key1              = {}  # 키보드1 복합키 두개 - hot key 하기
-    # __key1_wait         = {}  # 키보드1 대기
         
     __seq_start         = 0     # 테스트 시작구간 
     __seq_end           = 9999  # 테스트 종료구간
-    # __file_nm           = '' # 파일이름    
     # 전역변수 - end
     
     '''
@@ -74,25 +56,9 @@ class MyApp(QWidget):
     def init_param(self): # 파라미터 초기화
         ''''''
         # 전역변수 - begin
-        # self.__url_xy            = ()  # url 클릭 좌표
-        # self.__url_xy_wait       = 0.5 # 0.5 초 기본 대기 url 클릭후 대기
-        # self.__url_path          = ''  # url 주소
-        # self.__url_path_wait     = 2   # 2초 기본 대기 url 주소 입력후 대기시간
-        # self.__cvs_path          = ''  # cvs 파일 위치
-        # self.__div               = {}  # 선택값        
-        # self.__click_xy          = {}  # 클릭좌표    
-        # self.__click_rand        = {}  # 클릭 랜덤클릭
-        # self.__click_xy_wait     = {}  # 클릭 실행후 대기시간    
-        # self.__click_evn         = {}  # 클릭   복사 컬럼 위치 선택후 붙여넣기
-        # self.__key0              = {}  # 키보드0 단일키 하나
-        # self.__key0_wait         = {}  # 키보드0 입력 횟수
-        # self.__key1              = {}  # 키보드1 복합키 두개 - hot key 하기
-        # self.__key1_wait         = {}  # 키보드1 대기
-        # self.__rep               = {}  # 구간반복 배열
-
-
         self.__seq_start         = 0     # 테스트 시작구간 
         self.__seq_end           = 9999  # 테스트 종료구간
+        # 전역변수 - end
 
     def keyboard_event(self , evt):
         try:
@@ -140,55 +106,27 @@ class MyApp(QWidget):
 
             for i in range(0,20):
                 file_lists.append( self.__load_cb_ui[i].currentText() )
-            
-            for list in file_lists:
-                if list != '':
-                    print('[',list,']','시작','>'*50)      
-                    self.__work = work.WorkArmy()                    
-                    _data           = self.fnFildLoad(list) # 메크로 데이터 로드     
-                    csv_data        = self.readfile( _data[0]['cvs_path'] )
 
-
-                    for i in _data[0]['div']:
-                        _tmp        = {} # 임시 배열
-                        _tmp.update({'seq'              : i                                     })  
-                        _tmp.update({'url_xy'           : _data[0]['url_xy']            })  # url_xy 
-                        _tmp.update({'url_xy_wait'      : _data[0]['url_xy_wait']       })  # url_xy_wait
-                        _tmp.update({'url_path'         : _data[0]['url_path']          })  # url_path
-                        _tmp.update({'url_path_wait'    : _data[0]['url_path_wait']     })  # url_path_wait
-                        _tmp.update({'step_wait_time'   : _data[0]['step_wait_time']    })  # step_wait_time => wait_time 와 동일하다.
-                        _tmp.update({'cvs_path'         : _data[0]['cvs_path']          })  # cvs_path
-                        _tmp.update({'file_name'        : list                          })  # 파일명
-                        _tmp.update({'program_nm'       : self.__title_nm               })  # 프로그램명
-                        _tmp.update({'version'          : self.__version                })  # 프로그램 버전                                                
-                        _tmp.update({'div'              : _data[0]['div'].get(i)                })
-                        _tmp.update({'click_xy'         : _data[0]['click_xy'].get(i)           })
-                        _tmp.update({'click_evn'        : _data[0]['click_evn'].get(i)          })
-                        _tmp.update({'click_rand'       : _data[0]['click_rand'].get(i)         })
-                        _tmp.update({'click_xy_wait'    : _data[0]['click_xy_wait'].get(i)      })
-                        _tmp.update({'key0'             : _data[0]['key0'].get(i)               })
-                        _tmp.update({'key0_wait'        : _data[0]['key0_wait'].get(i)          })
-                        _tmp.update({'key1'             : _data[0]['key1'].get(i)               })
-                        _tmp.update({'key1_wait'        : _data[0]['key1_wait'].get(i)          })
-                        _tmp.update({'rep'              : _data[0]['rep'].get(i)                })
-                        macro_data.append(_tmp)                    
-                        if _data[0]['div'].get(i) == '끝':
-                            break
-
-                    
-                    '''
-                    macro_data
-                    csv_data
-                    '''
-                    self.__work.fn_param(macro_data , csv_data) # 데이터 바인딩
-                    self.__work.start()
-                    self.__work.wait()                    
-                    print('[',list,']','종료','>'*50)                                    
+            if type.currentText() == '개별':            
+                ## manyToMany - start
+                self.__work     = work.WorkArmy()   
+                macros , excels = self.manybymany(file_lists)  
+                self.__work.fnParamMany(macros , excels)
+                self.__work.start()
+                self.__work.wait()                                
+                ## manyToMany - end
+            elif type.currentText() == '일괄':            
+                for list in file_lists:
+                    if list != '':
+                        print('[',list,']','시작','>'*50)      
+                        self.__work     = work.WorkArmy()   
+                        macro_data , csv_data = self.onebyone( list ) # 피클 파일 명을 넣으면 매크로와 엑셀 데이터를 리턴한다.
+                        self.__work.fn_param(macro_data , csv_data) # 데이터 바인딩
+                        self.__work.start()
+                        self.__work.wait()                    
             
             pyautogui.alert('===== 연속 실행이 완료 되었습니다 =====')
             print('종료','>'*50)
-                
-            
        
         def fnStop():
             '''매크로 종료 버튼'''
@@ -205,6 +143,14 @@ class MyApp(QWidget):
         stop_btn = QPushButton('Stop')        
         stop_btn.clicked.connect(    fnStop   )  
         grid.addWidget( stop_btn , 0 , 1,1,1 )
+
+        type = QComboBox()
+        type.setFixedHeight(17)        
+
+        type.addItem('개별') # 공백파일 
+        type.addItem('일괄') # 공백파일 
+        grid.addWidget( type , 0 , 2,1,1 )
+
         
         groupbox.setFixedHeight(40)
         groupbox.setLayout(grid)
@@ -257,6 +203,54 @@ class MyApp(QWidget):
 
 
 # 기능 함수 시작 부분 ##################################################
+    def onebyone(self, path):
+        ''' 데이터를 하나씩 작업해서 리턴한다. '''
+        macro_data  = [] # 메크로 데이터
+        csv_data    = [] # 엑셀 데이터 #self.readfile( self.__cvs_path )   
+        _data       = self.fnFildLoad( path ) # 메크로 데이터 로드     
+        file =  _data[0]['cvs_path']
+        csv_data    = self.readfile( file )      
+        for i in _data[0]['div']:
+            _tmp        = {} # 임시 배열
+            _tmp.update({'seq'              : i                                     })  
+            _tmp.update({'url_xy'           : _data[0]['url_xy']            })  # url_xy 
+            _tmp.update({'url_xy_wait'      : _data[0]['url_xy_wait']       })  # url_xy_wait
+            _tmp.update({'url_path'         : _data[0]['url_path']          })  # url_path
+            _tmp.update({'url_path_wait'    : _data[0]['url_path_wait']     })  # url_path_wait
+            _tmp.update({'step_wait_time'   : _data[0]['step_wait_time']    })  # step_wait_time => wait_time 와 동일하다.
+            _tmp.update({'cvs_path'         : _data[0]['cvs_path']          })  # cvs_path
+            _tmp.update({'file_name'        : path                          })  # 파일명
+            _tmp.update({'program_nm'       : self.__title_nm               })  # 프로그램명
+            _tmp.update({'version'          : self.__version                })  # 프로그램 버전                                                
+            _tmp.update({'div'              : _data[0]['div'].get(i)                })
+            _tmp.update({'click_xy'         : _data[0]['click_xy'].get(i)           })
+            _tmp.update({'click_evn'        : _data[0]['click_evn'].get(i)          })
+            _tmp.update({'click_rand'       : _data[0]['click_rand'].get(i)         })
+            _tmp.update({'click_xy_wait'    : _data[0]['click_xy_wait'].get(i)      })
+            _tmp.update({'key0'             : _data[0]['key0'].get(i)               })
+            _tmp.update({'key0_wait'        : _data[0]['key0_wait'].get(i)          })
+            _tmp.update({'key1'             : _data[0]['key1'].get(i)               })
+            _tmp.update({'key1_wait'        : _data[0]['key1_wait'].get(i)          })
+            _tmp.update({'rep'              : _data[0]['rep'].get(i)                })
+            macro_data.append(_tmp)                    
+            if _data[0]['div'].get(i) == '끝':
+                break   
+        return  macro_data ,  csv_data         
+
+    def manybymany(self , paths):
+        ''' 데이터들을 한번에 처리 한다. '''
+        macros      = [] # 리턴할 매크로 다차원 데이터 셋
+        excels      = [] # 리턴할 엑셀 다차원 데이터 셋
+        
+        for path in paths:
+            if path != '':
+                macro_data  = [] # 메크로 데이터
+                csv_data    = [] # 엑셀 데이터 #self.readfile( self.__cvs_path )   
+                macro_data , csv_data = self.onebyone( path )
+                macros.append( macro_data   )
+                excels.append( csv_data     )
+        return macros , excels
+
     def readfile(self , path): #엑셀파일로드
         _rt = []
         df = pd.read_excel(path ,   engine='openpyxl' , dtype=object)
