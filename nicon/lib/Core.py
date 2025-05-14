@@ -115,8 +115,7 @@ class Core:
         ''' 지정된 좌표 클릭 '''          
         r0 = rand.get( appoint )
         self.fnclick( r0 , waitTime ) #클릭   
-        time.sleep( wait_sec ) #대기       
-
+        time.sleep( wait_sec ) #대기     
 
     def fnCapture(self , r11 , r12 , txt:str ,wait_sec:float):
         '''화면 캡쳐'''
@@ -140,9 +139,7 @@ class Core:
         d2 = rand.get(16)     
         pyautogui.moveTo( d1 )          # 마우스 이동     
         pyautogui.dragTo( d2.x , d2.y , duration= 0.3)
-        time.sleep( wait_sec )    #대기   
-
-
+        time.sleep( wait_sec )    #대기 
 
     def fnReadCapture(self , step_name:str , xy  , txt:str , rand ,waitTime : float , wait_sec:float ):
         '''자동등록방지[숫자] 인식 구간.'''
@@ -244,74 +241,55 @@ class Core:
             time.sleep( float(xy_wait) ) #대기
 
         elif ( step_name == '붙여넣기'):
-            #self.__core.fnclick( xy , 0.2 )    #클릭Core
-            self.fnclick(xy=xy , wait_time = 0.2 )
+            self.fnclick(xy=xy , wait_time = 0.2 ) #클릭Core
             n       = int(evn)                    
             txt     = cdata[n]
-            #self.__core.fnpaste( txt , float(xy_wait) ) # 붙여넣기
-            self.fnpaste( txt , float(xy_wait) )
+            self.fnpaste( txt , float(xy_wait) )  # 붙여넣기
 
         elif ( step_name == '글씨쓰기'):
-            #self.__core.fnclick( xy , self.__waitTime ) #클릭
-            self.fnclick(xy=xy , wait_time = waitTime)
+            self.fnclick(xy=xy , wait_time = waitTime)  #클릭
             n   = int(evn)                    
             txt     = cdata[n]
-            #self.__core.fnwrite( txt  , float(xy_wait) ) #타이핑
-            self.fnwrite( txt=txt , wait_sec= float(xy_wait) )
+            self.fnwrite( txt=txt , wait_sec= float(xy_wait) )  #타이핑
 
         elif ( step_name == '선택하기') :
-            #self.__core.fnclick( xy , self.__waitTime ) #클릭
-            self.fnclick(xy=xy , wait_time=waitTime)
-            #self.__core.fnRandClick( rand , self.__waitTime , float(xy_wait)) # 랜덤 클릭
-            self.fnRandClick( rand=rand , waitTime=waitTime , wait_sec=float(xy_wait)  )
+            self.fnclick(xy=xy , wait_time=waitTime) #클릭
+            self.fnRandClick( rand=rand , waitTime=waitTime , wait_sec=float(xy_wait)  )  # 랜덤 클릭
 
         elif ( step_name == '중복선택') :
-            #self.__core.fnclick( xy , self.__waitTime ) #클릭   
-            self.fnclick(xy=xy , wait_time=waitTime)
-            #self.__core.fnMultClick( rand , self.__waitTime , float(xy_wait) )# 다중선택
-            self.fnMultClick(rand=rand , waitTime=waitTime , wait_sec=float(xy_wait))
+            self.fnclick(xy=xy , wait_time=waitTime) #클릭   
+            self.fnMultClick(rand=rand , waitTime=waitTime , wait_sec=float(xy_wait))  # 다중선택
 
         elif ( step_name == '랜덤선택') :
-            #self.__core.fnclick( xy , self.__waitTime ) #클릭
-            self.fnclick(xy=xy , wait_time=waitTime)
-            #self.__core.fnMultRandClick( rand , self.__waitTime  , float(xy_wait)) # 다중 랜덤 클릭
-            self.fnMultRandClick(rand=rand , waitTime=waitTime , wait_sec=float(xy_wait))
+            self.fnclick(xy=xy , wait_time=waitTime) #클릭
+            self.fnMultRandClick(rand=rand , waitTime=waitTime , wait_sec=float(xy_wait)) # 다중 랜덤 클릭
         
         elif ( step_name == '지정선택') :
-            #self.__core.fnclick( xy , self.__waitTime ) #클릭
-            self.fnclick(xy=xy , wait_time=waitTime)
+            self.fnclick(xy=xy , wait_time=waitTime) #클릭
             n   = int(evn)      # 엑셀의 가져올 컬럼의 번호를 읽어온다.                    
-            #txt = _j[n]         # 엑셀의 값의 특정 커럼값을 가져온다.
             txt = cdata[n]      # 엑셀의 값의 특정 커럼값을 가져온다.
             appoint = int(txt)  # 값을 정수형으로 변경한다.
-            #self.__core.fnAppointClick(rand , appoint , self.__waitTime , float(xy_wait) ) # 지정된 좌표 클릭
-            self.fnAppointClick( rand=rand , appoint=appoint , waitTime=waitTime , wait_sec=float(xy_wait) )
+            self.fnAppointClick( rand=rand , appoint=appoint , waitTime=waitTime , wait_sec=float(xy_wait) ) # 지정된 좌표 클릭
             
         elif ( step_name == '방향전환'):
-            #self.__core.fnclick( xy , self.__waitTime ) #클릭                        
-            self.fnclick(xy=xy , wait_time=waitTime)
-            #self.__core.fnkey( key0 , int(key0_wait) , float(xy_wait) ) #키 입력
-            self.fnkey(txt=key0 , cnt=int(key0_wait) , wait_sec=float(xy_wait))
+            self.fnclick(   xy=xy       , wait_time=waitTime) #클릭                        
+            self.fnkey(     txt=key0    , cnt=int(key0_wait) , wait_sec=float(xy_wait)) #키 입력
 
         elif ( step_name == '무시'):
             '''행동 없음.'''
         elif ( step_name == '랜덤대기'):
-            #self.__core.fnRandWait() #랜덤 대기 시간
-            self.fnRandWait()
+            self.fnRandWait() #랜덤 대기 시간
 
         elif ( step_name == '캡쳐'):
             '''캡쳐'''
             r11 = rand.get(11)
             r12 = rand.get(12)
-            #self.__core.fnCapture(r11 , r12 , str(_j[0]) , float(xy_wait)) # 캡쳐
-            self.fnCapture(r11=r11 , r12=r12 , txt= cdata[0] , wait_sec=float(xy_wait) )
+            self.fnCapture(r11=r11 , r12=r12 , txt= cdata[0] , wait_sec=float(xy_wait) ) # 캡쳐
         
         elif( step_name =='D&D') :
             '''드래드 & 드랍'''
-            #self.__core.fnDragNDrop( rand , float(xy_wait) ) # 드래그 앤 드랍
-            self.fnDragNDrop( rand=rand , wait_sec= float(xy_wait) )
+            self.fnDragNDrop( rand=rand , wait_sec= float(xy_wait) ) # 드래그 앤 드랍
         
         elif( (step_name == '자방[숫자]') or (step_name == '자방[문자]') or (step_name == '자방[혼합]') ) :
             '''자동등록방지[숫자] 인식 구간.'''
-            #self.__core.fnReadCapture( step_name , xy  , str(_j[0]) , rand ,self.__waitTime, float(xy_wait) ) # 캡쳐후 인식한 숫자를 파일에 같이 넣어 이후 신뢰도를 확인한다.
-            self.fnReadCapture( step_name=step_name , xy=xy , txt= str(cdata[0]) ,rand=rand , waitTime=waitTime , wait_sec=float(xy_wait) )
+            self.fnReadCapture( step_name=step_name , xy=xy , txt= str(cdata[0]) ,rand=rand , waitTime=waitTime , wait_sec=float(xy_wait) ) # 캡쳐후 인식한 숫자를 파일에 같이 넣어 이후 신뢰도를 확인한다.
