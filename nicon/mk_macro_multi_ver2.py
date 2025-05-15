@@ -103,31 +103,25 @@ class MyApp(QWidget):
 
             macro_data  = [] # 메크로 데이터
             csv_data    = None # 엑셀 데이터 #self.readfile( self.__cvs_path )
-
+            self.__work     = work.WorkArmy()   
             for i in range(0,20):
-                file_lists.append( self.__load_cb_ui[i].currentText() )
+                txt = self.__load_cb_ui[i].currentText()
+                if txt != '':
+                    file_lists.append( txt )
 
             if type.currentText() == '개별':            
-                ## manyToMany - start
-                self.__work     = work.WorkArmy()   
+                # 엑셀 행 기준으로
                 macros , excels = self.manybymany(file_lists)  
                 self.__work.fnParamMany(macros , excels)
-                self.__work.start()
-                self.__work.wait()                                
-                ## manyToMany - end
+                self.__work.wait()
+                self.__work.start()                
             elif type.currentText() == '일괄':            
-                for list in file_lists:
-                    if list != '':
-                        print('[',list,']','시작','>'*50)      
-                        self.__work     = work.WorkArmy()   
-                        macro_data , csv_data = self.onebyone( list ) # 피클 파일 명을 넣으면 매크로와 엑셀 데이터를 리턴한다.
-                        self.__work.fn_param(macro_data , csv_data) # 데이터 바인딩
-                        self.__work.start()
-                        self.__work.wait()                    
-            
-            pyautogui.alert('===== 연속 실행이 완료 되었습니다 =====')
-            print('종료','>'*50)
-       
+                # 작업 단위 기준으로
+                macros , excels = self.manybymany(file_lists)  
+                self.__work.fn_param(macros , excels)
+                self.__work.wait()
+                self.__work.start() 
+      
         def fnStop():
             '''매크로 종료 버튼'''
             print('fnStop','*'*50)
