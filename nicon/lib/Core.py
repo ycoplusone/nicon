@@ -8,6 +8,8 @@ import os
 import base64
 import openai                       # pip install openai == 0.28.0
 import re
+import ctypes
+
 
 ''' 자동화 수행 클래스
 1.0.0 생성.
@@ -128,7 +130,7 @@ class Core:
             os.mkdir('c:\\ncnc_class\\capture')
         except Exception as e:
             '''폴더 생성 있으면 넘어간다.''' 
-        file_nm     = base_dttm+'_'+txt
+        file_nm     = txt+'_'+base_dttm
         file_name   = r"c:\\ncnc_class\\capture\\{}{}".format( file_nm ,'.png') 
         pyautogui.screenshot( file_name , region=(r11.x , r11.y , capture_width, capture_height))    
         time.sleep( wait_sec ) #대기       
@@ -216,6 +218,18 @@ class Core:
         self.fnwrite( capcha_number , 0.1 )             ## 타이핑
         time.sleep( wait_sec ) #대기        
 
+    def run_as_admin(self , exe_path, params, wait_time :float  ):
+        # ShellExecuteW를 통해 관리자 권한으로 실행
+        ctypes.windll.shell32.ShellExecuteW(
+            None,                # hwnd
+            "runas",             # operation
+            exe_path,            # 실행할 파일
+            params,              # 파라미터
+            None,                # 디렉토리 (None이면 현재 디렉토리)
+            1                    # show command (1: SW_SHOWNORMAL, 0: SW_HIDE)
+        )
+        time.sleep(wait_time)
+
 
     def fnMain(self , step_name : str , mdata , cdata  ): 
         '''메인 프로세스
@@ -233,6 +247,7 @@ class Core:
         key1            = mdata['key1']             # self.fnArrayGet( self.__key1          , i )
         key1_wait       = mdata['key1_wait']        # self.fnArrayGet( self.__key1_wait     , i )
         waitTime        = float( mdata['step_wait_time']) # 기존 waitTime 와 동일
+        job_name        = mdata['file_name']        # 실행 작엄명
         
         print('\t 행번호 : ', seq ,' , 작업구분 : ', step_name , (f", 키부분 : {key0}" if step_name == '방향전환' else "")  )    
         if ( step_name == '클릭'):
@@ -284,7 +299,8 @@ class Core:
             '''캡쳐'''
             r11 = rand.get(11)
             r12 = rand.get(12)
-            self.fnCapture(r11=r11 , r12=r12 , txt= cdata[0] , wait_sec=float(xy_wait) ) # 캡쳐
+            file_name = f'{job_name[5:10]}_{cdata[0]}' # 작업명_수행데이터의 열값
+            self.fnCapture(r11=r11 , r12=r12 , txt= file_name , wait_sec=float(xy_wait) ) # 캡쳐
         
         elif( step_name =='D&D') :
             '''드래드 & 드랍'''
@@ -293,3 +309,8 @@ class Core:
         elif( (step_name == '자방[숫자]') or (step_name == '자방[문자]') or (step_name == '자방[혼합]') ) :
             '''자동등록방지[숫자] 인식 구간.'''
             self.fnReadCapture( step_name=step_name , xy=xy , txt= str(cdata[0]) ,rand=rand , waitTime=waitTime , wait_sec=float(xy_wait) ) # 캡쳐후 인식한 숫자를 파일에 같이 넣어 이후 신뢰도를 확인한다.
+        
+        elif( step_name =='브라우저') :
+            exe_path    = os.environ.get('brower_path')
+            exe_option  = os.environ.get('brower_options')  
+            self.run_as_admin(exe_path , exe_option , float(xy_wait))

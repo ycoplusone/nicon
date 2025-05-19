@@ -179,6 +179,10 @@ class WorkSoldier(QThread):
         elif( (step_name == '자방[숫자]') or (step_name == '자방[문자]') or (step_name == '자방[혼합]') ) and ( self.__power == True ) :
             '''자동등록방지[숫자] 인식 구간.'''
             self.__core.fnReadCapture( step_name , xy  , str(_j[0]) , rand ,self.__waitTime, float(xy_wait) ) # 캡쳐후 인식한 숫자를 파일에 같이 넣어 이후 신뢰도를 확인한다.
+        elif( step_name =='브라우저') and ( self.__power == True ) :
+            exe_path    = os.environ.get('brower_path')
+            exe_option  = os.environ.get('brower_options')  
+            self.__core.run_as_admin(exe_path , exe_option , float(xy_wait))
         
     
     def run(self):
@@ -237,8 +241,9 @@ class WorkSoldier(QThread):
                                         self.fnMain( self.__div.get(m) , m , _j ) 
                                 print(i,'구간반복 - 종료','='*15)
                                         
-                            elif (self.__div.get(i) in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','지정선택','방향전환','무시','캡쳐','D&D','랜덤대기','자방[숫자]','자방[문자]','자방[혼합]'] ) :
+                            elif (self.__div.get(i) in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','지정선택','방향전환','무시','캡쳐','D&D','랜덤대기','자방[숫자]','자방[문자]','자방[혼합]','브라우저'] ) :
                                 self.fnMain( self.__div.get(i) , i , _j )                            
+
 
         except Exception as e:
             print('*'*50)

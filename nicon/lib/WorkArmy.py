@@ -160,7 +160,7 @@ class WorkArmy(QThread):
                                                 self.__core.fnMain( self.__mk_datas[m]['div'] , self.__mk_datas[m] , _j )
                                     print('구간반복 - 종료','='*15)
                                             
-                                elif (step_name in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','지정선택','방향전환','무시','캡쳐','D&D','랜덤대기','자방[숫자]','자방[문자]','자방[혼합]'] ) :
+                                elif (step_name in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','지정선택','방향전환','무시','캡쳐','D&D','랜덤대기','자방[숫자]','자방[문자]','자방[혼합]','브라우저'] ) :
                                     if (self.__power == True):
                                         self.__core.fnMain( step_name , i , _j )                      
 
@@ -257,7 +257,7 @@ class WorkArmy(QThread):
                                             if (self.__power == True):                                                
                                                 self.__core.fnMain( self.__macros[y][m]['div'] , self.__macros[y][m] , _j )
                                     print('구간반복 - 종료','='*15)
-                                elif (step_name in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','지정선택','방향전환','무시','캡쳐','D&D','랜덤대기','자방[숫자]','자방[문자]','자방[혼합]'] ) :
+                                elif (step_name in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','지정선택','방향전환','무시','캡쳐','D&D','랜덤대기','자방[숫자]','자방[문자]','자방[혼합]','브라우저'] ) :
                                     if (self.__power == True):
                                         self.__core.fnMain( step_name , i , _j ) 
 
