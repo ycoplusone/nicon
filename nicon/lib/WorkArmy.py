@@ -167,7 +167,7 @@ class WorkArmy(QThread):
 
                 if self.__power == True: # 완료처리
                     w2ji.sendTelegramMsg( f'[{self.__title_nm}]\n 전체소요시간 [{_hour}:{_minute}:{_second}]\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n ===== 완료 ====='  )            
-                    self.__power = False
+                    #self.__power = False
                 else :
                     print('정지 되었습니다') 
 
