@@ -196,6 +196,7 @@ class WorkArmy(QThread):
             file_nms      = []
             title_nms     = []
             for i in self.__excels:
+                '''배열들의 초기 값을 지정한다.'''
                 file_nms.append('')
                 title_nms.append('')
                 asTime.append( time.time() )
@@ -265,8 +266,11 @@ class WorkArmy(QThread):
                                         self.__core.fnMain( step_name , i , _j ) 
 
                         self.__pointRow[y] += 1     # 최종 수행후 행 마감 처리 필수   
-                        
-            w2ji.sendTelegramMsg( f'[{file_nms}]\n 전체소요시간 [{_hour}:{_minute}:{_second}] ]\n 예상시간 [{pt}] \n ===== 완료 ====='  )            
+            try:            
+                w2ji.sendTelegramMsg( f'[{file_nms}]\n 전체소요시간 [{_hour}:{_minute}:{_second}] ]\n 예상시간 [{pt}] \n ===== 완료 ====='  )                            
+            except Exception as e:
+                w2ji.sendTelegramMsg( f'완료문자 발송에 오류 발생{e}'  )                            
+                
 
         except Exception as e:
             print('*'*50)
@@ -275,6 +279,10 @@ class WorkArmy(QThread):
         
         
         if self.__power == True: # 완료처리            
+            print('*'*50)                                        
+            print('작업이 전부 완료 되었습니다.')
+            print('*'*50)                        
+            
             self.__power = False
 
     def run(self):
