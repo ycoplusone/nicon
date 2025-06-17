@@ -235,15 +235,18 @@ class WorkArmy(QThread):
                                         totalTime[y]   = useTime[y] * max( (self.__lenExcel[y]-1) , 1)   # 전체 소요 시간 산출
                                         predictTime[y] = self.add_time( totalTime[y] )        # 예상 종료 시간 산출
                                         if y == (len(self.__pointRow)-1):
-                                            pt           = self.add_time( sum(totalTime) )        # 전체 예상 종료 시간
-                                            _second      = int(sum(totalTime)%60)         # 초에서 60으로 나눈 나머지
-                                            _minute      = int((sum(totalTime)//60)%60)   # 초를 분으로 환산하여 60으로 나눈 나머지
-                                            _hour        = int(sum(totalTime)//60//60)    # 초를 분으로 환산하고, 그 분을 시간으로 환산한 몫                                        
-                                            msg         = f'1회 소요시간 [{round(sum(useTime),2)}초]\n 전체소요시간 [{_hour}:{_minute}:{_second}]\n 예상시간 [{pt}]'
-                                            print('소요시간 산출 - 시작','*'*20)
-                                            print(msg)
-                                            print('소요시간 산출 - 종료','*'*20)
-                                            w2ji.sendTelegramMsg( f'[{file_nms}]\n {msg}\n ===== 시작 =====' )
+                                            try:
+                                                pt           = self.add_time( sum(totalTime) )        # 전체 예상 종료 시간
+                                                _second      = int(sum(totalTime)%60)         # 초에서 60으로 나눈 나머지
+                                                _minute      = int((sum(totalTime)//60)%60)   # 초를 분으로 환산하여 60으로 나눈 나머지
+                                                _hour        = int(sum(totalTime)//60//60)    # 초를 분으로 환산하고, 그 분을 시간으로 환산한 몫                                        
+                                                msg         = f'1회 소요시간 [{round(sum(useTime),2)}초]\n 전체소요시간 [{_hour}:{_minute}:{_second}]\n 예상시간 [{pt}]'
+                                                print('소요시간 산출 - 시작','*'*20)
+                                                print(msg)
+                                                print('소요시간 산출 - 종료','*'*20)
+                                                w2ji.sendTelegramMsg( f'[{file_nms}]\n {msg}\n ===== 시작 =====' )
+                                            except Exception as e:
+                                                w2ji.sendTelegramMsg( f'개별수행 메세지 발송중 오류 발생 발생오류코는 ({e}) ' )
                                     break
                                 elif ( step_name == '구간반복' ):
                                     rep         =  i['rep']
