@@ -56,6 +56,7 @@ class Work(QThread):
         load_dotenv()   #환경변수 로딩    
         super().__init__()
         self.__power = True     # run 매소드 루프 플래그
+        pyautogui.FAILSAFE = False        
 
     def fn_param(self , title_nm , url_xy,url_xy_wait,url_path,url_path_wait,cvs_path,div,click_xy,click_evn,click_rand,click_xy_wait,key0,key0_wait,key1,key1_wait,csv_data , seq_start , seq_end , rep , file_nm , wait_time):
         self.__title_nm          = title_nm         # 프로그램 제목
@@ -78,7 +79,7 @@ class Work(QThread):
         self.__seq_end           = seq_end          # 종료구간
         self.__rep               = rep              # 구간반복
         self.__file_nm           = file_nm          # 파일명
-        self.__waitTime          = float(wait_time)        # 대기 시간
+        self.__waitTime          = float(wait_time) # 대기 시간
 
 
     def add_time(self , add_second):
