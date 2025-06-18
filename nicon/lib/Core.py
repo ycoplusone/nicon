@@ -40,12 +40,14 @@ class Core:
     
     def fnpaste(self , txt:str , wait_sec:float ):
         '''복사 붙여넣기'''        
+        txt = '' if txt == 'nan' else txt
         pyperclip.copy( txt )
         pyautogui.hotkey('ctrl', 'v')                   
         time.sleep( wait_sec ) #대기
     
     def fnwrite(self, txt : str , wait_sec:float):
         '''복사 타이핑'''
+        txt = '' if txt == 'nan' else txt
         for n in txt:
             pyautogui.press(n)
         
