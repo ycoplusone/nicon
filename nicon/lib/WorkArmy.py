@@ -143,7 +143,7 @@ class WorkArmy(QThread):
                                         print(beTime , asTime , useTime)
                                         print(msg)
                                         print('소요시간 산출 - 종료','*'*20)
-                                        w2ji.sendTelegramMsg( f'[{self.__title_nm}]\n {msg}\n ===== 시작 =====' )
+                                        w2ji.sendTelegramMsg( f'일괄 : [{self.__title_nm}]\n {msg}\n ===== 시작 =====' )
                                         _Msg_Flag   = False
                                         # 끝이닷.
                                     break
@@ -166,8 +166,9 @@ class WorkArmy(QThread):
 
 
                 if self.__power == True: # 완료처리
-                    w2ji.sendTelegramMsg( f'[{self.__title_nm}]\n 전체소요시간 [{_hour}:{_minute}:{_second}]\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n ===== 완료 ====='  )            
+                    w2ji.sendTelegramMsg( f'일괄 : [{self.__title_nm}]\n 전체소요시간 [{_hour}:{_minute}:{_second}]\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n ===== 완료 ====='  )            
                     #self.__power = False
+                    pyautogui.alert('완료 되었습니다.')
                 else :
                     print('정지 되었습니다') 
 
@@ -245,7 +246,7 @@ class WorkArmy(QThread):
                                                 print('소요시간 산출 - 시작','*'*20)
                                                 print(msg)
                                                 print('소요시간 산출 - 종료','*'*20)
-                                                w2ji.sendTelegramMsg( f'[{file_nms}]\n {msg}\n ===== 시작 =====' )
+                                                w2ji.sendTelegramMsg( f'개별 : [{file_nms}]\n {msg}\n ===== 시작 =====' )
                                             except Exception as e:
                                                 w2ji.sendTelegramMsg( f'개별수행 메세지 발송중 오류 발생 발생오류코는 ({e}) ' )
                                     break
@@ -267,7 +268,7 @@ class WorkArmy(QThread):
 
                         self.__pointRow[y] += 1     # 최종 수행후 행 마감 처리 필수   
             try:            
-                w2ji.sendTelegramMsg( f'[{file_nms}]\n 전체소요시간 [{_hour}:{_minute}:{_second}] ]\n 예상시간 [{pt}] \n ===== 완료 ====='  )                            
+                w2ji.sendTelegramMsg( f'개별 : [{file_nms}]\n 전체소요시간 [{_hour}:{_minute}:{_second}] ]\n 예상시간 [{pt}] \n ===== 완료 ====='  )                            
             except Exception as e:
                 w2ji.sendTelegramMsg( f'완료문자 발송에 오류 발생{e}'  )                            
                 
@@ -281,6 +282,7 @@ class WorkArmy(QThread):
         if self.__power == True: # 완료처리            
             print('*'*50)                                        
             print('작업이 전부 완료 되었습니다.')
+            pyautogui.alert('완료 되었습니다.')
             print('*'*50)                        
             
             self.__power = False
