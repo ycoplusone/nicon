@@ -168,7 +168,7 @@ class WorkArmy(QThread):
                 if self.__power == True: # 완료처리
                     w2ji.sendTelegramMsg( f'일괄 : [{self.__title_nm}]\n 전체소요시간 [{_hour}:{_minute}:{_second}]\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n ===== 완료 ====='  )            
                     #self.__power = False
-                    pyautogui.alert('완료 되었습니다.')
+                    pyautogui.alert('****************************************************************\n완료 되었습니다.\n****************************************************************')
                 else :
                     print('정지 되었습니다') 
 
@@ -282,7 +282,7 @@ class WorkArmy(QThread):
         if self.__power == True: # 완료처리            
             print('*'*50)                                        
             print('작업이 전부 완료 되었습니다.')
-            pyautogui.alert('완료 되었습니다.')
+            pyautogui.alert('****************************************************************\n완료 되었습니다.\n****************************************************************')
             print('*'*50)                        
             
             self.__power = False
