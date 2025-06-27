@@ -167,7 +167,7 @@ class nicon():
             print('ERROR fnDiv02',e)
             return _state
 
-    def fnDiv03( self , _str = '아이스커피S' ): # _str = '아메리카노 L'
+    def fnDiv03( self , _str = '아이스커피S' , _flag = False ): # _str = '아메리카노 L'
         '''하분류 찾기(상품 차지)'''
         _state = False
         item_name  = '//*[@id="items-container"]/a[2]'
@@ -212,6 +212,8 @@ class nicon():
             return _state
         except Exception as e:
             print('ERROR fnDiv03',e)
+            if _flag :
+                w2ji.send_telegram_message( f'******************** \n 상품명 : {_str} 를 찾을수 없습니다. \n ********************' )      
             return _state
 
     def fnSale( self , _nm = '' , _fold_nm = '' , _files = [] , _dbconn = None ):
@@ -291,7 +293,7 @@ if __name__ == "__main__":
             _tmp = _dbconn.getNiconState()                           
             _lastupdate = _tmp
             __lists    = _dbconn.get_nicon_upload_list() # 판매 상품 갯수가 있는 상품을 전체 순회 한다. 판매중 판매보류 여부 상관 없다.
-            
+            _msg_sned_flag = w2ji.get1HourOver( _check_time )
             print('*'*80)
             print('시작 : ',w2ji.getNow() , '\t 상품 갯수 : ', len( __lists ))                
 
@@ -333,7 +335,7 @@ if __name__ == "__main__":
                         
                         if _stat_flag:
                             #print(f'3단계 : {div03_str}' )
-                            _stat_flag = _nicon.fnDiv03( div03_str )   # 상품명 매개변수
+                            _stat_flag = _nicon.fnDiv03( div03_str , _msg_sned_flag )   # 상품명 매개변수
                             time.sleep(0.5)
                         else:
                             break
@@ -351,7 +353,7 @@ if __name__ == "__main__":
             print('*'*80)
             print( w2ji.getNow() )                
             _total_cnt += 1
-            if ( w2ji.get1HourOver( _check_time ) ):    # 마지막 메세지 발송후 1시간 이상 되면 다시 텔레그램 메세지를 발송한다.
+            if ( _msg_sned_flag ):    # 마지막 메세지 발송후 1시간 이상 되면 다시 텔레그램 메세지를 발송한다.
                 _check_time = w2ji.getNowDate()         # 메세지 발송 시간을 다시 등록한다.
                 w2ji.send_telegram_message(  f'NICON {_total_cnt}번재 실행중.' )      
             
