@@ -725,7 +725,7 @@ class DbConn(object):
             else:
                 update_query = ""
                 if flag == 'E':
-                    update_query = f"UPDATE marco_info SET job_st_dt = now() , job_ed_cnt = job_ed_cnt + 1 WHERE seq = {result['seq']} "
+                    update_query = f"UPDATE marco_info SET job_ed_dt = now() , job_ed_cnt = job_ed_cnt + 1 WHERE seq = {result['seq']} "
                 else :
                     update_query = f"UPDATE marco_info SET job_st_cnt = job_st_cnt + 1 WHERE seq = {result['seq']} "
                 
