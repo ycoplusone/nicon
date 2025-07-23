@@ -685,3 +685,54 @@ class DbConn(object):
             return cur.fetchall()         
         except Exception as e:
             print( 'get_ex_info => ' , e )
+    
+    def macro_job_log(self , job_nm , flag ):
+        ''' 작업 처리 체크  '''
+        try:
+            # PARAM['flag'] == 'E' 면 query1 처리 , 아니며 ㄴquery2 처리
+            select_query1 = (
+                " SELECT seq "
+                " FROM marco_info "
+                " WHERE job_nm = '"+str(job_nm)+"' "
+                " order by seq desc "
+                " LIMIT  1 "
+            )
+            select_query2 = (
+                " SELECT seq "
+                " FROM marco_info "
+                " WHERE job_nm = '"+str(job_nm)+"' "
+                " and DATE_FORMAT(job_st_dt, '%Y%m%d') = DATE_FORMAT( now() , '%Y%m%d') "
+                " order by seq desc "
+                " LIMIT  1 "
+            )            
+
+            cur = self.__conn.cursor( pymysql.cursors.DictCursor )
+            if flag == 'E':
+                cur.execute( select_query1 )
+            else :
+                cur.execute( select_query2 )
+
+            result = cur.fetchone()
+            
+            # 데이터가 없는 경우: INSERT
+            if result is None:
+                insert_query = (
+                    "INSERT INTO marco_info (  job_nm   , job_st_dt, job_ed_dt, job_st_cnt, job_ed_cnt)  "
+                    "VALUES('"+str(job_nm)+"' , now()    , now()    , 1         , 0         )"
+
+                )
+                cur.execute(insert_query)
+            else:
+                update_query = ""
+                if flag == 'E':
+                    update_query = f"UPDATE marco_info SET job_st_dt = now() , job_ed_cnt = job_ed_cnt + 1 WHERE seq = {result['seq']} "
+                else :
+                    update_query = f"UPDATE marco_info SET job_st_cnt = job_st_cnt + 1 WHERE seq = {result['seq']} "
+                
+                cur.execute(update_query)
+
+            self.__conn.commit()
+            
+        except Exception as e:
+            print("macro_job_log =>", e)
+            return False

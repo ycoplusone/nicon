@@ -15,6 +15,7 @@ import base64
 import openai                       # pip install openai == 0.28.0
 from dotenv import load_dotenv      # pip install python-dotenv == 1.0.0 , pip install dotenv 
 import lib.Core as core
+import lib.dbcon as dbcon
 
 ''' 자동화 클래스
 1.0.1 미사용 변수 제거
@@ -29,6 +30,7 @@ class WorkArmy(QThread):
     __seq_end           = 9999      # 종료구간
 
     __core              = core.Core()
+    __dbconn            = dbcon.DbConn() #db연결    
     __power = False
     #### 변수 사용 구분 - 시작
     __type              = 'A' # __type {A:한번다 , B:하나씩}
@@ -52,6 +54,7 @@ class WorkArmy(QThread):
         super().__init__()
         self.__power    = True     # run 매소드 루프 플래그
         self.__core     = core.Core()
+        self.__dbconn   = dbcon.DbConn() #db연결    
 
     def fn_param(self ,  macros , excels ):
         ''' 3차원 데이터 셋 '''
@@ -144,6 +147,7 @@ class WorkArmy(QThread):
                                         print(msg)
                                         print('소요시간 산출 - 종료','*'*20)
                                         w2ji.sendTelegramMsg( f'일괄 : [{self.__title_nm}]\n {msg}\n ===== 시작 =====' )
+                                        self.__dbconn.macro_job_log( self.__file_nm ,'S') # db 로그 생성
                                         _Msg_Flag   = False
                                         # 끝이닷.
                                     break
@@ -167,6 +171,7 @@ class WorkArmy(QThread):
 
                 if self.__power == True: # 완료처리
                     w2ji.sendTelegramMsg( f'일괄 : [{self.__title_nm}]\n 전체소요시간 [{_hour}:{_minute}:{_second}]\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n ===== 완료 ====='  )            
+                    self.__dbconn.macro_job_log( self.__file_nm ,'E') # db 로그 생성
                     #self.__power = False
                     pyautogui.alert('****************************************************************\n완료 되었습니다.\n****************************************************************')
                 else :
@@ -247,6 +252,7 @@ class WorkArmy(QThread):
                                                 print(msg)
                                                 print('소요시간 산출 - 종료','*'*20)
                                                 w2ji.sendTelegramMsg( f'개별 : [{file_nms}]\n {msg}\n ===== 시작 =====' )
+                                                #self.__dbconn.macro_job_log( file_nms ,'S') # db 로그 생성
                                             except Exception as e:
                                                 w2ji.sendTelegramMsg( f'개별수행 메세지 발송중 오류 발생 발생오류코는 ({e}) ' )
                                     break
@@ -268,7 +274,8 @@ class WorkArmy(QThread):
 
                         self.__pointRow[y] += 1     # 최종 수행후 행 마감 처리 필수   
             try:            
-                w2ji.sendTelegramMsg( f'개별 : [{file_nms}]\n 전체소요시간 [{_hour}:{_minute}:{_second}] ]\n 예상시간 [{pt}] \n ===== 완료 ====='  )                            
+                w2ji.sendTelegramMsg( f'개별 : [{file_nms}]\n 전체소요시간 [{_hour}:{_minute}:{_second}] ]\n 예상시간 [{pt}] \n ===== 완료 ====='  )   
+                #self.__dbconn.macro_job_log( file_nms ,'E') # db 로그 생성                         
             except Exception as e:
                 w2ji.sendTelegramMsg( f'완료문자 발송에 오류 발생{e}'  )                            
                 
