@@ -20,6 +20,7 @@ class Core:
     ''' Work.py 혹은 work_army.py 가 수행되는 클래스'''
     def __inti__ (self):
         ''' 초기화 함수 현재 기능 없음'''
+        pyautogui.FAILSAFE = False
 
     def fndbclick(self , xy , wait_time:float):
         '''더블클릭'''
