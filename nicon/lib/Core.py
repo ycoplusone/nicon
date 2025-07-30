@@ -17,6 +17,9 @@ import ctypes
 '''
 
 class Core:
+    
+    inputWait = False # 입력대기 z키 입력 대기 제어 변수
+
     ''' Work.py 혹은 work_army.py 가 수행되는 클래스'''
     def __inti__ (self):
         ''' 초기화 함수 현재 기능 없음'''
@@ -72,7 +75,16 @@ class Core:
     def fnRandWait(self):
         '''랜덤 대기 시간'''
         rand_wait_t = round(random.uniform(3,20),1)
-        time.sleep( rand_wait_t )        
+        time.sleep( rand_wait_t )    
+
+    def fnInputWait( self ):
+        '''입력 대기 외부 키 입력 이벤트를 위한 함수'''
+        while True:
+            if not self.inputWait:
+                break
+            time.sleep( 1 ) #대기            
+            print('\t\t Z 키 입력대기 Z키를 입력해서 다음 단계를 수행하세요.','?'*10)
+
     
     def fnRandClick(self , rand , waitTime : float , wait_sec:float):
         '''랜덤 클릭'''

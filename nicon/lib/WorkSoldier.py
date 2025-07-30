@@ -49,6 +49,8 @@ class WorkSoldier(QThread):
     __dbconn            = dbcon.DbConn() #db연결    
     __power = False
 
+    inputWait = False # 입력대기 신호
+
     def __init__(self ):
         load_dotenv()   #환경변수 로딩    
         super().__init__()
@@ -106,7 +108,11 @@ class WorkSoldier(QThread):
             ''''''
             return arr.get(pos)
         else :
-            return None        
+            return None    
+
+    def fnInputWait2( self ):
+        '''입력대기 제어함수'''
+        self.__core.inputWait = False
     
     def fnMain(self , step_name : str , i : int , _j  ): 
         '''메인 프로세스
@@ -168,6 +174,10 @@ class WorkSoldier(QThread):
             '''행동 없음.'''
         elif ( step_name == '랜덤대기') and ( self.__power == True ):            
             self.__core.fnRandWait() #랜덤 대기 시간
+        
+        elif ( step_name == '입력대기') and ( self.__power == True ):            
+            self.__core.inputWait = True
+            self.__core.fnInputWait()            
 
         elif ( step_name == '캡쳐') and ( self.__power == True ):
             '''캡쳐'''
@@ -245,7 +255,7 @@ class WorkSoldier(QThread):
                                         self.fnMain( self.__div.get(m) , m , _j ) 
                                 print(i,'구간반복 - 종료','='*15)
                                         
-                            elif (self.__div.get(i) in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','지정선택','방향전환','무시','캡쳐','D&D','랜덤대기','자방[숫자]','자방[문자]','자방[혼합]','브라우저'] ) :
+                            elif (self.__div.get(i) in ['클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','지정선택','방향전환','무시','캡쳐','D&D','랜덤대기','입력대기','자방[숫자]','자방[문자]','자방[혼합]','브라우저'] ) :
                                 self.fnMain( self.__div.get(i) , i , _j )                            
 
 
