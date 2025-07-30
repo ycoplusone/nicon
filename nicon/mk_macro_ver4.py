@@ -217,6 +217,11 @@ class MyApp(QWidget):
                 self.__start_btn.setEnabled(True)  
                 self.__work.stop()
                 self.__work.terminate()         # 강제 종료                
+            elif( evt.name == 'z' or evt.name == 'Z' ):
+                ''''''
+                #self.__work.inputWait = False
+                self.__work.fnInputWait2()
+
         except Exception as e:
             print(f'keyboard_event => ')
 
@@ -767,7 +772,7 @@ class MyApp(QWidget):
         self.__rep_cnt_qe[i].setVisible( False )    # 구간반복                                                   
         self.__dnd_bnt0[i].setVisible( False )      # 드래그 & 드랍
         self.__dnd_bnt1[i].setVisible( False )      # 드래그 & 드랍     
-        if (str == '끝') or (str == '무시')or (str == '랜덤대기'):                
+        if (str == '끝') or (str == '무시')or (str == '랜덤대기')or (str == '입력대기'):                
             ''''''                                             
         elif (str == '클릭') or (str == '붙여넣기') or (str == '글씨쓰기'):
             self.__geo_btn[i].setVisible( True )                
@@ -896,7 +901,7 @@ class MyApp(QWidget):
         combo_style = 'QAbstractItemView {min-height: 220px;}' # 콤보박스 리스트 길이 스타일        
         self.__qt_div[i] = QComboBox()        
         self.__qt_div[i].setStyleSheet(combo_style)
-        self.__qt_div[i].addItems(['끝','클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','지정선택','방향전환','무시','캡쳐','구간반복','D&D','랜덤대기','자방[숫자]','자방[문자]','자방[혼합]','브라우저' ])
+        self.__qt_div[i].addItems(['끝','클릭','붙여넣기','글씨쓰기','선택하기','중복선택','랜덤선택','지정선택','방향전환','무시','캡쳐','구간반복','D&D','랜덤대기','입력대기','자방[숫자]','자방[문자]','자방[혼합]','브라우저' ])
         self.__qt_div[i].setCurrentText( self.__div[i] )  # 행동구분        
         self.__qt_div[i].activated[str].connect( fnDiv )                           
         hbox.addWidget( self.__qt_div[i] )        

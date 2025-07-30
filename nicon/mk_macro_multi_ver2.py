@@ -66,6 +66,8 @@ class MyApp(QWidget):
                 self.__work.stop()
                 self.__work.terminate() # 강제 종료
                 pyautogui.alert('정지 되었습니다.')
+            elif( evt.name == 'z' or evt.name == 'Z' ): #입력 대기 제어키                
+                self.__work.fnInputWait2()            
         except Exception as e:
             print(f'keyboard_event => ')
 
