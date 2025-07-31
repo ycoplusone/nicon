@@ -79,11 +79,12 @@ class Core:
 
     def fnInputWait( self ):
         '''입력 대기 외부 키 입력 이벤트를 위한 함수'''
+        print('\t\t Z 키 입력대기 Z키를 입력해서 다음 단계를 수행하세요.','?'*10)
         while True:
             if not self.inputWait:
                 break
             time.sleep( 1 ) #대기            
-            print('\t\t Z 키 입력대기 Z키를 입력해서 다음 단계를 수행하세요.','?'*10)
+            
 
     
     def fnRandClick(self , rand , waitTime : float , wait_sec:float):
