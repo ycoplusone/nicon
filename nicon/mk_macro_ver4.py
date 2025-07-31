@@ -690,7 +690,7 @@ class MyApp(QWidget):
         '''통합 저장'''
         try:
             file_name = self.__save_file_nm_ui.text()        
-            file_name = re.sub('[\/:*?"<>|]','',file_name)
+            file_name = re.sub('[/:*?"<>|]','',file_name)
             file_name = file_name.replace(' ','').replace('ver3_','')   
             if file_name == '':
                 QMessageBox.about(self,'About Title','파일이름이 없습니다... ')
