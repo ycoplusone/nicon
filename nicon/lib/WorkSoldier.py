@@ -15,7 +15,7 @@ import base64
 import openai                       # pip install openai == 0.28.0
 from dotenv import load_dotenv      # pip install python-dotenv == 1.0.0 , pip install dotenv 
 import lib.Core as core
-import lib.dbcon as dbcon
+#import lib.dbcon as dbcon
 
 ''' 자동화 클래스
 1.0.0 자동화 클랙스 work 와 core 분리.
@@ -46,7 +46,7 @@ class WorkSoldier(QThread):
     __waitTime          = 0.01   # 기본 대기 시간. 각 행동당 기본 대시 시간을 의미함.
     
     __core              = core.Core()
-    __dbconn            = dbcon.DbConn() #db연결    
+    #__dbconn            = dbcon.DbConn() #db연결    
     __power = False
 
     inputWait = False # 입력대기 신호
@@ -56,7 +56,7 @@ class WorkSoldier(QThread):
         super().__init__()
         self.__power    = True     # run 매소드 루프 플래그
         self.__core     = core.Core()
-        self.__dbconn   = dbcon.DbConn() #db연결    
+        #self.__dbconn   = dbcon.DbConn() #db연결    
 
     def fn_param(self , title_nm , url_xy,url_xy_wait,url_path,url_path_wait,cvs_path,div,click_xy,click_evn,click_rand,click_xy_wait,key0,key0_wait,key1,key1_wait,csv_data , seq_start , seq_end , rep , file_nm , wait_time):
         self.__title_nm          = title_nm         # 프로그램 제목
@@ -239,7 +239,8 @@ class WorkSoldier(QThread):
                                     print(msg)
                                     print('소요시간 산출 - 종료','*'*20)
                                     w2ji.sendTelegramMsg( f'[{self.__title_nm}]\n {msg}\n ===== 시작 =====' )
-                                    self.__dbconn.macro_job_log( self.__file_nm ,'S') # db 로그 생성
+                                    w2ji.setJobLog(self.__file_nm , 'S')
+                                    #self.__dbconn.macro_job_log( self.__file_nm ,'S') # db 로그 생성
                                     _Msg_Flag   = False
                                 # 끝이닷.
                                 break
@@ -266,7 +267,8 @@ class WorkSoldier(QThread):
         
         if self.__power == True: # 완료처리
             w2ji.sendTelegramMsg( f'[{self.__title_nm}]\n 전체소요시간 [{_hour}:{_minute}:{_second}]\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n ===== 완료 ====='  )            
-            self.__dbconn.macro_job_log( self.__file_nm ,'E') # db 로그 생성
+            #self.__dbconn.macro_job_log( self.__file_nm ,'E') # db 로그 생성
+            w2ji.setJobLog(self.__file_nm ,'E')
             if self.__title_nm == 'Soldier':
                 pyautogui.alert('========== 완료 ==========')
 

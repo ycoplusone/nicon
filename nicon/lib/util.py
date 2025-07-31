@@ -50,7 +50,8 @@ def decode(im):
     try:
         decodedObjects = pyzbar.decode(im)        
         for obj in decodedObjects:
-            _str = obj.data.decode('utf-8')        
+            _str = obj.data.decode('utf-8') 
+            print(_str)       
     except Exception as e:
         print(e)
         return None
@@ -81,7 +82,7 @@ def into_rename_barcode():
             file_names =  [ X for X in path_files if os.path.isfile(X)]
             file_nm    =  [ x for x in listdir ]                
             uniq = 1
-            for ii in file_names:                
+            for ii in file_names:               
                 __sp = os.path.splitext(ii)
                 __exc = __sp[1] # 확장자
 
@@ -243,3 +244,15 @@ def getFileCnt( _dbconn ):
     
     send_telegram_message( txt )
 
+
+
+def setJobLog( job_nm , flag):
+    '''작업 로그 생성 URL 호출'''
+    try:
+        url = "https://themoreschool.cafe24.com/job_log.php"
+        payload = {"job_nm": job_nm, "flag": flag}
+        response = requests.post(url, data=payload)  # ← json= → data= 로 변경
+    except Exception as e:
+        print('='*20)
+        print( 'setJobLog error', e )
+        print('='*20)
