@@ -19,6 +19,7 @@ import ctypes
 class Core:
     
     inputWait = False # 입력대기 z키 입력 대기 제어 변수
+    pyautogui.FAILSAFE = False
 
     ''' Work.py 혹은 work_army.py 가 수행되는 클래스'''
     def __inti__ (self):
