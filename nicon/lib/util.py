@@ -246,11 +246,11 @@ def getFileCnt( _dbconn ):
 
 
 
-def setJobLog( job_nm , flag):
+def setJobLog( job_nm ,url_path, flag):
     '''작업 로그 생성 URL 호출'''
     try:
-        url = "https://themoreschool.cafe24.com/job_log.php"
-        payload = {"job_nm": job_nm, "flag": flag}
+        url = "https://themoreschool.cafe24.com/job_log_v2.php"
+        payload = {"job_nm": job_nm, "url_path":url_path, "flag": flag}
         response = requests.post(url, data=payload)  # ← json= → data= 로 변경
     except Exception as e:
         print('='*20)

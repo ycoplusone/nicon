@@ -239,7 +239,7 @@ class WorkSoldier(QThread):
                                     print(msg)
                                     print('소요시간 산출 - 종료','*'*20)
                                     w2ji.sendTelegramMsg( f'[{self.__title_nm}]\n {msg}\n ===== 시작 =====' )
-                                    w2ji.setJobLog(self.__file_nm , 'S')
+                                    w2ji.setJobLog(self.__file_nm , self.__url_path, 'S')
                                     #self.__dbconn.macro_job_log( self.__file_nm ,'S') # db 로그 생성
                                     _Msg_Flag   = False
                                 # 끝이닷.
@@ -268,7 +268,7 @@ class WorkSoldier(QThread):
         if self.__power == True: # 완료처리
             w2ji.sendTelegramMsg( f'[{self.__title_nm}]\n 전체소요시간 [{_hour}:{_minute}:{_second}]\n 예상시간 [{predictTime}]\n 작업명 [{self.__file_nm}]\n ===== 완료 ====='  )            
             #self.__dbconn.macro_job_log( self.__file_nm ,'E') # db 로그 생성
-            w2ji.setJobLog(self.__file_nm ,'E')
+            w2ji.setJobLog(self.__file_nm , self.__url_path ,'E')
             if self.__title_nm == 'Soldier':
                 pyautogui.alert('========== 완료 ==========')
 
