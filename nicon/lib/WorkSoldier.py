@@ -167,7 +167,8 @@ class WorkSoldier(QThread):
             self.__core.fnAppointClick(rand , appoint , self.__waitTime , float(xy_wait) ) # 지정된 좌표 클릭
             
         elif ( step_name == '방향전환') and ( self.__power == True ):
-            self.__core.fnclick( xy , self.__waitTime ) #클릭                        
+            if (key0 != 'ctrl+a' or key0 != 'ctrl+c' or key0 != 'ctrl+v' ):
+                self.__core.fnclick( xy , self.__waitTime ) #클릭                        
             self.__core.fnkey( key0 , int(key0_wait) , float(xy_wait) ) #키 입력
 
         elif ( step_name == '무시') and ( self.__power == True ):

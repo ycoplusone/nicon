@@ -28,7 +28,13 @@ class Core:
 
     def fndbclick(self , xy , wait_time:float):
         '''더블클릭'''
-        pyautogui.doubleClick(x= xy.x  , y= xy.y)        
+        pyautogui.doubleClick(x= xy.x  , y= xy.y)                
+        time.sleep( wait_time )         
+    
+    def fntripleClick(self , xy , wait_time:float):
+        '''트리풀'''
+        #pyautogui.tripleClick(x= xy.x  , y= xy.y)                
+        pyautogui.click(x= xy.x  , y= xy.y, clicks=3)
         time.sleep( wait_time )         
 
     def fnclick(self , xy , wait_time:float):
@@ -62,11 +68,11 @@ class Core:
     def fnkey(self , txt : str , cnt : int , wait_sec:float ):
         '''키 입력'''
         if txt == 'ctrl+a': # 전체선택
-            pyautogui.hotkey('ctrl', 'a' , interval=0.2)            
-        elif str == 'ctrl+c': # 복사
-            pyautogui.hotkey('ctrl', 'c' , interval=0.2)            
-        elif str == 'ctrl+v': # 붙여넣기
-            pyautogui.hotkey('ctrl', 'v' , interval=0.2)                        
+            pyautogui.hotkey('ctrl', 'a' )
+        elif txt == 'ctrl+c': # 복사
+            pyautogui.hotkey("ctrl", "c")
+        elif txt == 'ctrl+v': # 붙여넣기
+            pyautogui.hotkey("ctrl", "v")
         else : # 이외 전체 키 처리.
             pyautogui.press( txt , presses = cnt , interval=0.2)  
 
@@ -80,7 +86,7 @@ class Core:
 
     def fnInputWait( self ):
         '''입력 대기 외부 키 입력 이벤트를 위한 함수'''
-        print('\t\t Z 키 입력대기 Z키를 입력해서 다음 단계를 수행하세요.','?'*10)
+        print('\t\t (Z키 또는 +키) 입력대기 (Z키 또는 +키)를 입력해서 다음 단계를 수행하세요.','?'*10)
         while True:
             if not self.inputWait:
                 break
@@ -317,8 +323,9 @@ class Core:
             appoint = int(txt)  # 값을 정수형으로 변경한다.
             self.fnAppointClick( rand=rand , appoint=appoint , waitTime=waitTime , wait_sec=float(xy_wait) ) # 지정된 좌표 클릭
             
-        elif ( step_name == '방향전환'):
-            self.fnclick(   xy=xy       , wait_time=waitTime) #클릭                        
+        elif ( step_name == '방향전환'):        
+            if (key0 != 'ctrl+a' or key0 != 'ctrl+c' or key0 != 'ctrl+v' ):
+                self.fnclick(xy=xy , wait_time=waitTime) #클릭
             self.fnkey(     txt=key0    , cnt=int(key0_wait) , wait_sec=float(xy_wait)) #키 입력
 
         elif ( step_name == '무시'):
