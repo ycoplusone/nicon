@@ -217,9 +217,8 @@ class MyApp(QWidget):
                 self.__start_btn.setEnabled(True)  
                 self.__work.stop()
                 self.__work.terminate()         # 강제 종료                
-            elif( evt.name == 'z' or evt.name == 'Z' ):
+            elif( evt.name == 'z' or evt.name == 'Z' or evt.name == '+' ):
                 ''''''
-                #self.__work.inputWait = False
                 self.__work.fnInputWait2()
 
         except Exception as e:
