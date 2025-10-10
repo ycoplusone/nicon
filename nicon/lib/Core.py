@@ -159,26 +159,17 @@ class Core:
         pyautogui.screenshot( file_name , region=(r11.x , r11.y , capture_width, capture_height))    
         time.sleep( wait_sec ) #대기       
 
-    '''
-    def fnDragNDrop(self , rand , wait_sec:float):
-        # 드래그 앤 드롭
-        d1 = rand.get(15)
-        d2 = rand.get(16)     
-        pyautogui.moveTo( d1 )          # 마우스 이동     
-        pyautogui.dragTo( d2.x , d2.y , duration= 0.3)
-        time.sleep( wait_sec )    #대기 
-    '''
     def fnDragNDrop(self , rand , wait_sec:float):
         #드래그 앤 드롭
         d1 = rand.get(15)
         d2 = rand.get(16)     
         pyautogui.moveTo( d1 )          # 마우스 이동    
         pyautogui.mouseDown(button='left') 
-        pyautogui.dragTo( d2.x , d2.y , duration= 0.3  ,button='left' , mouseDownUp =False )
-        time.sleep(0.2)
+        pyautogui.dragTo( d2.x , d2.y , duration= wait_sec  ,button='left' , mouseDownUp =False )
+        time.sleep(0.1)
         pyautogui.mouseUp(button='left')
         #pyautogui.dragRel(d2.x , d2.y , duration= 1 )
-        time.sleep( wait_sec )    #대기         
+        time.sleep(0.1)
 
     def fnReadCapture(self , step_name:str , xy  , txt:str , rand ,waitTime : float , wait_sec:float ):
         '''자동등록방지[숫자] 인식 구간.'''
