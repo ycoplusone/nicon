@@ -102,13 +102,13 @@ class Core:
         r2 = rand.get(2)
         r3 = rand.get(3)
         if r == 0:
-            self.fnclick( r0 , waitTime ) #클릭   
+            self.fnclick( r0 , (waitTime) ) #클릭   
         elif r == 1:
-            self.fnclick( r1 , waitTime ) #클릭   
+            self.fnclick( r1 , (waitTime) ) #클릭   
         elif r == 2:
-            self.fnclick( r2 , waitTime ) #클릭   
+            self.fnclick( r2 , (waitTime) ) #클릭   
         elif r == 3:
-            self.fnclick( r3 , waitTime ) #클릭   
+            self.fnclick( r3 , (waitTime) ) #클릭   
         time.sleep( wait_sec ) #대기        
     
     def fnMultClick(self , rand , waitTime : float , wait_sec:float):
@@ -277,7 +277,7 @@ class Core:
         waitTime        = float( mdata['step_wait_time']) # 기존 waitTime 와 동일
         job_name        = mdata['file_name']        # 실행 작엄명
         
-        print('\t 행번호 : ', seq ,' , 작업구분 : ', step_name , (f", 키부분 : {key0}" if step_name == '방향전환' else "")  )    
+        print('\t 행번호 : ', seq ,' , 작업구분 : ', step_name , (f", 키부분 : {key0}" if step_name == '방향전환' else "") , '작업간대기',xy_wait  )    
         if ( step_name == '클릭'):
             for j in range(0, int(evn)): #반복 실행한다.
                 self.fnclick( xy = xy , wait_time = waitTime  )
@@ -296,7 +296,7 @@ class Core:
             self.fnwrite( txt=txt , wait_sec= float(xy_wait) )  #타이핑
 
         elif ( step_name == '선택하기') :
-            self.fnclick(xy=xy , wait_time=waitTime) #클릭
+            self.fnclick(xy=xy , wait_time=(waitTime+float(xy_wait))  ) #클릭
             self.fnRandClick( rand=rand , waitTime=waitTime , wait_sec=float(xy_wait)  )  # 랜덤 클릭
 
         elif ( step_name == '중복선택') :
@@ -308,7 +308,7 @@ class Core:
             self.fnMultRandClick(rand=rand , waitTime=waitTime , wait_sec=float(xy_wait)) # 다중 랜덤 클릭
         
         elif ( step_name == '지정선택') :
-            self.fnclick(xy=xy , wait_time=waitTime) #클릭
+            self.fnclick(xy=xy , wait_time=(waitTime+float(xy_wait)) ) #클릭
             n   = int(evn)      # 엑셀의 가져올 컬럼의 번호를 읽어온다.                    
             txt = cdata[n]      # 엑셀의 값의 특정 커럼값을 가져온다.
             appoint = int(txt)  # 값을 정수형으로 변경한다.
