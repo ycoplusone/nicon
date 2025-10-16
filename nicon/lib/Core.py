@@ -72,7 +72,11 @@ class Core:
         elif txt == 'ctrl+c': # 복사
             pyautogui.hotkey("ctrl", "c")
         elif txt == 'ctrl+v': # 붙여넣기
-            pyautogui.hotkey("ctrl", "v")
+            #pyautogui.hotkey("ctrl", "v")
+            pyautogui.click(button='right')
+            time.sleep(0.2)
+            pyautogui.press('down', presses=6, interval=0.1) 
+            pyautogui.press('enter')           
         else : # 이외 전체 키 처리.
             pyautogui.press( txt , presses = cnt , interval=0.2)  
 
