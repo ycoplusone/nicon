@@ -219,6 +219,7 @@ class MyApp(QWidget):
                 self.__work.terminate()         # 강제 종료                
             elif( evt.name == 'z' or evt.name == 'Z' or evt.name == '+' ):
                 ''''''
+                print('??')
                 self.__work.fnInputWait2()
 
         except Exception as e:
