@@ -162,17 +162,18 @@ class WorkSoldier(QThread):
             self.__core.fnMultRandClick( rand , self.__waitTime  , float(xy_wait)) # 다중 랜덤 클릭
         
         elif ( step_name == '지정선택') and ( self.__power == True ):
-            #self.__core.fnclick( xy , self.__waitTime ) #클릭
             self.__core.fnclick( xy ,  float(xy_wait) ) #클릭
             n   = int(evn)      # 엑셀의 가져올 컬럼의 번호를 읽어온다.                    
             txt = _j[n]         # 엑셀의 값의 특정 커럼값을 가져온다.
             appoint = int(txt)  # 값을 정수형으로 변경한다.
-            #self.__core.fnAppointClick(rand , appoint , self.__waitTime , float(xy_wait) ) # 지정된 좌표 클릭
             self.__core.fnAppointClick(rand , appoint , float(xy_wait), self.__waitTime  ) # 지정된 좌표 클릭
             
         elif ( step_name == '방향전환') and ( self.__power == True ):
             if (key0 != 'ctrl+a' or key0 != 'ctrl+c' or key0 != 'ctrl+v' ):
-                self.__core.fnclick( xy , self.__waitTime ) #클릭                        
+                self.__core.fnclick( xy , self.__waitTime ) #클릭     
+            if (key0 == 'ctrl+c'):
+                self.__core.fnclick(xy , self.__waitTime)
+
             self.__core.fnkey( key0 , int(key0_wait) , float(xy_wait) ) #키 입력
 
         elif ( step_name == '무시') and ( self.__power == True ):

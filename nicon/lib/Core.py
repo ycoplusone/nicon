@@ -28,13 +28,13 @@ class Core:
 
     def fndbclick(self , xy , wait_time:float):
         '''더블클릭'''
-        pyautogui.doubleClick(x= xy.x  , y= xy.y)                
+        pyautogui.doubleClick(x= xy.x  , y= xy.y )
         time.sleep( wait_time )         
     
     def fntripleClick(self , xy , wait_time:float):
         '''트리풀'''
-        #pyautogui.tripleClick(x= xy.x  , y= xy.y)                
-        pyautogui.click(x= xy.x  , y= xy.y, clicks=3)
+        pyautogui.tripleClick(x= xy.x  , y= xy.y)                
+        #pyautogui.click(x= xy.x  , y= xy.y, clicks=3)
         time.sleep( wait_time )         
 
     def fnclick(self , xy , wait_time:float):
@@ -75,7 +75,7 @@ class Core:
             #pyautogui.hotkey("ctrl", "v")
             pyautogui.click(button='right')
             time.sleep(0.2)
-            pyautogui.press('down', presses=6, interval=0.1) 
+            pyautogui.press('down', presses=cnt, interval=0.1) 
             pyautogui.press('enter')           
         else : # 이외 전체 키 처리.
             pyautogui.press( txt , presses = cnt , interval=0.2)  
