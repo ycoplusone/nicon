@@ -69,14 +69,13 @@ class Core:
         '''키 입력'''
         if txt == 'ctrl+a': # 전체선택
             pyautogui.hotkey('ctrl', 'a' )
-        elif txt == 'ctrl+c': # 복사
-            #pyautogui.hotkey("ctrl", "v")
+        elif txt == 'ctrl+c': # 복사            
             pyautogui.click(button='right')
             time.sleep(0.2)
             pyautogui.press('down', presses=cnt, interval=0.1) 
             pyautogui.press('enter')     
         elif txt == 'ctrl+v': # 붙여넣기
-            pyautogui.hotkey("ctrl", "c")
+            pyautogui.hotkey("ctrl", "v")
          
         else : # 이외 전체 키 처리.
             pyautogui.press( txt , presses = cnt , interval=0.2)  
@@ -349,3 +348,4 @@ class Core:
             exe_option  = os.environ.get('brower_options')  
 
             self.run_as_admin(exe_path , exe_option , float(xy_wait))
+
