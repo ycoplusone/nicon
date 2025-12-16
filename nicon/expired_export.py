@@ -130,6 +130,10 @@ def read_image_unicode(path: str):
 
 
 if __name__ == "__main__":
+    '''
+    Tesseract 설치 파일 경로 : https://github.com/UB-Mannheim/tesseract/wiki
+    나머지는 실행하면서 lib를 추가 하자.
+    '''
     __ver = '0.1'
     __comment = '니콘의 유효기간을 추출해서 엑셀로 출력한다.'
     print(__ver , __comment)
