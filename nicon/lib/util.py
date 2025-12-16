@@ -342,7 +342,7 @@ def count_files(path):
         if os.path.isfile(os.path.join(path, f))
     )
 
-def getFileCnt_v02( _dbconn ):
+def getFileCnt_v02( _dbconn , _flag:bool=True):
     '''잔여파일 개수 확인.'''
     # 'cat':'' , 'prod':'' , 'fold_cnt':0 , 'fold_date' : '' , 'bal_qty': 0 , 'suc_qty' : 0 , 'chk_qty':0
     # '카테고리'  '상품명'   , 폴더수       ,  폴더 생성일      , 잔여수량      , 완료수량     , 이상수량
@@ -385,10 +385,11 @@ def getFileCnt_v02( _dbconn ):
             _dbconn.insert_nicon_sale_list(__temp)
     #print('*'*50)
     #print(rt)
-    txt = ''
-    for i in rt :
-        txt += f"{i['brand']}||{i['prod']}\n \t ===>[{i['bal_qty']}개] \n----------------------------------\n"
-    send_telegram_message( txt )
+    if _flag : #메세지 발송 여부 체크
+        txt = ''
+        for i in rt :
+            txt += f"{i['brand']}||{i['prod']}\n \t ===>[{i['bal_qty']}개] \n----------------------------------\n"
+        send_telegram_message( txt )
     return rt    
     
    
