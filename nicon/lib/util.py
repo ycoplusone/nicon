@@ -346,6 +346,7 @@ def getFileCnt_v02( _dbconn ):
     '''잔여파일 개수 확인.'''
     # 'cat':'' , 'prod':'' , 'fold_cnt':0 , 'fold_date' : '' , 'bal_qty': 0 , 'suc_qty' : 0 , 'chk_qty':0
     # '카테고리'  '상품명'   , 폴더수       ,  폴더 생성일      , 잔여수량      , 완료수량     , 이상수량
+    _dbconn.delete_nicon_sale_list() # nicon_sale_list  테이블 초기화
     data = [] 
     rt = []
     root = 'c:\\ncnc'    
@@ -381,6 +382,7 @@ def getFileCnt_v02( _dbconn ):
             
             #print(__temp)
             rt.append(__temp)
+            _dbconn.insert_nicon_sale_list(__temp)
     #print('*'*50)
     #print(rt)
     txt = ''

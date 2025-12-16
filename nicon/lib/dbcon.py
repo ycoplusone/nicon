@@ -798,3 +798,37 @@ class DbConn(object):
         except Exception as e:
             print("macro_job_log =>", e)
             return False
+        
+
+    def insert_nicon_sale_list(self , param ):
+        '''get_nicon'''
+        try :
+            cur = self.__conn.cursor()
+                        
+            query = (
+            " INSERT INTO nicon_sale_list (div_nm, brand, prod, fold_date, fold_cnt, bal_qty, suc_qty, chk_qty,c_date) "
+            " VALUES('{div_nm}', '{brand}', '{prod}', '{fold_date}',{fold_cnt},{bal_qty},{suc_qty},{chk_qty},now()) "
+            )
+            query = query.format( **param )                      
+            cur.execute( query )
+            self.__conn.commit()
+        except Exception as e:
+            print( 'insert_nicon_sale_list', e )
+        finally:
+            pass          
+
+
+    def delete_nicon_sale_list(self ):
+        '''delete_nicon_sale_list '''
+        try :
+            cur = self.__conn.cursor()                        
+
+            query_del = (                " delete from nicon_sale_list  "                )                        
+            cur.execute( query_del )
+            self.__conn.commit()           
+
+            
+        except Exception as e:
+            print( 'delete_nicon_sale_list error', e )
+        finally:
+            pass    
