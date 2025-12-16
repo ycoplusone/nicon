@@ -9,6 +9,7 @@ import requests
 import time
 from pytz import timezone
 #from pytz import timezone
+import re
 
 
 
@@ -69,7 +70,7 @@ def base_fold_create( _dbconn ):
             #print( 'base_fold_create' , e ) 
 
 def into_rename_barcode():
-    '''파일명 바코드로 변환'''
+    '''파일명 바코드로 변환 asis'''
     try:
         ''''''
         str = 'c:\\ncnc'  
@@ -95,6 +96,38 @@ def into_rename_barcode():
 
     except Exception as e :
         print('into_rename_barcode : ',e)
+
+def into_rename_barcode_v02():
+    '''파일명 바코드로 변환 tobe'''
+    try:
+        ''''''
+        str = 'c:\\ncnc'  
+        rootlist = os.listdir(str)
+        rootdirs = [X for X in rootlist if os.path.isdir(str+'\\'+X)]
+        for j in rootdirs:        
+            __path = f'{str}\\{j}'
+            __list = rootlist = os.listdir(__path)
+            __dirs = [X for X in __list if os.path.isdir(__path+'\\'+X)]
+            for i in __dirs:            
+                dirname = f'{__path}\\{i}'         
+                listdir = os.listdir(dirname)
+                path_files =  [ os.path.join(dirname, x)  for x in listdir ]        
+                file_names =  [ X for X in path_files if os.path.isfile(X)]
+                file_nm    =  [ x for x in listdir ]                
+                uniq = 1
+                for ii in file_names:               
+                    __sp = os.path.splitext(ii)
+                    __exc = __sp[1] # 확장자
+
+                    __n = np.fromfile(ii, np.uint8)
+                    __img = cv2.imdecode(__n, cv2.IMREAD_COLOR)
+                    __barcode = decode(__img)      
+                    __rename_file_nm=dirname+'\\'+'{0}_{1}{2}'.format(__barcode,uniq,__exc)
+                    os.rename( ii , __rename_file_nm )
+                    uniq +=1
+    except Exception as e :
+        print('into_rename_barcode_v02 : ',e)
+
 
 def init_fold( _dbconn ):
     '''폴더 정리.'''
@@ -145,6 +178,57 @@ def init_fold( _dbconn ):
     except Exception as e:
         print('init_fold : ',e)
 
+def init_fold_v02( _dbconn ):
+    '''폴더 정리 v02.'''
+    try:
+        str = 'c:\\ncnc'        
+        dd = _dbconn
+        rootlist = os.listdir(str)
+        rootdirs = [X for X in rootlist if os.path.isdir(str+'\\'+X)]
+        for j in rootdirs:        
+            __path = f'{str}\\{j}'
+            __list = rootlist = os.listdir(__path)
+            __dirs = [X for X in __list if os.path.isdir(__path+'\\'+X)]        
+            for i in __dirs:        
+                dirname = f'{__path}\\{i}' 
+                base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M_')        
+                listdir = os.listdir(dirname)
+
+                path_files =  [ os.path.join(dirname, x)  for x in listdir ]        
+                file_names =  [ X for X in path_files if os.path.isfile(X)]
+                file_nm    =  [ x for x in listdir ]
+                    
+                cnt = 1 # 폴더 카운트        
+                while( len(file_names) > 0):
+                    default_fold_nm = base_dttm+(repr(cnt).zfill(2))
+                    prod_fold       = base_dttm+(repr(cnt).zfill(2))
+                    v_range = 0
+                    # 5개씩 볼더 복사 
+                    if len(file_names) >= 5:
+                        default_fold_nm = dirname+'\\'+default_fold_nm+'_5' 
+                        prod_fold       = prod_fold+'_5' 
+                        v_range = 5       
+                    else :
+                        default_fold_nm = dirname+'\\'+default_fold_nm+'_'+repr( len(file_names) ).zfill(2)
+                        prod_fold       = prod_fold+'_'+repr( len(file_names) ).zfill(2)
+                        v_range = len(file_names)                        
+                    os.mkdir(default_fold_nm)                    
+                    for j in range(v_range):                
+                        __full_path = file_names[0]
+                        __file_nm = os.path.basename(__full_path) 
+                        __n = np.fromfile(__full_path, np.uint8)
+                        __img = cv2.imdecode(__n, cv2.IMREAD_COLOR)
+                        __barcode = decode(__img)               
+                        param = {'base_fold':i , 'prod_fold':prod_fold ,'file_nm':__file_nm,'barcode': __barcode }
+                        dd.insert_nicon_barcode(param)                    
+                        shutil.move(file_names[0] , default_fold_nm )
+                        del file_names[0]
+                        del file_nm[0]    
+                            
+                    cnt = cnt+ 1
+    except Exception as e:
+        print('init_fold_v02 : ',e)        
+
 def getfolelist(str):    
     base = 'c:\\ncnc'
     path_str = base+'\\'+str
@@ -152,6 +236,8 @@ def getfolelist(str):
     temp_list = [ X for X in __list if os.path.isdir(path_str+'\\'+X)]
     list = [ path_str+'\\'+X for X in temp_list if X[-4:-1] != '(완료']
     return list            
+
+          
 
 def getFileList( _path ):    
     __list = os.listdir( _path )    
@@ -244,6 +330,68 @@ def getFileCnt( _dbconn ):
     
     send_telegram_message( txt )
 
+def classify(name: str) -> str:
+    '''폴더 상태 분류'''
+    if name.endswith("이상이상(완료)"):
+        return "이상"
+    return "완료" if  name[-4:-1] == "(완료" else "미처리"
+
+def count_files(path):
+    return sum(
+        1 for f in os.listdir(path)
+        if os.path.isfile(os.path.join(path, f))
+    )
+
+def getFileCnt_v02( _dbconn ):
+    '''잔여파일 개수 확인.'''
+    # 'cat':'' , 'prod':'' , 'fold_cnt':0 , 'fold_date' : '' , 'bal_qty': 0 , 'suc_qty' : 0 , 'chk_qty':0
+    # '카테고리'  '상품명'   , 폴더수       ,  폴더 생성일      , 잔여수량      , 완료수량     , 이상수량
+    data = [] 
+    rt = []
+    root = 'c:\\ncnc'    
+    __path0 = os.listdir( root )                                  # root
+    __dirs0 = [ X for X in __path0 if os.path.isdir(root+'\\'+X)] # 카테고리_브랜드 
+    
+    for i0 in __dirs0:
+        __category  = i0.split("_")[0]                                                        # 카테고리
+        __brand     = i0.split("_")[1]                                                        # 브랜드
+        __name1     = f'{root}\\{i0}'                                           # root + 카테고리_브랜드
+        __path1     = os.listdir( __name1 )                                     
+        __dirs1     = [ X for X in __path1 if os.path.isdir(__name1+'\\'+X)]    # 상품                
+        
+        for i1 in __dirs1:            
+            __prod  = i1
+            __name2 = f'{__name1}\\{i1}'                                        # {root + 카테고리_브랜드} + 상품
+            __path2 = os.listdir( __name2 )                                     
+            __dirs2 = [ X for X in __path2 if os.path.isdir(__name2+'\\'+X)]    # 일련번호폴더  
+            __temp = {'div_nm' : __category , 'brand':__brand , 'prod':__prod , 'fold_cnt':0 , 'fold_date':'99991231' , 'bal_qty':0 , 'suc_qty':0 , 'chk_qty':0}
+            for i2 in __dirs2:
+                __name3 = f'{__name2}\\{i2}'                                        # {root + 카테고리 + 상품} + 일련번호폴더
+                __cla   = classify(i2) # 폴더 상태 확인.
+                __cdate = datetime.fromtimestamp( os.path.getctime( __name3 ) ).strftime('%Y%m%d') #  폴더 생성일자.
+                __cnt   = count_files(__name3)                
+                if __cla =='완료':
+                    __temp['suc_qty'] += __cnt
+                elif __cla == '이상':
+                    __temp['chk_qty'] += __cnt
+                else:
+                    __temp['fold_cnt'] += 1 #폴더 갯수 추가
+                    __temp['bal_qty'] += __cnt
+                    __temp['fold_date'] = min( __temp['fold_date'] , __cdate )
+            
+            #print(__temp)
+            rt.append(__temp)
+    #print('*'*50)
+    #print(rt)
+    txt = ''
+    for i in rt :
+        txt += f"{i['brand']}||{i['prod']}\n \t ===>[{i['bal_qty']}개] \n----------------------------------\n"
+    send_telegram_message( txt )
+    return rt    
+    
+   
+    
+
 
 
 def setJobLog( job_nm ,url_path, flag):
@@ -256,3 +404,4 @@ def setJobLog( job_nm ,url_path, flag):
         print('='*20)
         print( 'setJobLog error', e )
         print('='*20)
+
