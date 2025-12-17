@@ -386,10 +386,10 @@ def getFileCnt_v02( _dbconn , _flag:bool=True):
     #print('*'*50)
     #print(rt)
     if _flag : #메세지 발송 여부 체크
-        txt = ''
-        for i in rt :
-            txt += f"{i['brand']}||{i['prod']}\n \t ===>[{i['bal_qty']}개] \n----------------------------------\n"
-        send_telegram_message( txt )
+        #txt = ''
+        #for i in rt :
+            #txt += f"{i['brand']}||{i['prod']}\n \t ===>[{i['bal_qty']}개] \n----------------------------------\n"
+        send_telegram_message( '니콘 내콘 판매 시작.','='*20 )
     return rt    
     
    

@@ -832,3 +832,23 @@ class DbConn(object):
             print( 'delete_nicon_sale_list error', e )
         finally:
             pass    
+
+    def update_nicon_sale_list(self ,  param):
+        '''update_nicon_sale_list qty 컬럼 갱신 '''
+        try :
+            cur = self.__conn.cursor()                        
+            query = (
+            " update nicon_sale_list "
+            " set fold_cnt = fold_cnt - 1 "
+            " , bal_qty = bal_qty - {bal_qty} "
+            " , sale_qty = sale_qty + {sale_qty}  "
+            " where brand = '{brand}'  "
+            " and prod = '{prod}' "
+            )                        
+            query = query.format( **param )                      
+            cur.execute( query )
+            self.__conn.commit()                      
+        except Exception as e:
+            print( 'update_nicon_job_list error', e )
+        finally:
+            pass  
