@@ -230,11 +230,11 @@ def init_fold_v02( _dbconn ):
         print('init_fold_v02 : ',e)        
 
 def getfolelist(str):    
-    base = 'c:\\ncnc'
-    path_str = base+'\\'+str
-    __list = os.listdir( path_str )
-    temp_list = [ X for X in __list if os.path.isdir(path_str+'\\'+X)]
-    list = [ path_str+'\\'+X for X in temp_list if X[-4:-1] != '(완료']
+    base        = 'c:\\ncnc'
+    path_str    = base+'\\'+str
+    __list      = os.listdir( path_str )
+    temp_list   = [ X for X in __list if os.path.isdir(path_str+'\\'+X)]
+    list        = [ path_str+'\\'+X for X in temp_list if X[-4:-1] != '(완료']
     return list            
 
           
