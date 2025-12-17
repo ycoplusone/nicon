@@ -274,11 +274,12 @@ if __name__ == "__main__":
     # 251216 제외 w2ji.base_fold_create( _dbconn ) #기초폴더 생성    
     w2ji.into_rename_barcode_v02()  # 251216 수정완 #파일명 바코드 명으로 변경작업 바코드 생성 못하면   None으로 치환된다.
     w2ji.init_fold_v02( _dbconn )   # 251216 수정완 폴더내 파일 정리.    
-    __lists = w2ji.getFileCnt_v02( _dbconn ) # 251216 수정완 파일 잔여 개수 확인 후 텔레그램 발송     
+    __lists = w2ji.getFileCnt_v02( _dbconn ) # 251216 수정완 파일 잔여 개수 확인 후 텔레그램 발송
 
     _nicon.fnInit() #초기화    
-    time.sleep(1)
-    _nicon.fnLoging() #매개변수 없음
+    time.sleep(60)
+    #_nicon.fnLoging() #매개변수 없음
+
     _nicon.fnDiv01( )  # 대분류 첫글짜 매개변수
     _nicon.fnDiv02( )   # 중분류명 매개변수
     _nicon.fnDiv03( )   # 상품명 매개변수	
@@ -337,6 +338,9 @@ if __name__ == "__main__":
                             files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
                             _nicon.fnSale(fold_nm , _fold_nm, files , _dbconn ) # 판매
                             list['fold_cnt'] -= 1 #폴더 1건 처리
+                            _temp_update = {'brand':div02_str , 'prod':div03_str , 'bal_qty':len(files) , 'sale_qty':len(files) }
+                            _dbconn.update_nicon_sale_list(_temp_update) # 
+                            
                         else:
                             break
 
