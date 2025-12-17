@@ -299,53 +299,47 @@ if __name__ == "__main__":
                 div03_str   = list['prod']
                 fold_nm     = f'{div01_str}_{div02_str}\\{div03_str}'
                 cnt         = list['fold_cnt'] 
-
-                prod_fold_list = w2ji.getfolelist( fold_nm ) # 상품 폴더 리스트의 하위 폴더 리스트 생성.
-                _stat_flag = True
-                for _fold_nm in prod_fold_list:
-
-                    print('*'*80)
-                    print( f'{fold_nm} 의 잔여 폴더수 [{cnt}] 입니다.' )
-                    
-                    if cnt <= 0 : #잔여 판매수가 0건이면 수행을 중단한다.
-                        _stat_flag = False                            
-
-                    _nicon.fnRefresh() #브라이져 새로고침
-                    try:                        
-                        if _stat_flag:
-                            #print(f'1단계 : {div01_str}' )
-                            _stat_flag = _nicon.fnDiv01( div01_str )   # 대분류 첫글짜 매개변수
-                            time.sleep(0.5)
-                        else:
-                            break
-                        
-                        if _stat_flag:
-                            #print(f'2단계 : {div02_str}' )
-                            _stat_flag = _nicon.fnDiv02( div02_str )   # 중분류명 매개변수
-                            time.sleep(0.5)
-                        else:
-                            break
-                        
-                        if _stat_flag:
-                            #print(f'3단계 : {div03_str}' )
-                            _stat_flag = _nicon.fnDiv03( div03_str , _msg_sned_flag )   # 상품명 매개변수
-                            time.sleep(0.5)
-                        else:
-                            break
-                        
-                        if _stat_flag:
-                            #print(f'4단계 : {_fold_nm}' )
-                            files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
-                            _nicon.fnSale(fold_nm , _fold_nm, files , _dbconn ) # 판매
-                            list['fold_cnt'] -= 1 #폴더 1건 처리
-                            _temp_update = {'brand':div02_str , 'prod':div03_str , 'bal_qty':len(files) , 'sale_qty':len(files) }
-                            _dbconn.update_nicon_sale_list(_temp_update) # 
+                print('*'*80)
+                print( f'{fold_nm} 의 잔여 폴더수 [{cnt}] 입니다.' )
+                if cnt > 0 : # 잔여 폴더수가 0 초과 시에만 수행.
+                    prod_fold_list = w2ji.getfolelist( fold_nm ) # 상품 폴더 리스트의 하위 폴더 리스트 생성.
+                    _stat_flag = True
+                    for _fold_nm in prod_fold_list:
+                        _nicon.fnRefresh() #브라이져 새로고침
+                        try:                        
+                            if _stat_flag:
+                                #print(f'1단계 : {div01_str}' )
+                                _stat_flag = _nicon.fnDiv01( div01_str )   # 대분류 첫글짜 매개변수
+                                time.sleep(0.5)
+                            else:
+                                break
                             
-                        else:
-                            break
+                            if _stat_flag:
+                                #print(f'2단계 : {div02_str}' )
+                                _stat_flag = _nicon.fnDiv02( div02_str )   # 중분류명 매개변수
+                                time.sleep(0.5)
+                            else:
+                                break
+                            
+                            if _stat_flag:
+                                #print(f'3단계 : {div03_str}' )
+                                _stat_flag = _nicon.fnDiv03( div03_str , _msg_sned_flag )   # 상품명 매개변수
+                                time.sleep(0.5)
+                            else:
+                                break
+                            
+                            if _stat_flag:
+                                #print(f'4단계 : {_fold_nm}' )
+                                files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
+                                _nicon.fnSale(fold_nm , _fold_nm, files , _dbconn ) # 판매
+                                list['fold_cnt'] -= 1 #폴더 1건 처리
+                                _temp_update = {'brand':div02_str , 'prod':div03_str , 'bal_qty':len(files) , 'sale_qty':len(files) }
+                                _dbconn.update_nicon_sale_list(_temp_update) #
+                            else:
+                                break
 
-                    except Exception as e:
-                        print( '판매 작업중 오류',e )
+                        except Exception as e:
+                            print( '판매 작업중 오류',e )
             
             print('*'*80)
             print( w2ji.getNow() )                
