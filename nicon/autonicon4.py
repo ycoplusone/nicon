@@ -274,8 +274,8 @@ if __name__ == "__main__":
     # 251216 제외 w2ji.base_fold_create( _dbconn ) #기초폴더 생성    
     w2ji.into_rename_barcode_v02()  # 251216 수정완 #파일명 바코드 명으로 변경작업 바코드 생성 못하면   None으로 치환된다.
     w2ji.init_fold_v02( _dbconn )   # 251216 수정완 폴더내 파일 정리.    
-    __lists = w2ji.getFileCnt_v02( _dbconn ) # 251216 수정완 파일 잔여 개수 확인 후 텔레그램 발송
-
+    __lists     = w2ji.getFileCnt_v02( _dbconn ) # 251216 수정완 파일 잔여 개수 확인 후 텔레그램 발송
+    alter_name  = w2ji.getAlterProdList() #폴더명칭과 실제 상품명의 차이 때문에 해당 매핑을 이용한다.
     _nicon.fnInit() #초기화    
     time.sleep(60)
     #_nicon.fnLoging() #매개변수 없음
@@ -297,6 +297,9 @@ if __name__ == "__main__":
                 div01_str   = list['div_nm']
                 div02_str   = list['brand']
                 div03_str   = list['prod']
+                div03_temp  = w2ji.getResolveProd(alter_name ,div02_str , div03_str )
+                div03_alter = div03_temp if div03_temp != '' else div03_str
+
                 fold_nm     = f'{div01_str}_{div02_str}\\{div03_str}'
                 cnt         = list['fold_cnt'] 
                 print('*'*80)
@@ -322,8 +325,8 @@ if __name__ == "__main__":
                                 break
                             
                             if _stat_flag:
-                                #print(f'3단계 : {div03_str}' )
-                                _stat_flag = _nicon.fnDiv03( div03_str , _msg_sned_flag )   # 상품명 매개변수
+                                #print(f'3단계 : {div03_alter}' )
+                                _stat_flag = _nicon.fnDiv03( div03_alter , _msg_sned_flag )   # 상품명 매개변수
                                 time.sleep(0.5)
                             else:
                                 break
