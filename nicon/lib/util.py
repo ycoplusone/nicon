@@ -10,7 +10,7 @@ import time
 from pytz import timezone
 #from pytz import timezone
 import re
-
+import csv
 
 
 
@@ -349,7 +349,9 @@ def getFileCnt_v02( _dbconn , _flag:bool=True):
     '''잔여파일 개수 확인.'''
     # 'cat':'' , 'prod':'' , 'fold_cnt':0 , 'fold_date' : '' , 'bal_qty': 0 , 'suc_qty' : 0 , 'chk_qty':0
     # '카테고리'  '상품명'   , 폴더수       ,  폴더 생성일      , 잔여수량      , 완료수량     , 이상수량
-    _dbconn.delete_nicon_sale_list() # nicon_sale_list  테이블 초기화
+    if _flag: # True  일 경우에만 db 등록
+        _dbconn.delete_nicon_sale_list() # nicon_sale_list  테이블 초기화
+
     data = [] 
     rt = []
     root = 'c:\\ncnc'    
@@ -385,7 +387,8 @@ def getFileCnt_v02( _dbconn , _flag:bool=True):
             
             #print(__temp)
             rt.append(__temp)
-            _dbconn.insert_nicon_sale_list(__temp)
+            if _flag: # True  일 경우에만 db 등록
+                _dbconn.insert_nicon_sale_list(__temp)
     #print('*'*50)
     #print(rt)
     if _flag : #메세지 발송 여부 체크
@@ -411,3 +414,36 @@ def setJobLog( job_nm ,url_path, flag):
         print( 'setJobLog error', e )
         print('='*20)
 
+
+def getAlterProdList(file_path:str='c:\\ncnc\\alter_prod_list.csv'):
+    '''대체 상품명 파일 로드'''
+    try:
+        data_list = []
+
+        with open(file_path, newline='', encoding='utf-8') as f:
+            reader = csv.DictReader(f,delimiter='^')
+            for row in reader:
+                data_list.append(row)
+        return data_list
+    except Exception as e:
+        print('util.getAlterProdList error',e)
+        return []
+
+def getResolveProd(_arr:dict , brand_nm:str , prod_nm:str):
+    '''대체 상품명 가져오기'''
+    try:
+        key = (brand_nm,prod_nm)
+        str = ''
+        for an in _arr:
+            div_nm      = an['브랜드'].split('_')[0]
+            brand       = an['브랜드'].split('_')[1]
+            prod        = an['폴더명']
+            alter_prod  = an['변경명']
+            key1        = (brand,prod)                
+            if key1 == key:  
+                str = alter_prod
+        return str
+    except Exception as e:
+        print('util.getResolveProd',e)
+        return ''
+        
