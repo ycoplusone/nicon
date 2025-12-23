@@ -848,22 +848,21 @@ class DbConn(object):
             query = query.format( **param )                                  
             cur.execute( query )
             self.__conn.commit()                      
-            self.insert_sql_log('nicon_sale_list',query)
+            self.insert_sql_log('nicon_sale_list',query,'Y')
         except Exception as e:
             print( 'update_nicon_job_list error', e )
+            self.insert_sql_log('nicon_sale_list',query,'N')
         finally:
             pass  
 
-    def insert_sql_log(self , module_nm, sql_text ):
+    def insert_sql_log(self , module_nm, sql_text ,success_yn):
         try :
             cur = self.__conn.cursor()                        
             query = """
-                INSERT INTO system_sql_log(log_dt,module_nm, sql_text)
-                VALUES (CURRENT_TIMESTAMP,%s, %s) 
+                INSERT INTO system_sql_log(log_dt,module_nm, sql_text,success_yn)
+                VALUES (CURRENT_TIMESTAMP,%s, %s,%s) 
                 """            
-            
-            #cur.execute( query  )
-            cur.execute(    query,    (module_nm, sql_text) )
+            cur.execute(    query,    (module_nm, sql_text,success_yn) )
             self.__conn.commit()                      
         except Exception as e:
             print( 'insert_sql_log error', e )
