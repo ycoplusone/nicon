@@ -852,8 +852,10 @@ class DbConn(object):
         except Exception as e:
             print( 'update_nicon_job_list error', e )
             self.insert_sql_log('nicon_sale_list',query,'N')
+            self.__conn.commit()
         finally:
             pass  
+            self.__conn.commit()
 
     def insert_sql_log(self , module_nm, sql_text ,success_yn):
         try :
