@@ -48,10 +48,20 @@ if __name__ == "__main__":
     __root_path = 'C:\\Users\\DLIVE\\Documents\\카카오톡 받은 파일\\test'
 
     __list      = os.listdir( __root_path )
+    '''
     files = [
         f for f in os.listdir(__root_path)
         if os.path.isfile(os.path.join(__root_path, f))
     ]  
+    '''
+    files = sorted(
+        [
+            f for f in os.listdir(__root_path)
+            if os.path.isfile(os.path.join(__root_path, f))
+        ],
+        key=lambda x: x.lower(),
+        reverse=False
+    )    
 
     #temp_list   = [ X for X in files if os.path.isdir(__root_path+'\\'+X)]
     for i in files:
