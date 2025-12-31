@@ -204,10 +204,10 @@ def init_fold_v02( _dbconn ):
                     prod_fold       = base_dttm+(repr(cnt).zfill(2))
                     v_range = 0
                     # 5개씩 볼더 복사 
-                    if len(file_names) >= 5:
-                        default_fold_nm = dirname+'\\'+default_fold_nm+'_5' 
-                        prod_fold       = prod_fold+'_5' 
-                        v_range = 5       
+                    if len(file_names) >= 10:
+                        default_fold_nm = dirname+'\\'+default_fold_nm+'_10' 
+                        prod_fold       = prod_fold+'_10' 
+                        v_range = 10       
                     else :
                         default_fold_nm = dirname+'\\'+default_fold_nm+'_'+repr( len(file_names) ).zfill(2)
                         prod_fold       = prod_fold+'_'+repr( len(file_names) ).zfill(2)
