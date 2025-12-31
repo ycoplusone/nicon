@@ -194,7 +194,12 @@ def init_fold_v02( _dbconn ):
                 base_dttm = datetime.now(timezone('Asia/Seoul')).strftime('%Y%m%d_%H%M_')        
                 listdir = os.listdir(dirname)
 
-                path_files =  [ os.path.join(dirname, x)  for x in listdir ]        
+                #path_files =  [ os.path.join(dirname, x)  for x in listdir ]        
+                path_files = sorted(
+                    [os.path.join(dirname, x) for x in listdir],
+                    key=lambda x: os.path.basename(x).lower(),
+                    reverse=False
+                )
                 file_names =  [ X for X in path_files if os.path.isfile(X)]
                 file_nm    =  [ x for x in listdir ]
                     
