@@ -86,6 +86,8 @@ class nicon():
         except Exception as e:
             print( 'alert error', e )
             return _rt
+        finally:
+            return _rt
 
 
 
@@ -338,8 +340,6 @@ if __name__ == "__main__":
                                 _temp_update = {'brand':div02_str , 'prod':div03_str , 'bal_qty':len(files) , 'sale_qty':len(files) } #로그남길 데이터set
                                 _nicon.fnSale(fold_nm , _fold_nm, files , _temp_update , _dbconn ) # 판매
                                 list['fold_cnt'] -= 1 #폴더 1건 처리
-                                
-                                
                             else:
                                 break
 
