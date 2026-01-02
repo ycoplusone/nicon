@@ -12,6 +12,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import pyperclip #복사
 import time
+import os
 
 import lib.util as w2ji
 import lib.dbcon as dbcon
@@ -81,7 +82,8 @@ class nicon():
             alert_present = WebDriverWait(self.__driver, 10).until(EC.alert_is_present())
             if alert_present :
                 result = self.__driver.switch_to.alert
-                _rt = result.text                
+                _rt = result.text             
+                #result.accept()   
                 return _rt
         except Exception as e:
             print( 'alert error', e )
@@ -223,7 +225,9 @@ class nicon():
         '''판매 '''
         try:
             for file in _files:
-                self.__driver.find_element(By.CSS_SELECTOR , "input[type='file']").send_keys(file) #파일 등록
+                #self.__driver.find_element(By.CSS_SELECTOR , "input[type='file']").send_keys(file) #파일 등록
+                file_input = self.__driver.find_element(By.CSS_SELECTOR, "input[type='file']")
+                file_input.send_keys(os.path.abspath(file))
             
             time.sleep(1)            
             self.fnClick('//*[@id="app"]/div/div[2]/div/section/div/div/div/section/button') # 판매 등록        
