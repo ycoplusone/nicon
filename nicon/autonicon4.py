@@ -172,7 +172,7 @@ class nicon():
             print('ERROR fnDiv02',e)
             return _state
 
-    def fnDiv03( self , _str = '아이스커피S' , _flag = False ): # _str = '아메리카노 L'
+    def fnDiv03( self , _brand = '커피빈' , _str = '아이스커피S' , _flag = False ): # _str = '아메리카노 L'
         '''하분류 찾기(상품 차지)'''
         _state = False
         item_name  = '//*[@id="items-container"]/a[2]'
@@ -218,7 +218,7 @@ class nicon():
         except Exception as e:
             print('ERROR fnDiv03',e)
             if _flag :
-                w2ji.send_telegram_message( f'******************** \n 상품명 : {_str} 를 찾을수 없습니다. \n ********************' )      
+                w2ji.send_telegram_message( f'******************** \n 상품명 : {_brand} || {_str} 를 찾을수 없습니다. \n ********************' )      
             return _state
 
     def fnSale( self , _nm = '' , _fold_nm = '' , _files = [] , _param = {}, _dbconn = None ):
@@ -333,7 +333,7 @@ if __name__ == "__main__":
                             
                             if _stat_flag:
                                 #print(f'3단계 : {div03_alter}' )
-                                _stat_flag = _nicon.fnDiv03( div03_alter , _msg_sned_flag )   # 상품명 매개변수
+                                _stat_flag = _nicon.fnDiv03( div02_str , div03_alter , _msg_sned_flag )   # 상품명 매개변수
                                 time.sleep(0.5)
                             else:
                                 break
