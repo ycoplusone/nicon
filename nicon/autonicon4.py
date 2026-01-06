@@ -83,7 +83,7 @@ class nicon():
             if alert_present :
                 result = self.__driver.switch_to.alert
                 _rt = result.text             
-                #result.accept()   
+                result.accept()   # 보통 확인 260106 추가.
                 return _rt
         except Exception as e:
             print( 'alert error', e )
