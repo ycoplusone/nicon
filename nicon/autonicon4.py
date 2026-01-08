@@ -221,7 +221,7 @@ class nicon():
                 w2ji.send_telegram_message( f'******************** \n 상품명 : {_brand} || {_str} 를 찾을수 없습니다. \n ********************' )      
             return _state
 
-    def fnSale( self , _nm = '' , _fold_nm = '' , _files = [] , _param = {}, _dbconn = None ):
+    def fnSale( self , _nm = '' , _fold_nm = '' , _files = [] , _dbconn = None ):
         '''판매 '''
         try:
             for file in _files:
@@ -247,8 +247,7 @@ class nicon():
                 telegram_str += '원본 : '+ _fold_nm +'\n\n'
                 telegram_str += '완료 : '+ w2ji.complete_fold(_fold_nm , False)
                 w2ji.send_telegram_message(  telegram_str )
-            
-            _dbconn.update_nicon_sale_list(_param) # 로그남기기.
+
             time.sleep(0.15)
             self.fnRefresh() #드라이버 초기화
         except Exception as e:
@@ -342,7 +341,8 @@ if __name__ == "__main__":
                                 #print(f'4단계 : {_fold_nm}' )
                                 files = w2ji.getFileList( _fold_nm ) #상품폴더내 파일 리스트 생성
                                 _temp_update = {'brand':div02_str , 'prod':div03_str , 'bal_qty':len(files) , 'sale_qty':len(files) } #로그남길 데이터set
-                                _nicon.fnSale(fold_nm , _fold_nm, files , _temp_update , _dbconn ) # 판매
+                                _dbconn.update_nicon_sale_list(_temp_update) # 로그남기기.
+                                _nicon.fnSale(fold_nm , _fold_nm, files , _dbconn ) # 판매
                                 list['fold_cnt'] -= 1 #폴더 1건 처리
                             else:
                                 break
