@@ -949,7 +949,7 @@ class MyApp(QWidget):
         # 키보드 키값 - begin
         self.__key[i] = QComboBox()
         self.__key[i].setStyleSheet(combo_style) 
-        self.__key[i].addItems(['pagedown','pageup','up','down','left','right','enter', 'del', 'delete','backspace','space','tab','ctrl+a','ctrl+c','ctrl+v'])        
+        self.__key[i].addItems(['pagedown','pageup','up','down','left','right','enter', 'del', 'delete','backspace','space','tab','ctrl+a','ctrl+c','ctrl+v','f12'])        
         self.__key[i].setVisible( False )
         self.__key[i].currentTextChanged.connect( fnkey )
         hbox.addWidget( self.__key[i] )  
@@ -1051,3 +1051,4 @@ if __name__ == '__main__':
     ex = MyApp()
     sys.exit(app.exec_())
     
+
