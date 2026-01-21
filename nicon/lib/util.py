@@ -11,7 +11,9 @@ from pytz import timezone
 #from pytz import timezone
 import re
 import csv
+from dotenv import load_dotenv
 
+load_dotenv()
 
 
 def mk_image():
@@ -209,10 +211,10 @@ def init_fold_v02( _dbconn ):
                     prod_fold       = base_dttm+(repr(cnt).zfill(2))
                     v_range = 0
                     # 5개씩 볼더 복사 
-                    if len(file_names) >= 5:
-                        default_fold_nm = dirname+'\\'+default_fold_nm+'_5' 
-                        prod_fold       = prod_fold+'_5' 
-                        v_range = 5       
+                    if len(file_names) >= 10:
+                        default_fold_nm = dirname+'\\'+default_fold_nm+'_10' 
+                        prod_fold       = prod_fold+'_10' 
+                        v_range = 10       
                     else :
                         default_fold_nm = dirname+'\\'+default_fold_nm+'_'+repr( len(file_names) ).zfill(2)
                         prod_fold       = prod_fold+'_'+repr( len(file_names) ).zfill(2)
@@ -254,8 +256,8 @@ def getFileList( _path ):
 
 def send_telegram_message( message , div='' ):
     '''텔러그램 판매 발송
-    '''
-    token = '6173895901:AAH54vZaLnXXZq9hngplJNeEJIDEzH2azbc' 
+    '''    
+    token = os.environ.get('telegram_token') 
     '''
     -1001813504824 : 니콘방 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
     -1002336115183 : 매크로 봇방
@@ -276,7 +278,7 @@ def send_telegram_message( message , div='' ):
 def sendTelegramMsg( message ):
     '''텔러그램 매크로 봇방
     '''
-    token = '6173895901:AAH54vZaLnXXZq9hngplJNeEJIDEzH2azbc' 
+    token = os.environ.get('telegram_token') 
     '''
     -1001813504824 : 니콘방 우정이 개인방 SEND_TYPE V , VE 일경우 이쪽으로 보낸다.
     -1002336115183 : 매크로 봇방
@@ -451,5 +453,4 @@ def getResolveProd(_arr:dict , brand_nm:str , prod_nm:str):
     except Exception as e:
         print('util.getResolveProd',e)
         return ''
-
         
