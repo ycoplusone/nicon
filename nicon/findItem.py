@@ -7,11 +7,15 @@ from selenium.webdriver.common.by import By
 from urllib.parse import urlparse, parse_qs
 import random
 import time
+from datetime import datetime
+from pytz import timezone
 import cv2
 from pyzbar.pyzbar import decode
 import numpy as np
 import pytesseract
 from PIL import Image
+
+from tqdm import tqdm
 import lib.dbcon as dbcon
 
 
@@ -151,9 +155,14 @@ class Search():
         eles = driver.find_elements(By.CSS_SELECTOR, "div.eA0Zlc")
         
         results = []
-        print(f"검색어[{keyword}] 총 {len(eles)}개의 항목을 찾았어.\n")
-
-        for i, el in enumerate(eles, 1):
+        print(f"검색어[{keyword}] 총 {len(eles)}개의 항목을 찾았어.")
+        '''
+        chunk_embeddings_dict = {
+            size : rc.ch3_create_embeddings( chunks )
+            for size , chunks in tqdm(text_chunks_dict.items() , desc='임베딩생성중')
+        }
+        '''
+        for i, el in tqdm(enumerate(eles, 1)):
             # 1. 태그 사이에 있는 순수 텍스트 추출
             
             # 3. 만약 내부 img 태그의 alt 값을 보고 싶다면
@@ -177,9 +186,9 @@ class Search():
             tx1  = self.check_target_words(img , target_keywords )
             txt  = [word for word in target_keywords if word in alt_text]
             tx2  = True if txt else False
-            __temp = {'url' : imgurl , 'description':alt_text[0:128] , 'has_qr':qr0 , 'has_text_survey':tx1 , 'has_text_satisfaction':tx2}
-            #print(i , imgurl)
-            self.__dbconn.upsert_nicon_survey_collection(__temp)
+            __temp = {'url' : imgurl , 'description':alt_text[0:128] , 'has_qr':qr0 , 'has_text_survey':tx1 , 'has_text_satisfaction':tx2}            
+            if ( (qr0 or tx1 or tx2) and "instagram" in imgurl ):
+                self.__dbconn.upsert_nicon_survey_collection(__temp)
 
     
 if __name__ == "__main__":   
@@ -195,7 +204,7 @@ if __name__ == "__main__":
             print(f"⏳ 다음 단어 검색까지 {wait_time // 60}분 {wait_time % 60}초 대기합니다...")
             time.sleep(wait_time)
         
-        print(f"⏳ 다음 수집까지 2시간 대기합니다...")
+        print(f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} ⏳ 다음 수집까지 2시간 대기합니다...")
         time.sleep(7200)
 
         
