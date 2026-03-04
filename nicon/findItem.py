@@ -17,6 +17,7 @@ from PIL import Image
 
 from tqdm import tqdm
 import lib.dbcon as dbcon
+import re
 
 
 class Search():
@@ -168,6 +169,7 @@ class Search():
             # 3. 만약 내부 img 태그의 alt 값을 보고 싶다면
             try:
                 alt_text = el.find_element(By.TAG_NAME, "img").get_attribute("alt")
+                alt_text = re.sub(r'[^가-힣a-zA-Z0-9\s]', '', alt_text)
             except:
                 alt_text = ""
             try:
