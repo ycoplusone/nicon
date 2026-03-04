@@ -152,6 +152,7 @@ class Search():
         search_url = f"https://www.google.com/search?q={keyword}&tbm=isch&tbs=qdr:d"
         driver.get(search_url)
         time.sleep(3) # 로딩 대기
+        self.__dbconn     = dbcon.DbConn() #db연결 재연결        
 
         eles = driver.find_elements(By.CSS_SELECTOR, "div.eA0Zlc")
         
