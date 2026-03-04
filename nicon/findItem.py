@@ -18,6 +18,7 @@ from PIL import Image
 from tqdm import tqdm
 import lib.dbcon as dbcon
 import re
+import lib.util as w2ji
 
 
 class Search():
@@ -197,16 +198,23 @@ class Search():
 if __name__ == "__main__":   
     ''''''
     ss = Search()
+    _check_time = w2ji.getNowDate()                   # 현재 시간
+
     target_keywords = ["설문", "만족"] # 이미지 혹은 이미지의 설명에 해당 단어가 포함되는지 확인
     
     keywords_list = ['"설문 조사"'] # 검색할 키워드 리스트 반드시 "" 안에 문자를 넣어야 한다.
+
+
     while(True):
+        _msg_sned_flag = w2ji.get1HourOver( _check_time )
         for word in keywords_list:
             ss.get_google_images_no_api( word , target_keywords )
             wait_time = random.randint(60, 300)
             print(f"⏳ 다음 단어 검색까지 {wait_time // 60}분 {wait_time % 60}초 대기합니다...")
             time.sleep(wait_time)
-        
+        if ( _msg_sned_flag ):    # 마지막 메세지 발송후 1시간 이상 되면 다시 텔레그램 메세지를 발송한다.
+            _check_time = w2ji.getNowDate()         # 메세지 발송 시간을 다시 등록한다.
+            w2ji.send_telegram_message(  f'설문 수집 프로그램 정상 동작중 ' )      
         print(f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} ⏳ 다음 수집까지 2시간 대기합니다...")
         time.sleep(7200)
 
