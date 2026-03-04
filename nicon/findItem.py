@@ -164,7 +164,7 @@ class Search():
             for size , chunks in tqdm(text_chunks_dict.items() , desc='임베딩생성중')
         }
         '''
-        for i, el in tqdm(enumerate(eles, 1)):
+        for i, el in tqdm(enumerate(eles, 1) , desc='데이터 수집중.......'):
             # 1. 태그 사이에 있는 순수 텍스트 추출
             
             # 3. 만약 내부 img 태그의 alt 값을 보고 싶다면
