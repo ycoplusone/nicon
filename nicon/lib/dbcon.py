@@ -4,6 +4,7 @@ Created on 2022. 7. 22.
 @author: DLIVE
 '''
 import pymysql
+from pymysql.converters import escape_string
 
 class DbConn(object):
     '''
@@ -869,4 +870,26 @@ class DbConn(object):
         except Exception as e:
             print( 'insert_sql_log error', e )
         finally:
-            pass          
+            pass      
+
+    def upsert_nicon_survey_collection(self , param ):
+            '''설문조사 입력 부분'''
+            try :
+                cur = self.__conn.cursor()                        
+                url = escape_string( param['url']  )
+                description = escape_string( param['description']  )
+                has_qr = param['has_qr']
+                has_text_survey = param['has_text_survey']
+                has_text_satisfaction = param['has_text_satisfaction']
+
+                query = f""" INSERT INTO nicon_survey_collection (url, collection_dt, description, has_qr, has_text_survey, has_text_satisfaction , reg_dt) 
+                values('{url}', now(), '{description}', {has_qr}, {has_text_survey}, {has_text_satisfaction} , now()) 
+                on DUPLICATE key update reg_dt = now()  """
+                
+                #query = query.format( **param )     
+                cur.execute( query )
+                self.__conn.commit()
+            except Exception as e:
+                print( 'upsert_nicon_survey_collection', e ,'\n',query ,'\n',param )
+            finally:
+                pass            
