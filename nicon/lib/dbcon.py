@@ -892,4 +892,41 @@ class DbConn(object):
             except Exception as e:
                 print( 'upsert_nicon_survey_collection', e ,'\n',query ,'\n',param )
             finally:
-                pass            
+                pass       
+
+    def get_db_word_list(self, table_name, column_name):
+        """
+        특정 테이블에서 사용 중('Y')인 단어들만 리스트로 반환하는 함수
+        table_name: nicon_search_keywords 또는 nicon_target_words
+        column_name: keyword 또는 word
+        """      
+        
+        try:
+            
+            # 2. 사용 중인(is_use='Y') 데이터만 조회
+            sql = f"SELECT {column_name} FROM {table_name} WHERE is_use = 'Y'"
+            cur = self.__conn.cursor( pymysql.cursors.DictCursor )
+            cur.execute( sql )
+            results = cur.fetchall()
+
+            # 3. [{column: '단어1'}, {column: '단어2'}] 형태를 ['단어1', '단어2'] 리스트로 변환
+            word_list = [row[column_name] for row in results]
+                
+            return word_list
+
+        finally:
+            pass
+'''
+            select_query2 = (
+                " SELECT seq "
+                " FROM marco_info "
+                " WHERE job_nm = '"+str(job_nm)+"' "
+                " and DATE_FORMAT(job_st_dt, '%Y%m%d') = STR_TO_DATE('"+str(str_date)+"', '%Y%m%d') "
+                " order by seq desc "
+                " LIMIT  1 "
+            )            
+
+            cur = self.__conn.cursor( pymysql.cursors.DictCursor )
+            if flag == 'E':
+                cur.execute( select_query1 )
+'''
