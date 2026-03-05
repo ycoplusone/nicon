@@ -154,26 +154,20 @@ class Search():
         driver.get(search_url)
         time.sleep(3) # 로딩 대기
         self.__dbconn     = dbcon.DbConn() #db연결 재연결        
+        except_word       = self.__dbconn.get_db_word_list('nicon_survey_exception_list','word') # 제외 url 리스트
 
         eles = driver.find_elements(By.CSS_SELECTOR, "div.eA0Zlc")
         
         results = []
         print(f"검색어[{keyword}] 총 {len(eles)}개의 항목을 찾았어.")
-        '''
-        chunk_embeddings_dict = {
-            size : rc.ch3_create_embeddings( chunks )
-            for size , chunks in tqdm(text_chunks_dict.items() , desc='임베딩생성중')
-        }
-        '''
+        cnt = 0
         for i, el in tqdm(enumerate(eles, 1) , desc='데이터 수집중.......'):
-            # 1. 태그 사이에 있는 순수 텍스트 추출
-            
-            # 3. 만약 내부 img 태그의 alt 값을 보고 싶다면
             try:
                 alt_text = el.find_element(By.TAG_NAME, "img").get_attribute("alt")
                 alt_text = re.sub(r'[^가-힣a-zA-Z0-9\s]', '', alt_text)
             except:
                 alt_text = ""
+
             try:
                 img_src = el.find_element(By.TAG_NAME, "img").get_attribute("src")
             except:
@@ -185,14 +179,19 @@ class Search():
             except:
                 imgurl = ""
             
-            img = self.text2img(img_src)
+            img  = self.text2img(img_src)
             qr0  = self.detect_qr_logic(img)
             tx1  = self.check_target_words(img , target_keywords )
             txt  = [word for word in target_keywords if word in alt_text]
             tx2  = True if txt else False
             __temp = {'url' : imgurl , 'description':alt_text[0:128] , 'has_qr':qr0 , 'has_text_survey':tx1 , 'has_text_satisfaction':tx2}            
             if ( (qr0 or tx1 or tx2) and "instagram" in imgurl ):
-                self.__dbconn.upsert_nicon_survey_collection(__temp)
+                if any(word in imgurl for word in except_word):
+                    pass
+                else:   
+                    cnt += 1
+                    self.__dbconn.upsert_nicon_survey_collection(__temp)
+        print(f"검색어[{keyword}] 의 처리는 {cnt}건 입니다.")
 
     
 if __name__ == "__main__":   
@@ -200,22 +199,22 @@ if __name__ == "__main__":
     ss = Search()
     _check_time = w2ji.getNowDate()                   # 현재 시간
 
-    target_keywords = ["설문", "만족"] # 이미지 혹은 이미지의 설명에 해당 단어가 포함되는지 확인
     
-    keywords_list = ['"설문 조사"'] # 검색할 키워드 리스트 반드시 "" 안에 문자를 넣어야 한다.
-
-
     while(True):
         _msg_sned_flag = w2ji.get1HourOver( _check_time )
+        dd = dbcon.DbConn()
+        target_keywords = dd.get_db_word_list('nicon_target_words','word') # 이미지 혹은 이미지의 설명에 해당 단어가 포함되는지 확인
+        keywords_list   = dd.get_db_word_list('nicon_search_keywords','keyword') # 검색할 키워드 리스트 반드시 "" 안에 문자를 넣어야 한다.
+                
         for word in keywords_list:
             ss.get_google_images_no_api( word , target_keywords )
             wait_time = random.randint(60, 300)
             print(f"⏳ 다음 단어 검색까지 {wait_time // 60}분 {wait_time % 60}초 대기합니다...")
             time.sleep(wait_time)
+
         if ( _msg_sned_flag ):    # 마지막 메세지 발송후 1시간 이상 되면 다시 텔레그램 메세지를 발송한다.
             _check_time = w2ji.getNowDate()         # 메세지 발송 시간을 다시 등록한다.
             w2ji.send_telegram_message(  f'설문 수집 프로그램 정상 동작중 ' )      
         print(f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} ⏳ 다음 수집까지 2시간 대기합니다...")
         time.sleep(7200)
-
         
