@@ -185,7 +185,7 @@ class Search():
             txt  = [word for word in target_keywords if word in alt_text]
             tx2  = True if txt else False
             __temp = {'url' : imgurl , 'description':alt_text[0:128] , 'has_qr':qr0 , 'has_text_survey':tx1 , 'has_text_satisfaction':tx2}            
-            if ( (qr0 or tx1 or tx2) and "instagram" in imgurl ):
+            if ( qr0 or tx1 or tx2 ):
                 if any(word in imgurl for word in except_word):
                     pass
                 else:   
