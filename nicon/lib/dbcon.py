@@ -881,10 +881,11 @@ class DbConn(object):
                 has_qr = param['has_qr']
                 has_text_survey = param['has_text_survey']
                 has_text_satisfaction = param['has_text_satisfaction']
+                words = param['words']
 
-                query = f""" INSERT INTO nicon_survey_collection (url, collection_dt, description, has_qr, has_text_survey, has_text_satisfaction , reg_dt) 
-                values('{url}', now(), '{description}', {has_qr}, {has_text_survey}, {has_text_satisfaction} , now()) 
-                on DUPLICATE key update reg_dt = now()  """
+                query = f""" INSERT INTO nicon_survey_collection (url, collection_dt, description, has_qr, has_text_survey, has_text_satisfaction , reg_dt , words) 
+                values('{url}', now(), '{description}', {has_qr}, {has_text_survey}, {has_text_satisfaction} , now(),'{words}') 
+                on DUPLICATE key update reg_dt = now() ,  words = (case when words like '%{words}%' then words else concat( words , ' , {words}' ) end) """
                 
                 #query = query.format( **param )     
                 cur.execute( query )
