@@ -886,9 +886,9 @@ class DbConn(object):
                 query = f""" INSERT INTO nicon_survey_collection (url, collection_dt, description, has_qr, has_text_survey, has_text_satisfaction , reg_dt , words) 
                 values('{url}', now(), '{description}', {has_qr}, {has_text_survey}, {has_text_satisfaction} , now(),'{words}') 
                 on DUPLICATE key update reg_dt = now() ,  words = (case when words like '%{words}%' then words else concat( words , ' , {words}' ) end) 
-                , has_qr = (case when has_qr = 1 then has_qr else {has_qr} end)
-                , has_text_survey = (case when has_text_survey = 1 then has_text_survey else {has_text_survey} end)
-                , has_text_satisfaction = (case when has_text_satisfaction = 1 then has_text_satisfaction else {has_text_satisfaction} end)
+                , has_qr                = (case when has_qr = 1                 then 1 else {has_qr} end)
+                , has_text_survey       = (case when has_text_survey = 1        then 1 else {has_text_survey} end)
+                , has_text_satisfaction = (case when has_text_satisfaction = 1  then 1 else {has_text_satisfaction} end)
                 """
                 
                 #query = query.format( **param )     
