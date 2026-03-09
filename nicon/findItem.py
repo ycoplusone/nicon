@@ -207,6 +207,10 @@ class Search():
         chrome_options = Options()
         chrome_options.add_argument("--headless")  # 화면 없이 실행
         chrome_options.add_argument("--window-size=800,1536")
+        # 로그 레벨 설정 (3: FATAL 에러만 표시, INFO/WARNING/ERROR 무시)
+        chrome_options.add_argument('--log-level=3')
+        # 불필요한 콘솔 메시지 차단
+        chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])        
         driver      = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         chk_qr      = False
         chk_txt     = False        
