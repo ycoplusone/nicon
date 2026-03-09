@@ -871,6 +871,48 @@ class DbConn(object):
             print( 'insert_sql_log error', e )
         finally:
             pass      
+    
+    def get_nicon_survey_url(self):
+        try:
+            
+            # 2. 사용 중인(is_use='Y') 데이터만 조회
+            sql = f"""
+                SELECT url
+                from nicon_survey_collection
+                where 	is_verified = 0
+                and 	detail_chk  = 0
+                and 	collection_dt >= NOW() - INTERVAL 10 day
+            """
+            cur = self.__conn.cursor( pymysql.cursors.DictCursor )
+            cur.execute( sql )
+            results = cur.fetchall()
+            list = [row['url'] for row in results]                
+            return list
+        finally:
+            pass    
+    
+    def upsert_nicon_survey_detail(self , param ):
+            '''설문조사 detail 부분'''
+            try :
+                cur = self.__conn.cursor()                        
+                #url = escape_string( param['url']  )                
+                #detail_qr  = param['chk_qr']
+                #detail_txt = param['chk_txt']                               
+
+                query = (
+                " update nicon_survey_collection "
+                " set detail_chk = 1 "
+                " , detail_qr   = {chk_qr} "
+                " , detail_txt  = {chk_txt}  "
+                " where url     = '{url}'  "                
+                )                  
+                query = query.format( **param )     
+                cur.execute( query )
+                self.__conn.commit()
+            except Exception as e:
+                print( 'upsert_nicon_survey_collection', e ,'\n',query ,'\n',param )
+            finally:
+                pass          
 
     def upsert_nicon_survey_collection(self , param ):
             '''설문조사 입력 부분'''
@@ -904,8 +946,7 @@ class DbConn(object):
         특정 테이블에서 사용 중('Y')인 단어들만 리스트로 반환하는 함수
         table_name: nicon_search_keywords 또는 nicon_target_words
         column_name: keyword 또는 word
-        """      
-        
+        """              
         try:
             
             # 2. 사용 중인(is_use='Y') 데이터만 조회
@@ -915,23 +956,7 @@ class DbConn(object):
             results = cur.fetchall()
 
             # 3. [{column: '단어1'}, {column: '단어2'}] 형태를 ['단어1', '단어2'] 리스트로 변환
-            word_list = [row[column_name] for row in results]
-                
+            word_list = [row[column_name] for row in results]                
             return word_list
-
         finally:
             pass
-'''
-            select_query2 = (
-                " SELECT seq "
-                " FROM marco_info "
-                " WHERE job_nm = '"+str(job_nm)+"' "
-                " and DATE_FORMAT(job_st_dt, '%Y%m%d') = STR_TO_DATE('"+str(str_date)+"', '%Y%m%d') "
-                " order by seq desc "
-                " LIMIT  1 "
-            )            
-
-            cur = self.__conn.cursor( pymysql.cursors.DictCursor )
-            if flag == 'E':
-                cur.execute( select_query1 )
-'''
