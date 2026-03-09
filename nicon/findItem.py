@@ -4,6 +4,8 @@ from io import BytesIO
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import urlparse, parse_qs
 import random
 import time
@@ -89,9 +91,10 @@ class Search():
             
         return results    
 
-    def check_target_words(self , image_obj , targets ):
+    def check_target_words(self , image_obj , targets , except_word ):
         """
-        이미지 객체에서 '설문' 또는 '만족' 단어가 포함되어 있는지 판별함
+        이미지 객체에서 targets 단어가 포함되어 있는지 판별함
+        , 이미지 객체에 except_word 가 포함되어 있는지 판별.
         """
         # 1. OCR 인식률을 높이기 위한 전처리 (OpenCV 활용)
         # 이미지를 흑백으로 바꾸고 대비를 높여 글자를 뚜렷하게 해
@@ -109,15 +112,19 @@ class Search():
         # 3. 특정 단어 포함 여부 확인
         # 공백과 줄바꿈을 제거해서 검색 정확도를 높여
         clean_text = extracted_text.replace(" ", "").replace("\n", "")
-        
-        
+        print('\n','#'*20)
+        print( 'clean_text',clean_text )
         found_words = [word for word in targets if word in clean_text]
+        print( 'found_words',found_words )
+        found_except_words = [word for word in except_word if word in clean_text]
+        print( 'excpt_words',found_except_words )
+        print( 'condition',found_words and not found_except_words )
 
-        if found_words:
-            #print(f"✅ 단어 검출 성공: {found_words}")
+        if found_words and not found_except_words:
+            print(f"✅ 단어 검출 성공: {found_words}")
             return True
         else:
-            #print("❌ 대상 단어를 찾지 못했습니다.")
+            print("❌ 대상 단어를 찾지 못했습니다.")
             return False
     
     def text2img( self , base64_data:str ):
@@ -142,7 +149,7 @@ class Search():
         except:
             return ''
 
-    def get_google_images_no_api(self , keyword , target_keywords):
+    def get_google_images_no_api(self , keyword , target_keywords , except_word):
         chrome_options = Options()
         # 차단 방지를 위한 설정
         chrome_options.add_argument("--disable-blink-features=AutomationControlled") 
@@ -154,7 +161,7 @@ class Search():
         driver.get(search_url)
         time.sleep(3) # 로딩 대기
         self.__dbconn     = dbcon.DbConn() #db연결 재연결        
-        except_word       = self.__dbconn.get_db_word_list('nicon_survey_exception_list','word') # 제외 url 리스트
+        
 
         eles = driver.find_elements(By.CSS_SELECTOR, "div.eA0Zlc")
         
@@ -181,19 +188,75 @@ class Search():
             
             img  = "" if img_src == "" else self.text2img(img_src)
             qr0  = False if img == "" else self.detect_qr_logic(img)
-            tx1  = False if img == "" else self.check_target_words(img , target_keywords )
+            tx1  = False if img == "" else self.check_target_words(img , target_keywords , except_word )
             txt  = [word for word in target_keywords if word in alt_text]
             tx2  = True if txt else False
             __temp = {'url' : imgurl , 'description':alt_text[0:128] , 'has_qr':qr0 , 'has_text_survey':tx1 , 'has_text_satisfaction':tx2 , 'words':keyword}            
             if ( qr0 or tx1 or tx2 ):
-                if any(word in imgurl for word in except_word):
+                print('url', imgurl , any(word in imgurl for word in except_word) , any(word in alt_text for word in except_word))
+                print('url condi', any(word in imgurl for word in except_word) or any(word in alt_text for word in except_word) )
+                if any(word in imgurl for word in except_word) or any(word in alt_text for word in except_word) : # url 과 이미지설명에 금지단어 검출
                     pass
                 else:   
                     cnt += 1
                     self.__dbconn.upsert_nicon_survey_collection(__temp)
         print(f"검색어[{keyword}] 의 처리는 {cnt}건 입니다.")
 
+    def extract_data_from_url(self, url,  targets , except_word , save_path="screenshot.png" ):
+        # 브라우저 설정
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # 화면 없이 실행
+        chrome_options.add_argument("--window-size=800,1536")
+        driver      = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        chk_qr      = False
+        chk_txt     = False        
+
+        try:
+            # 사이트 접속
+            driver.get(url)
+            #driver.execute_script("document.body.style.zoom='0.70'")
+            time.sleep(3)  # 페이지 로딩 대기 (필요시 조정)
+
+            # 2. 스크린샷 저장
+            driver.save_screenshot(save_path)
+            print(f"✅ 스크린샷 저장 완료: {save_path}")
+
+            # 3. 이미지 로드
+            img = Image.open(save_path)
+
+            # 4. 텍스트 추출 (OCR)
+            # lang='kor+eng' 설정을 통해 한글과 영어를 동시에 인식 가능해
+            text_data = pytesseract.image_to_string(img, lang='kor+eng')
+            print("\n--- [추출된 텍스트] ---")
+            text_data           = text_data.replace(" ", "").replace("\n", "")
+            found_words         = [word for word in targets if word in text_data]            
+            found_except_words  = [word for word in except_word if word in text_data]                        
+            if( found_words and not found_except_words ):
+                chk_txt = True
+            else:
+                chk_txt = False
+
+            print(text_data)
+            print( 'found_words',found_words )
+            print( 'excpt_words',found_except_words )
+            print( 'condition'  , chk_txt )            
+            
+
+            # 5. QR 코드 추출
+            qr_results = decode(img)
+            print("\n--- [추출된 QR 코드 정보] ---")
+            if qr_results:
+                for qr in qr_results:
+                    print(f"🔗 QR 데이터: {qr.data.decode('utf-8')}")
+                    chk_qr = True # QR코드 식별
+            print( 'qr'  , chk_qr )   
+            return chk_qr , chk_txt         
+
+        finally:
+            return chk_qr , chk_txt
+            driver.quit()    
     
+
 if __name__ == "__main__":   
     ''''''
     ss = Search()
@@ -203,18 +266,28 @@ if __name__ == "__main__":
     while(True):
         _msg_sned_flag = w2ji.get1HourOver( _check_time )
         dd = dbcon.DbConn()
-        target_keywords = dd.get_db_word_list('nicon_target_words','word') # 이미지 혹은 이미지의 설명에 해당 단어가 포함되는지 확인
-        keywords_list   = dd.get_db_word_list('nicon_search_keywords','keyword') # 검색할 키워드 리스트 반드시 "" 안에 문자를 넣어야 한다.
-                
+        keywords_list   = dd.get_db_word_list('nicon_search_keywords','keyword') # 검색할 키워드 리스트 반드시 "" 안에 문자를 넣어야 한다. 검색리스트
+
+        target_keywords = dd.get_db_word_list('nicon_target_words','word') # 이미지 혹은 이미지의 설명에 해당 단어가 포함되는지 확인        
+        except_word     = dd.get_db_word_list('nicon_survey_exception_list','word') # 제외 단어 리스트
         for word in keywords_list:
-            ss.get_google_images_no_api( word , target_keywords )
+            ss.get_google_images_no_api( word , target_keywords , except_word )
             wait_time = random.randint(60, 300)
             print(f"{_check_time} |||| 다음 단어 검색까지 {wait_time // 60}분 {wait_time % 60}초 대기합니다...")
             time.sleep(wait_time)
 
         if ( _msg_sned_flag ):    # 마지막 메세지 발송후 1시간 이상 되면 다시 텔레그램 메세지를 발송한다.
             _check_time = w2ji.getNowDate()         # 메세지 발송 시간을 다시 등록한다.
-            w2ji.send_telegram_message(  f'설문 수집 프로그램 정상 동작중 ' )      
-        print(f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} ⏳ 다음 수집까지 2시간 대기합니다...")
-        time.sleep(7200)
-        
+            w2ji.send_telegram_message(  f'설문 수집 프로그램 정상 동작중 ' )  
+
+        # 상세 스샷후 검출작업
+        url_list = dd.get_nicon_survey_url()
+        for url in tqdm(url_list , desc='URL 처리중.'):            
+            chk_qr , chk_txt = ss.extract_data_from_url(url=url ,targets=target_keywords,except_word=except_word)
+            __temp = {'url' : url , 'chk_qr':chk_qr , 'chk_txt':chk_txt }
+            dd.upsert_nicon_survey_detail( param=__temp )
+
+
+        print(f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} ⏳ 다음 수집까지 1시간 대기합니다...")
+        time.sleep(3600)
+    
