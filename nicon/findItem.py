@@ -177,7 +177,7 @@ class Search():
             
             print(f"검색어[{keyword}] 총 {len(eles)}개의 항목을 찾았어.")
             cnt = 0
-            for  el in tqdm(eles , desc='\n데이터 수집중.......'):
+            for  el in tqdm(eles , desc=f'\n[{keyword}] 데이터 수집중.......'):
                 try:
                     alt_text = el.find_element(By.TAG_NAME, "img").get_attribute("alt")
                     alt_text = re.sub(r'[^가-힣a-zA-Z0-9\s]', '', alt_text)
@@ -197,7 +197,7 @@ class Search():
         print('\n')
         time.sleep(0.5)  # 잠시 대기
        
-        for result in tqdm(results , desc='처리중 => ',leave=False):
+        for result in tqdm(results , desc=f'[{keyword}] 처리중 => ',leave=False):
             url         = result['url']
             img_src     = result['img_src']
             alt_text    = result['alt_text']
@@ -377,7 +377,6 @@ if __name__ == "__main__":
         try:
             dd = dbcon.DbConn()
             keywords_list   = dd.get_db_word_list('nicon_search_keywords','keyword') # 검색할 키워드 리스트 반드시 "" 안에 문자를 넣어야 한다. 검색리스트
-
             target_keywords = dd.get_db_word_list('nicon_target_words','word') # 이미지 혹은 이미지의 설명에 해당 단어가 포함되는지 확인        
             except_word     = dd.get_db_word_list('nicon_survey_exception_list','word') # 제외 단어 리스트
             
