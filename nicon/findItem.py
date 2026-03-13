@@ -2,11 +2,12 @@ import base64
 from io import BytesIO
 
 from selenium import webdriver
+from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs , unquote
 import random
 import time
 from datetime import datetime
@@ -21,6 +22,9 @@ from tqdm import tqdm
 import lib.dbcon as dbcon
 import re
 import lib.util as w2ji
+import os
+
+
 
 
 class Search():
@@ -112,19 +116,20 @@ class Search():
         # 3. 특정 단어 포함 여부 확인
         # 공백과 줄바꿈을 제거해서 검색 정확도를 높여
         clean_text = extracted_text.replace(" ", "").replace("\n", "")
-        print('\n','#'*20)
-        print( 'clean_text',clean_text )
         found_words = [word for word in targets if word in clean_text]
-        print( 'found_words',found_words )
         found_except_words = [word for word in except_word if word in clean_text]
+        '''print('\n','#'*20)
+        print( 'clean_text',clean_text )        
+        print( 'found_words',found_words )        
         print( 'excpt_words',found_except_words )
         print( 'condition',found_words and not found_except_words )
+        '''
 
         if found_words and not found_except_words:
-            print(f"✅ 단어 검출 성공: {found_words}")
+            #print(f"✅ 단어 검출 성공: {found_words}")
             return True
         else:
-            print("❌ 대상 단어를 찾지 못했습니다.")
+            #print("❌ 대상 단어를 찾지 못했습니다.")
             return False
     
     def text2img( self , base64_data:str ):
@@ -152,66 +157,119 @@ class Search():
     def get_google_images_no_api(self , keyword , target_keywords , except_word):
         chrome_options = Options()
         # 차단 방지를 위한 설정
-        chrome_options.add_argument("--disable-blink-features=AutomationControlled") 
-        chrome_options.add_argument('--headless')       
-        driver = webdriver.Chrome(options=chrome_options)        
-        
-        # 최근 1일(qdr:d) 옵션이 포함된 검색 URL
-        search_url = f"https://www.google.com/search?q={keyword}&tbm=isch&tbs=qdr:d"
-        driver.get(search_url)
-        time.sleep(3) # 로딩 대기
-        self.__dbconn     = dbcon.DbConn() #db연결 재연결        
-        
+        options = Options()
+        options.add_argument('--headless')
+        #options.add_argument('--disable-gpu')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        # 불필요한 콘솔 메시지 차단
+        chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])                
+        #driver = webdriver.Chrome(options=chrome_options)   
+        results = [] # 검색 결과 리스트
+        with Chrome(options=options) as driver:             
+            # 최근 1일(qdr:d) 옵션이 포함된 검색 URL
+            search_url = f"https://www.google.com/search?q={keyword}&tbm=isch&tbs=qdr:d"
+            driver.get(search_url)
+            time.sleep(3) # 로딩 대기
+            self.__dbconn     = dbcon.DbConn() #db연결 재연결
 
-        eles = driver.find_elements(By.CSS_SELECTOR, "div.eA0Zlc")
-        
-        results = []
-        print(f"검색어[{keyword}] 총 {len(eles)}개의 항목을 찾았어.")
-        cnt = 0
-        for i, el in tqdm(enumerate(eles, 1) , desc='데이터 수집중.......'):
-            try:
-                alt_text = el.find_element(By.TAG_NAME, "img").get_attribute("alt")
-                alt_text = re.sub(r'[^가-힣a-zA-Z0-9\s]', '', alt_text)
-            except:
-                alt_text = ""
+            eles = driver.find_elements(By.CSS_SELECTOR, "div.eA0Zlc")            
+            
+            print(f"검색어[{keyword}] 총 {len(eles)}개의 항목을 찾았어.")
+            cnt = 0
+            for  el in tqdm(eles , desc='\n데이터 수집중.......'):
+                try:
+                    alt_text = el.find_element(By.TAG_NAME, "img").get_attribute("alt")
+                    alt_text = re.sub(r'[^가-힣a-zA-Z0-9\s]', '', alt_text)
+                except:
+                    alt_text = ""
+                try:
+                    img_src = el.find_element(By.TAG_NAME, "img").get_attribute("src")
+                except:
+                    img_src = ""                
+                try:
+                    imgurl = unquote( el.get_attribute("data-lpage") )                
+                except:
+                    imgurl = ""                
+                __temp_data = {'url' : imgurl , 'alt_text':alt_text , 'img_src':img_src  }
+                results.append( __temp_data )
 
-            try:
-                img_src = el.find_element(By.TAG_NAME, "img").get_attribute("src")
-            except:
-                img_src = ""
+        print('\n')
+        time.sleep(0.5)  # 잠시 대기
+       
+        for result in tqdm(results , desc='처리중 => ',leave=False):
+            url         = result['url']
+            img_src     = result['img_src']
+            alt_text    = result['alt_text']
+            url_chk     = self.__dbconn.get_nicon_survey_url_chk( {'url':url} ) # 미등록 0 등록 1 0만 처리한다.
+
+            # url 에서 확장자 추출
+            _, ext = os.path.splitext(url)
+            ext = ext.lower()
+
+            # 3. 확장자 그룹 정의
+            extension_map = {
+                '.pdf': 'PDF 문서',
+                '.txt': '텍스트 파일',
+                '.xlsx': '엑셀(Excel) 파일',
+                '.xls': '엑셀(Excel) 파일',
+                '.csv': '엑셀(CSV) 파일',
+                '.docx': '워드(Word) 파일',
+                '.doc': '워드(Word) 파일',
+                '.hwp': '한글(HWP) 파일',
+                '.hwpx': '한글(HWPX) 파일',
+                '.pptx': '파워포인트(PPT) 파일',
+                '.ppt': '파워포인트(PPT) 파일'
+            }
+
+            # 4. 검출 논리
+            if ext in extension_map:
+                url_pdf = True # 확장자 검출
+            else:
+                url_pdf = False # 확장자 미검출 
             
-            try:
-                imgurl = el.get_attribute("data-lpage")
+            img         = "" if img_src == "" else self.text2img(img_src) # 이미지 생성
+            qr0         = False  if img == "" else self.detect_qr_logic(img) # 이미지내 qr 검출
+            tx1         = False  if img == "" else self.check_target_words(img , target_keywords , except_word ) # 이미지내 단어 검출
+            txt         = [word for word in target_keywords if word in alt_text]
+            tx2         = True if txt else False # 설명문에 단어 검출                
+            __temp = {'url' : url , 'description':alt_text[0:128] , 'has_qr':qr0 , 'has_text_survey':tx1 , 'has_text_satisfaction':tx2 , 'words':keyword}            
+            #print('\n',url ,'===>', url_chk)
+            if (url_chk == 0 and url_pdf == False):
+                if ( qr0 or tx1 or tx2 ):
+                    if any(word in url for word in except_word) or any(word in alt_text for word in except_word) : # url 과 이미지설명에 금지단어 검출                        
+                        #print(url, '=>' ,'worst_url 1단계 제외 단어 검출')
+                        self.__dbconn.upsert_nicon_survey_worst_url_list(param=__temp) # 제외 url에 넣는다.
+                    else:                           
+                        cnt += 1
+                        self.__dbconn.upsert_nicon_survey_collection(__temp)
+                        chk_qr , chk_txt = ss.extract_data_from_url(url=url ,targets=target_keywords,except_word=except_word)
+                        #chk_qr , chk_txt = ss.extract_data_from_url_ver2(driver=driver2 , url=url ,targets=target_keywords,except_word=except_word)
+                        __tempdd = {'url' : url , 'chk_qr':chk_qr , 'chk_txt':chk_txt }
+                        self.__dbconn.upsert_nicon_survey_detail( param=__tempdd )
+                        #print(url, '=>' ,'등록1',qr0,tx1 , tx2,chk_qr,chk_txt)
+                else:
+                    chk_qr , chk_txt = ss.extract_data_from_url(url=url ,targets=target_keywords,except_word=except_word)
+                    #chk_qr , chk_txt = ss.extract_data_from_url_ver2(driver=driver2 , url=url ,targets=target_keywords,except_word=except_word)
+                    if (chk_qr or chk_txt ):                        
+                        self.__dbconn.upsert_nicon_survey_collection( __temp ) # 등록
+                        __tempdd = {'url' : url , 'chk_qr' : chk_qr , 'chk_txt' : chk_txt } # 상세 등록
+                        self.__dbconn.upsert_nicon_survey_detail( param=__tempdd )                            
+                        #print(url, '=>' ,'등록2',qr0,tx1 , tx2,chk_qr,chk_txt)
+                    else :
+                        #print(url, '=>' ,'worst_url 2단계 아무것도 검출안됨')
+                        self.__dbconn.upsert_nicon_survey_worst_url_list(param=__temp) # 제외 url에 넣는다.                    
+            elif( url_chk >= 9 ):
+                #print(url, '=>' ,'이미등록건')
+                self.__dbconn.upsert_nicon_survey_collection(__temp) # 검색어만 업데이트 한다.
+            else:
+                # url에 PDF 파일이 포함되어 있다면 검사 없이 넘어간다.
+                self.__dbconn.upsert_nicon_survey_worst_url_list(param=__temp) # 제외 url에 넣는다.
             
-            except:
-                imgurl = ""
-            
-            img  = "" if img_src == "" else self.text2img(img_src)
-            qr0  = False if img == "" else self.detect_qr_logic(img)
-            tx1  = False if img == "" else self.check_target_words(img , target_keywords , except_word )
-            txt  = [word for word in target_keywords if word in alt_text]
-            tx2  = True if txt else False
-            __temp = {'url' : imgurl , 'description':alt_text[0:128] , 'has_qr':qr0 , 'has_text_survey':tx1 , 'has_text_satisfaction':tx2 , 'words':keyword}            
-            if ( qr0 or tx1 or tx2 ):
-                print('url', imgurl , any(word in imgurl for word in except_word) , any(word in alt_text for word in except_word))
-                print('url condi', any(word in imgurl for word in except_word) or any(word in alt_text for word in except_word) )
-                if any(word in imgurl for word in except_word) or any(word in alt_text for word in except_word) : # url 과 이미지설명에 금지단어 검출
-                    pass
-                else:   
-                    cnt += 1
-                    self.__dbconn.upsert_nicon_survey_collection(__temp)
         print(f"검색어[{keyword}] 의 처리는 {cnt}건 입니다.")
 
-    def extract_data_from_url(self, url,  targets , except_word , save_path="screenshot.png" ):
+    def extract_data_from_url_ver2(self,driver, url,  targets , except_word , save_path="screenshot.png" ):
         # 브라우저 설정
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")  # 화면 없이 실행
-        chrome_options.add_argument("--window-size=800,1536")
-        # 로그 레벨 설정 (3: FATAL 에러만 표시, INFO/WARNING/ERROR 무시)
-        chrome_options.add_argument('--log-level=3')
-        # 불필요한 콘솔 메시지 차단
-        chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])        
-        driver      = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         chk_qr      = False
         chk_txt     = False        
 
@@ -223,7 +281,7 @@ class Search():
 
             # 2. 스크린샷 저장
             driver.save_screenshot(save_path)
-            print(f"✅ 스크린샷 저장 완료: {save_path}")
+            #print(f"✅ 스크린샷 저장 완료: {save_path}")
 
             # 3. 이미지 로드
             img = Image.open(save_path)
@@ -231,7 +289,7 @@ class Search():
             # 4. 텍스트 추출 (OCR)
             # lang='kor+eng' 설정을 통해 한글과 영어를 동시에 인식 가능해
             text_data = pytesseract.image_to_string(img, lang='kor+eng')
-            print("\n--- [추출된 텍스트] ---")
+            #print("\n--- [추출된 텍스트] ---")
             text_data           = text_data.replace(" ", "").replace("\n", "")
             found_words         = [word for word in targets if word in text_data]            
             found_except_words  = [word for word in except_word if word in text_data]                        
@@ -240,57 +298,111 @@ class Search():
             else:
                 chk_txt = False
 
-            print(text_data)
-            print( 'found_words',found_words )
-            print( 'excpt_words',found_except_words )
-            print( 'condition'  , chk_txt )            
-            
-
             # 5. QR 코드 추출
             qr_results = decode(img)
-            print("\n--- [추출된 QR 코드 정보] ---")
+            #print("\n--- [추출된 QR 코드 정보] ---")
             if qr_results:
                 for qr in qr_results:
-                    print(f"🔗 QR 데이터: {qr.data.decode('utf-8')}")
+                    #print(f"🔗 QR 데이터: {qr.data.decode('utf-8')}")
                     chk_qr = True # QR코드 식별
-            print( 'qr'  , chk_qr )   
-            return chk_qr , chk_txt         
-
+            #print( 'qr'  , chk_qr )   
+            return chk_qr , chk_txt
         finally:
             return chk_qr , chk_txt
-            driver.quit()    
+
+
+    def extract_data_from_url(self, url,  targets , except_word , save_path="screenshot.png" ):
+        # 브라우저 설정
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # 화면 없이 실행
+        chrome_options.add_argument("--window-size=800,1536")
+        # 로그 레벨 설정 (3: FATAL 에러만 표시, INFO/WARNING/ERROR 무시)
+        chrome_options.add_argument('--log-level=3')
+        # 불필요한 콘솔 메시지 차단
+        chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])         
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')               
+        #driver      = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        chk_qr      = False
+        chk_txt     = False        
+        with Chrome(options=chrome_options) as driver:
+            try:
+                # 사이트 접속
+                driver.get(url)
+                #driver.execute_script("document.body.style.zoom='0.70'")
+                time.sleep(3)  # 페이지 로딩 대기 (필요시 조정)
+
+                # 2. 스크린샷 저장
+                driver.save_screenshot(save_path)
+                #print(f"✅ 스크린샷 저장 완료: {save_path}")
+
+                # 3. 이미지 로드
+                img = Image.open(save_path)
+
+                # 4. 텍스트 추출 (OCR)
+                # lang='kor+eng' 설정을 통해 한글과 영어를 동시에 인식 가능해
+                text_data = pytesseract.image_to_string(img, lang='kor+eng')
+                #print("\n--- [추출된 텍스트] ---")
+                text_data           = text_data.replace(" ", "").replace("\n", "")
+                found_words         = [word for word in targets if word in text_data]            
+                found_except_words  = [word for word in except_word if word in text_data]                        
+                if( found_words and not found_except_words ):
+                    chk_txt = True
+                else:
+                    chk_txt = False
+
+                # 5. QR 코드 추출
+                qr_results = decode(img)
+                #print("\n--- [추출된 QR 코드 정보] ---")
+                if qr_results:
+                    for qr in qr_results:
+                        #print(f"🔗 QR 데이터: {qr.data.decode('utf-8')}")
+                        chk_qr = True # QR코드 식별
+                #print( 'qr'  , chk_qr )   
+                return chk_qr , chk_txt
+            finally:
+                return chk_qr , chk_txt
+
     
 
 if __name__ == "__main__":   
     ''''''
     ss = Search()
     _check_time = w2ji.getNowDate()                   # 현재 시간
-
-    
+    _tot_cnt = 0 # 전체 실행 횟수 카운트
+    w2ji.send_telegram_message(  f'키워드 검색 수집 시작 .........' )
     while(True):
-        _msg_sned_flag = w2ji.get1HourOver( _check_time )
-        dd = dbcon.DbConn()
-        keywords_list   = dd.get_db_word_list('nicon_search_keywords','keyword') # 검색할 키워드 리스트 반드시 "" 안에 문자를 넣어야 한다. 검색리스트
+        try:
+            dd = dbcon.DbConn()
+            keywords_list   = dd.get_db_word_list('nicon_search_keywords','keyword') # 검색할 키워드 리스트 반드시 "" 안에 문자를 넣어야 한다. 검색리스트
 
-        target_keywords = dd.get_db_word_list('nicon_target_words','word') # 이미지 혹은 이미지의 설명에 해당 단어가 포함되는지 확인        
-        except_word     = dd.get_db_word_list('nicon_survey_exception_list','word') # 제외 단어 리스트
-        for word in keywords_list:
-            ss.get_google_images_no_api( word , target_keywords , except_word )
-            wait_time = random.randint(60, 300)
-            print(f"{_check_time} |||| 다음 단어 검색까지 {wait_time // 60}분 {wait_time % 60}초 대기합니다...")
-            time.sleep(wait_time)
+            target_keywords = dd.get_db_word_list('nicon_target_words','word') # 이미지 혹은 이미지의 설명에 해당 단어가 포함되는지 확인        
+            except_word     = dd.get_db_word_list('nicon_survey_exception_list','word') # 제외 단어 리스트
+            
+            _tot_cnt += 1 #  전체 실행 횟수 가산
+            _sub_cnt = 0 # 검색 횟수
 
-        if ( _msg_sned_flag ):    # 마지막 메세지 발송후 1시간 이상 되면 다시 텔레그램 메세지를 발송한다.
-            _check_time = w2ji.getNowDate()         # 메세지 발송 시간을 다시 등록한다.
-            w2ji.send_telegram_message(  f'설문 수집 프로그램 정상 동작중 ' )  
+            for word in tqdm(keywords_list , desc='\n검색중.......'):                
+                _sub_cnt += 1 # 검색 횟수 가산
+                ss.get_google_images_no_api( word , target_keywords , except_word )
+                wait_time = random.randint(60, 300)
+                print(f"{_check_time} |||| 다음 단어 검색까지 {wait_time // 60}분 {wait_time % 60}초 대기합니다...")
+                time.sleep(wait_time)
+                
+                _msg_sned_flag = w2ji.get1HourOver( _check_time ) # 시간 이상 체크
+                if ( _msg_sned_flag ):    # 마지막 메세지 발송후 1시간 이상 되면 다시 텔레그램 메세지를 발송한다.
+                    _check_time = w2ji.getNowDate()         # 메세지 발송 시간을 다시 등록한다.
+                    w2ji.send_telegram_message(  f'[{_tot_cnt}]회차 - [{_sub_cnt}/{len(keywords_list)}] 검색어 [{word}] 데이터 정상 수집중 ' )
 
-        # 상세 스샷후 검출작업
-        url_list = dd.get_nicon_survey_url()
-        for url in tqdm(url_list , desc='URL 처리중.'):            
-            chk_qr , chk_txt = ss.extract_data_from_url(url=url ,targets=target_keywords,except_word=except_word)
-            __temp = {'url' : url , 'chk_qr':chk_qr , 'chk_txt':chk_txt }
-            dd.upsert_nicon_survey_detail( param=__temp )
-
+            # 상세 스샷후 검출작업
+            url_list = dd.get_nicon_survey_url()
+            for url in tqdm(url_list , desc='URL 처리중.'):            
+                chk_qr , chk_txt = ss.extract_data_from_url(url=url ,targets=target_keywords,except_word=except_word)
+                __temp = {'url' : url , 'chk_qr':chk_qr , 'chk_txt':chk_txt }
+                dd.upsert_nicon_survey_detail( param=__temp )
+        except:
+            pass
 
         print(f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} ⏳ 다음 수집까지 1시간 대기합니다...")
         time.sleep(3600)
