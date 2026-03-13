@@ -899,8 +899,8 @@ class DbConn(object):
                 cur = self.__conn.cursor()                        
                 url = escape_string( param['url']  )
 
-                query = f""" INSERT INTO nicon_survey_worst_url_list (url , reg_dt) values('{url}', now() ) 
-                    on DUPLICATE key update reg_dt = now() 
+                query = f""" INSERT INTO nicon_survey_worst_url_list (url , reg_dt , cnt) values('{url}', now() , 1 ) 
+                    on DUPLICATE key update reg_dt = now() , cnt = cnt + 1
                 """
                 
                 #query = query.format( **param )     
