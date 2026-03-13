@@ -871,6 +871,46 @@ class DbConn(object):
             print( 'insert_sql_log error', e )
         finally:
             pass      
+
+    def get_nicon_survey_url_chk(self, param):
+        try:
+            query = (
+                " select sum(cnt) cnt "
+                " from ( "
+                " select 9 cnt "
+                " from nicon_survey_collection "
+                " where url = '{url}' "
+                " union all "
+                " select count(1) cnt "
+                " from nicon_survey_worst_url_list "
+                " where url = '{url}' "
+                " ) a "
+            )
+            query = query.format( **param ) 
+            cur = self.__conn.cursor( pymysql.cursors.DictCursor )                
+            cur.execute( query )
+            result = cur.fetchone()            
+            return result['cnt']
+        finally:
+            return 0
+
+    def upsert_nicon_survey_worst_url_list(self , param ):            
+            try :
+                cur = self.__conn.cursor()                        
+                url = escape_string( param['url']  )
+
+                query = f""" INSERT INTO nicon_survey_worst_url_list (url , reg_dt) values('{url}', now() ) 
+                    on DUPLICATE key update reg_dt = now() 
+                """
+                
+                #query = query.format( **param )     
+                cur.execute( query )
+                self.__conn.commit()
+            except Exception as e:
+                print( 'upsert_nicon_survey_worst_url_list', e ,'\n',query ,'\n',param )
+            finally:
+                pass        
+
     
     def get_nicon_survey_url(self):
         try:
@@ -895,9 +935,6 @@ class DbConn(object):
             '''설문조사 detail 부분'''
             try :
                 cur = self.__conn.cursor()                        
-                #url = escape_string( param['url']  )                
-                #detail_qr  = param['chk_qr']
-                #detail_txt = param['chk_txt']                               
 
                 query = (
                 " update nicon_survey_collection "
@@ -950,7 +987,7 @@ class DbConn(object):
         try:
             
             # 2. 사용 중인(is_use='Y') 데이터만 조회
-            sql = f"SELECT {column_name} FROM {table_name} WHERE is_use = 'Y'"
+            sql = f"SELECT {column_name} FROM {table_name} WHERE is_use = 'Y' ORDER BY RAND() "
             cur = self.__conn.cursor( pymysql.cursors.DictCursor )
             cur.execute( sql )
             results = cur.fetchall()
