@@ -325,7 +325,8 @@ class Search():
         chrome_options.add_argument('--disable-dev-shm-usage')               
         #driver      = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         chk_qr      = False
-        chk_txt     = False        
+        chk_txt     = False    
+        print('\n')   
         with Chrome(options=chrome_options) as driver:
             try:
                 # 사이트 접속
@@ -387,7 +388,7 @@ if __name__ == "__main__":
                 _sub_cnt += 1 # 검색 횟수 가산
                 ss.get_google_images_no_api( word , target_keywords , except_word )
                 wait_time = random.randint(60, 300)
-                print(f"{_check_time} |||| 다음 단어 검색까지 {wait_time // 60}분 {wait_time % 60}초 대기합니다...")
+                print(f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} |||| 다음 단어 검색까지 {wait_time // 60}분 {wait_time % 60}초 대기합니다...")
                 time.sleep(wait_time)
                 
                 _msg_sned_flag = w2ji.get1HourOver( _check_time ) # 시간 이상 체크
