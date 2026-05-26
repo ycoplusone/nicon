@@ -1,11 +1,16 @@
 import os
 import sys
+import shutil  # 파일 이동을 위해 추가
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
                              QLineEdit, QPushButton, QListWidget, QListWidgetItem, 
                              QLabel, QMessageBox, QToolTip)
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import Qt, QSize,QEvent
 from PyQt5.QtGui import QPixmap, QIcon
+import time
 
+'''
+니콘 파일 스캐너 삭제/이동 편의 목적 개별 파일에 대해서 수행한다.
+'''
 
 class CustomLineEdit(QLineEdit):
     def keyPressEvent(self, event):
@@ -35,6 +40,7 @@ class ImageButton(QPushButton):
         super().enterEvent(event)
 
 class FileCleanerApp(QWidget):
+    search_input = None
     def __init__(self):
         super().__init__()
         self.base_path = r'C:\ncnc'
@@ -47,7 +53,14 @@ class FileCleanerApp(QWidget):
         self.main_layout = QVBoxLayout()
         
         self.search_layout = QHBoxLayout()
-        self.search_input = CustomLineEdit(self)
+        self.search_input = CustomLineEdit()
+        self.search_input.setStyleSheet("""
+            QLineEdit {
+                font-size: 16px;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        """)        
         self.search_input.setPlaceholderText("파일명 입력 (엔터/스페이스 검색)")
         
         self.search_btn = QPushButton("검색")
@@ -69,6 +82,18 @@ class FileCleanerApp(QWidget):
         self.setLayout(self.main_layout)
         self.setWindowTitle('NCNC 파일 관리자 - 이미지 미리보기 지원')
         self.setGeometry(300, 300, 600, 400)
+        # ★ 1. 프로그램이 처음 실행될 때 입력창에 포커스를 줍니다.
+        self.search_input.setFocus()        
+
+    def changeEvent(self, event):
+        # QEvent.ActivationChange는 창의 활성화 상태가 변경될 때 발생합니다.
+        if event.type() == QEvent.ActivationChange:
+            if self.isActiveWindow():
+                #print("GUI 창이 포커스 되었습니다! (Focus On)")
+                # ★ 여기에 창이 포커스 되었을 때 실행하고 싶은 기능을 넣으세요.
+                self.search_input.setFocus() 
+        #self.search_input.setFocus()
+        super().changeEvent(event)
 
     def search_files(self):
         query = self.search_input.text().strip()
@@ -79,6 +104,7 @@ class FileCleanerApp(QWidget):
         self.search_input.clear()
         self.current_search_label.setText(f"조회: {query}")
         self.result_list.clear()
+        self.search_input.setFocus()
 
         try:
             for root, dirs, files in os.walk(self.base_path):
@@ -110,10 +136,20 @@ class FileCleanerApp(QWidget):
         del_btn.clicked.connect(lambda: self.delete_file(full_path, item))
         layout.addWidget(del_btn)
 
+        # ★ 2. 이동 버튼 (삭제 버튼 바로 옆에 추가)
+        move_btn = QPushButton("이동")
+        move_btn.setFixedWidth(50)
+        move_btn.setStyleSheet("background-color: #2196F3; color: white; font-weight: bold;")
+        move_btn.clicked.connect(lambda checked, p=full_path, i=item: self.move_file_up(p, i))
+        layout.addWidget(move_btn)        
+
        
         # 3. 정보 표시
         info_label = QLabel(f"{brand_name} \n{prod_name} \n{Period_name} \n{file_name}")
         info_label.setStyleSheet("margin-left: 10px;font-size:14px")
+        # ★ 여기 두 줄을 추가/수정합니다.
+        info_label.setFixedWidth(250)  # 가로 넓이를 250픽셀로 고정 (원하는 크기로 변경 가능)
+        info_label.setWordWrap(True)   # 글자가 지정된 넓이를 넘어가면 자동으로 줄바꿈        
         layout.addWidget(info_label)
         
         layout.addStretch()
@@ -158,6 +194,38 @@ class FileCleanerApp(QWidget):
                 self.result_list.takeItem(row)
             except Exception as e:
                 QMessageBox.critical(self, "오류", f"삭제 실패: {e}")
+
+    # ★ 상위 폴더로 이동하는 메서드 추가
+    def move_file_up(self, src_path, item):
+        if not os.path.exists(src_path):
+            QMessageBox.warning(self, "경고", "파일이 존재하지 않습니다.")
+            return
+
+        current_dir = os.path.dirname(src_path)
+        # os.path.dirname을 한 번 더 쓰면 바로 위(상위) 폴더가 됩니다.
+        parent_dir = os.path.dirname(current_dir)
+        file_name = os.path.basename(src_path)
+        dest_path = os.path.join(parent_dir, file_name)
+
+        # 예외 처리: base_path보다 더 위로 올라가지 않도록 제한 (보안 및 에러 방지)
+        if len(current_dir) <= len(self.base_path):
+            QMessageBox.warning(self, "경고", "최상위 경로(base_path)보다 위로 이동할 수 없습니다.")
+            return
+
+        # 예외 처리: 목적지에 이미 같은 이름의 파일이 있는 경우
+        if os.path.exists(dest_path):
+            QMessageBox.warning(self, "이동 실패", f"상위 폴더에 이미 동일한 이름의 파일이 존재합니다.\n\n경로: {parent_dir}")
+            return
+
+        try:
+            # 파일 이동 실행
+            shutil.move(src_path, dest_path)
+            
+            # 이동 성공 시 UI 리스트에서 제거 (성공 메시지는 따로 띄우지 않아 작업 속도 유지)
+            row = self.result_list.row(item)
+            self.result_list.takeItem(row)
+        except Exception as e:
+            QMessageBox.critical(self, "오류", f"파일 이동 중 오류 발생: {e}")
 
 if __name__ == '__main__':
     # 툴팁 스타일 설정 (배경색 등)

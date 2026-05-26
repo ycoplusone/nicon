@@ -5,6 +5,10 @@ from datetime import datetime
 import os
 import pandas as pd
 
+
+'''
+대량의 바코드를 삭제 이동 시키는 스크립트를 생성한다.
+'''
 def convert_date_to_yyyymmdd(date_str):
     """
     '2026-05-18T13:08:31.000Z' 형태의 문자열을 '20260518' 형태로 변경하는 함수
@@ -30,11 +34,9 @@ def convert_date_to_yyyymmdd(date_str):
 def parse_standard_json():
     '''데이터 파싱 처리'''
     # 바탕화면의 nicon.json 경로 설정
-    desktop_path = Path.home() / "Desktop"
-    file_path = desktop_path / "nicon.json"
     
-    if not file_path.exists():
-        file_path = Path.home() / "바탕화면" / "nicon.json"
+    file_path = r"c:\ncnc\nicon.json"
+    
 
     try:
         # 표준 JSON이므로 open 후 곧바로 json.load()가 가능합니다.
@@ -76,6 +78,65 @@ def parse_standard_json():
         return []
     
 from collections import Counter
+
+def file_search(item):
+    unmatched_status_list = []
+    matched_files         = []
+    file_data = []
+    base_path = Path("C:/ncnc")
+
+    brand_name = str(item.get("brand_name", "")).strip()
+    item_name  = str(item.get("item_name", "")).strip()
+    last_code  = str(item.get("lastCodeNumber", "")).strip()
+    
+    if not brand_name or not item_name or not last_code:
+        item["file_match_count"] = 0
+        item["file_match_status"] = "Not Found11"
+        file_data.append(item)
+
+    matched_files = []
+    target_folder = None
+    
+    # 1. C:\ncnc 하위 실제 폴더명 스캔 (앞 2글자 제외 대조)
+    if base_path.is_dir():
+        for local_dir in base_path.iterdir():
+            if local_dir.is_dir():
+                if len(local_dir.name) > 2 and local_dir.name[2:] == brand_name:
+                    target_folder = local_dir / item_name
+                    break
+        
+    # 2. item_name 폴더 존재 확인 후 하위 폴더들 탐색
+    if target_folder and target_folder.exists() and target_folder.is_dir():
+        for sub_dir in target_folder.iterdir():
+            if sub_dir.is_dir():  # 하위 폴더 진입
+                
+                # 3. 하위 폴더 내부 파일 탐색 및 뒷자리 6글자 검증
+                for file_path in sub_dir.iterdir():
+                    if file_path.is_file():
+                        file_name_without_ext = file_path.stem.split('_')[0]
+                        if file_name_without_ext[-6:] == last_code:
+                            matched_files.append(str(file_path))
+                            
+
+
+                    
+    # 4. 파일 매칭 카운트 및 상태 세팅
+    match_count = len(matched_files)
+    item["file_match_count"] = match_count
+    item["actual_file_paths"] = matched_files 
+    
+    # 상태 값 지정
+    if match_count == 0:
+        item["file_match_status"] = "Not Found"
+    elif match_count == 1:
+        item["file_match_status"] = "Matched"
+    else:
+        item["file_match_status"] = "File Duplicate" 
+    
+    file_data.append(item)
+    return file_data
+       
+
 
 def separate_and_sort_duplicates(refined_list):
     """
@@ -146,6 +207,14 @@ def separate_unsold_data(refined_list):
         # 'sold'가 아닌 경우 (예: 'unsold', 'expired', None 등)
         else:
             unsold_list.append(item)
+    
+    aa = []
+    for item in unsold_list:
+        aa.append( file_search(item) )
+    
+    print(aa[0])
+
+    
             
     return sold_list, unsold_list
 
@@ -158,7 +227,7 @@ def verify_and_separate_by_matched(refined_list):
     base_path = Path("C:/ncnc")
     
     # 최종 분리할 2개의 배열
-    matched_status_list = []      # 파일이 정확히 1개 매칭된 데이터 (성공)
+    matched_status_list   = []    # 파일이 정확히 1개 매칭된 데이터 (성공)
     unmatched_status_list = []    # 파일이 0개이거나 2개 이상 중복된 데이터 (실패 및 검토 대상)
     
     if not base_path.exists():
@@ -221,7 +290,7 @@ def verify_and_separate_by_matched(refined_list):
             
     return matched_status_list, unmatched_status_list
 
-def export_unmatched_to_excel(d_list , none_list , not_list):
+def export_unmatched_to_excel(d_list , none_list , not_list , fin_list):
     """
     unmatched_status_list 데이터를 DataFrame으로 변환하여
     C:\\ncnc\\unmatched_report.xlsx 파일로 저장하는 함수
@@ -231,7 +300,7 @@ def export_unmatched_to_excel(d_list , none_list , not_list):
 
     """
     # 1. 저장할 폴더 및 파일 경로 설정
-    current_date_str = datetime.now().strftime("%Y%m%d")
+    current_date_str = datetime.now().strftime('%Y%m%d_%H%M')
     file_name = f"nicon_{current_date_str}.xlsx"
     target_dir = Path("C:/ncnc")
     file_path = target_dir / file_name
@@ -253,6 +322,23 @@ def export_unmatched_to_excel(d_list , none_list , not_list):
             # 데이터 내부에 있는 중첩 구조(actual_file_paths)를 문자열로 보기 좋게 합쳐줍니다.
             paths = item.get("actual_file_paths", [])
             paths_str = ", ".join(paths) if paths else "없음"
+            file_proc = ''
+            
+            if str =='정상':
+                file_proc = f'del /f /q "{paths_str}"'
+            elif str == '판매상태이상':
+                ''''''
+                file_path = Path(paths_str)
+                print('asdfasdf',file_path)
+                if file_path.exists():
+                    # 바로 위 폴더(부모 폴더) 경로 가져오기 (.parent)
+                    parent_dir  = file_path.parent.parent
+                    move_path   = f"{parent_dir}\{file_path.name}"
+                    file_proc   = f'move "{file_path}" "{move_path}" '
+            else :
+                file_proc = paths_str
+
+
             
             refined_row = {
                 "구분"      : str,
@@ -262,12 +348,13 @@ def export_unmatched_to_excel(d_list , none_list , not_list):
                 "바코드_끝6자리": item.get("lastCodeNumber"),
                 "상태": item.get("currentStatus"),
                 "발견된_파일_개수": item.get("file_match_count", 0),                
-                "발견된_파일_경로": paths_str
+                "발견된_파일_경로": file_proc
             }
             excel_data.append(refined_row)  
     fn_inner(d_list , '중복파일')      
     fn_inner(none_list , '판매상태이상')      
     fn_inner(not_list , '이상검색')      
+    fn_inner(fin_list , '정상')    
 
     # 3. 데이터가 비어있을 경우 예외 처리
     if not excel_data:
@@ -314,6 +401,7 @@ if __name__ == "__main__":
         .then(data => console.log(data))
         .catch(error => console.error('Error:', error));
 
+
         바탕 화면에 nicon.json 파일 생성
         /* 라이브러리*/
         pip install   openpyxl 
@@ -332,7 +420,8 @@ if __name__ == "__main__":
     # fin_list 단일 파일 리스트 , not_list 중복혹은 파일을 찾지 못한 리스트
     fin_list , not_list = verify_and_separate_by_matched(sold_list)
 
-    export_unmatched_to_excel(d_list , none_list, not_list)
+    # 엑셀 생성
+    export_unmatched_to_excel(d_list , none_list, not_list , fin_list)
 
 
     '''
@@ -348,11 +437,12 @@ if __name__ == "__main__":
     - 판매상태가 "판매완료" 가 아닌 건
     - 로컬pc 에서 파일이 0개 혹은 2개 이상 검출된 대상
     '''
-    
+    '''
     for item in fin_list:
         file_paths = item.get("actual_file_paths", [])
         win_path = file_paths[0].replace("/", "\\")
         print( f'del /f /q "{win_path}"' )
+    '''
     
 
     
