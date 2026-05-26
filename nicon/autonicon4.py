@@ -1,8 +1,3 @@
-#from selenium.webdriver.chrome.service import Service as ChromeService
-#from webdriver_manager.chrome import ChromeDriverManager
-#from selenium.webdriver.common.alert import Alert
-#import pyautogui
-
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.support.ui import WebDriverWait
@@ -19,6 +14,7 @@ import lib.dbcon as dbcon
 
 
 '''
+3.0.4 니콘 로그파일 로컬에 생성 c:\ncnc\nicon.log
 3.0.3 니콘 내콘 db 로딩 제외 local fold 만 접근 해서 처리 방식으로 변경.
 3.0.2 니콘 내콘 수행 이력 텔러그램 발송 추가
 3.0.1 니콘 내콘 데이터 수집및 판매기.
@@ -89,14 +85,14 @@ class nicon():
             print( 'alert error', e )
             return _rt
         finally:
-            return _rt
+            ''''''
 
 
 
     def fnLoging(self):
         '''로그인'''        
-        __id = 'skfmtltm1052'
-        __ps = 'Natktkfkd84!'    
+        __id = '0121052@hanmail.net'
+        __ps = 'Katktkfkd84!'    
         time.sleep(0.2)
         self.fnClick('//*[@id="app"]/div/div[2]/div/section/section/nav/section/button')
         
@@ -353,10 +349,13 @@ if __name__ == "__main__":
             print('*'*80)
             print( w2ji.getNow() )                
             _total_cnt += 1
+            '''
             if ( _msg_sned_flag ):    # 마지막 메세지 발송후 1시간 이상 되면 다시 텔레그램 메세지를 발송한다.
                 _check_time = w2ji.getNowDate()         # 메세지 발송 시간을 다시 등록한다.
-                w2ji.send_telegram_message(  f'NICON {_total_cnt}번재 실행중.' )      
-            
+                #w2ji.send_telegram_message(  f'NICON {_total_cnt}번재 실행중.' )      
+                w2ji.write_log('니콘기록')
+            '''
+            w2ji.write_log('니콘기록')
             time.sleep(600) # 일회 순회 후 대기 시간
         except Exception as e:
             w2ji.send_telegram_message(  f'NICON 재시작해 주세요. \n {e}' )  
