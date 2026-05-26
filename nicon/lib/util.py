@@ -13,6 +13,8 @@ import re
 import csv
 from dotenv import load_dotenv
 
+
+
 load_dotenv()
 
 
@@ -453,4 +455,22 @@ def getResolveProd(_arr:dict , brand_nm:str , prod_nm:str):
     except Exception as e:
         print('util.getResolveProd',e)
         return ''
+        
+def write_log(message):
+    # 1. 고정 경로 설정
+    log_dir = r"C:\ncnc"
+    log_filepath = os.path.join(log_dir, "nicon.log")
+    
+    # 2. 폴더가 없는 경우 자동으로 생성 (안전장치)
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+        
+    # 3. 현재 시간 및 로그 내용 포맷팅
+    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    log_line = f"[{current_time}] {message}\n"
+    
+    # 4. 파일 이어 쓰기 (utf-8 지정으로 한글 깨짐 방지)
+    with open(log_filepath, "a", encoding="utf-8") as file:
+        file.write(log_line)
+
         
