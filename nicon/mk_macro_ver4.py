@@ -75,6 +75,7 @@ class MyApp(QWidget):
     __rep               = {}  # 구간반복 배열
     __step_wait_time    = '0.01' # 단계별 대기 시간
 
+    __whole_wait_time   = 0     # 시작전 전체 대기 시간
     __seq_start         = 0     # 테스트 시작구간 
     __seq_end           = 9999  # 테스트 종료구간
     # 전역변수 - end
@@ -116,6 +117,7 @@ class MyApp(QWidget):
     __dnd_bnt1      = {} # 드래그 & 드랍   
     __wait_time_cb  = '' # 대기시간 조정  
 
+    __start_wait_eq = '' # 시작 대기 시간 설정
     __start_qe      = '' # 전체구간반복 시작
     __end_qe        = '' # 전체구간반복 종료
     # UI - END
@@ -387,13 +389,22 @@ class MyApp(QWidget):
         load_btn.clicked.connect( fn_load )
         grid.addWidget( load_btn , 0 , 2 ,1,1 )
 
+
          
 
         def fnStart():
-            '''매크로 시작 버튼'''
+            '''매크로 시작 버튼'''                        
+            _h,_m,_s = self.convert_seconds( self.__whole_wait_time )
+            print( f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} || {_h}시 {_m}분 {_s}초 대기합니다..." ) 
+            self.start_wait()
+            print( f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} " ) 
+            
+
+
             self.__start_btn.setEnabled(False)
             csv_data = self.readfile( self.__cvs_path )   
             file_name   = self.__save_file_nm_ui.text() # 파일명                    
+            
             self.__work = work.WorkSoldier() # work.Work()
             self.__work.fn_param( 
                 self.__title_nm # 프로그램명칭
@@ -431,7 +442,7 @@ class MyApp(QWidget):
 
 
         self.__start_btn = QPushButton('Start')
-        self.__start_btn.clicked.connect(    fnStart   )  
+        self.__start_btn.clicked.connect(    fnStart   )          
         grid.addWidget( self.__start_btn , 0 , 3,1,1 )
 
         stop_btn = QPushButton('Stop')        
@@ -484,7 +495,25 @@ class MyApp(QWidget):
         groupbox.setFixedHeight(70)
         groupbox.setLayout(grid)
         
-        return groupbox    
+        return groupbox  
+
+    def convert_seconds(self , total_seconds):
+        # 1. 전체 초를 3600으로 나눠서 시간(hour)과 남은 초를 구함
+        hours, remainder = divmod(total_seconds, 3600)
+        
+        # 2. 남은 초를 60으로 나눠서 분(minute)과 최종 초(second)를 구함
+        minutes, seconds = divmod(remainder, 60)
+        
+        return hours, minutes, seconds      
+    
+    def start_wait(self):
+        ''' cpu 점유 대기 '''        
+        start_time = time.time()
+        while time.time() - start_time < self.__whole_wait_time : # 5초 동안 반복
+            # 아주 짧게 쉬어주면서 CPU 점유율 폭등을 방지
+            time.sleep(0.1)             
+            # 🔥 핵심: 이 코드가 대기 중에도 창이 응답 없음이 되지 않게 이벤트를 뺍니다.
+            QCoreApplication.processEvents()    
 
     def fnAfterUiLoad(self, str): # 로드후 UI 함수
         ''''''
@@ -631,6 +660,7 @@ class MyApp(QWidget):
             '''키이벤트'''
             s = self.__start_qe.text()
             e = self.__end_qe.text()
+            w = self.__start_wait_eq.text()
             if s == '':
                 self.__start_qe.setText( '0' )
                 self.__seq_start = 0
@@ -644,25 +674,38 @@ class MyApp(QWidget):
             else :
                 self.__end_qe.setText( str(int(e)) )                    
                 self.__seq_end = int(e)     
+            
+            if w == '':
+                self.__start_wait_eq.setText( '0' )
+                self.__whole_wait_time = 0
+            else :
+                self.__start_wait_eq.setText( str(int(w)) )                    
+                self.__whole_wait_time = int(w)                     
 
         def ChgWaitTime(): # 전체 대기 시간 조정
             ''''''
             str = self.__wait_time_cb.currentText()
             self.__step_wait_time = str
             
-
+        # 시작대기
+        start_wait_lb    = QLabel('시작대기')
+        self.__start_wait_eq    = QLineEdit('0')
+        self.__start_wait_eq.setFixedWidth(100)  # 가로 크기 지정
+        self.__start_wait_eq.setStyleSheet( self.__lb_style )
+        self.__start_wait_eq.setValidator(QIntValidator(0,86400,self))    # 0..86400 0초에서 86400초 사이
+        self.__start_wait_eq.textChanged.connect( repeatEvent )        
 
         # 시작구간 , 끝구간 지정. - START
         start_lb    = QLabel('시작구간')
         self.__start_qe    = QLineEdit('0')
-        self.__start_qe.setFixedWidth(120)  # 가로 크기 지정
+        self.__start_qe.setFixedWidth(100)  # 가로 크기 지정
         self.__start_qe.setStyleSheet( self.__lb_style )
         self.__start_qe.setValidator(QIntValidator(0,999999,self))    # 100..999사이의 정수        
         self.__start_qe.textChanged.connect( repeatEvent )
         
         end_lb      = QLabel('     종료구간')
         self.__end_qe      = QLineEdit(  str(self.__max_obj)  )
-        self.__end_qe.setFixedWidth(120)  # 가로 크기 지정
+        self.__end_qe.setFixedWidth(100)  # 가로 크기 지정
         self.__end_qe.setStyleSheet( self.__lb_style )
         self.__end_qe.setValidator(QIntValidator(0,999999,self))    # 100..999사이의 정수   
         self.__end_qe.textChanged.connect( repeatEvent )
@@ -674,13 +717,15 @@ class MyApp(QWidget):
             f = str(num / 10)
             self.__wait_time_cb.addItem( f )
         self.__wait_time_cb.currentIndexChanged.connect( ChgWaitTime )
-                
-        grid.addWidget( start_lb    , 0 , 0)
-        grid.addWidget( self.__start_qe    , 0 , 1)        
-        grid.addWidget( end_lb      , 0 , 2)
-        grid.addWidget( self.__end_qe      , 0 , 3)  
-        grid.addWidget( wait_lb     , 0 , 4)  
-        grid.addWidget( self.__wait_time_cb   , 0 , 5)  
+        
+        grid.addWidget( start_wait_lb           , 0 , 0)
+        grid.addWidget( self.__start_wait_eq    , 0 , 1)                                
+        grid.addWidget( start_lb                , 0 , 2)
+        grid.addWidget( self.__start_qe         , 0 , 3)        
+        grid.addWidget( end_lb                  , 0 , 4)
+        grid.addWidget( self.__end_qe           , 0 , 5)  
+        grid.addWidget( wait_lb                 , 0 , 6)  
+        grid.addWidget( self.__wait_time_cb     , 0 , 7)  
         groupbox.setFixedHeight(40)
         groupbox.setLayout(grid)        
         # 시작구간 , 끝구간 지정. - end
@@ -1051,4 +1096,3 @@ if __name__ == '__main__':
     ex = MyApp()
     sys.exit(app.exec_())
     
-
