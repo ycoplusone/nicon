@@ -424,7 +424,7 @@ def setJobLog( job_nm ,url_path, flag):
         print('='*20)
 
 
-def getAlterProdList(file_path:str='c:\\ncnc\\alter_prod_list.csv'):
+def getAlterProdList(file_path:str='c:\\ncnc\\alter_prod_list.csv' , enconding='utf-8'):
     '''대체 상품명 파일 로드'''
     try:
         data_list = []
@@ -455,6 +455,8 @@ def getResolveProd(_arr:dict , brand_nm:str , prod_nm:str):
     except Exception as e:
         print('util.getResolveProd',e)
         return ''
+
+  
         
 def write_log(message):
     # 1. 고정 경로 설정
