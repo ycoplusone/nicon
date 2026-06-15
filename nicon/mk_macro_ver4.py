@@ -10,7 +10,7 @@ import pandas as pd
 import pickle
 import time
 import random
-from datetime import datetime
+from datetime import datetime , timedelta
 from pytz import timezone
 from PIL import ImageGrab , Image
 import lib.util as w2ji
@@ -24,6 +24,7 @@ import keyboard     # 20241015 키보드 이벤트 pip install keyboard
 
 '''
 매크로 작업 생성및 단일 수행 프로그램    
+    26.6.15 시작대기 기능 추가 대기 초 입력시 대시기능과 정지(esc) 수행시 시작 정지 수정
     25.0.6 work 클래스 worksoldier 로 변경
     25.0.5 '자방[문자]' , '자방[혼합]' 인식 추가.
     25.0.4 '자방[숫자]' 자동방지숫자 인식 추가.
@@ -75,6 +76,7 @@ class MyApp(QWidget):
     __rep               = {}  # 구간반복 배열
     __step_wait_time    = '0.01' # 단계별 대기 시간
 
+    __whole_wait_time_flag = False #대기중 정지.
     __whole_wait_time   = 0     # 시작전 전체 대기 시간
     __seq_start         = 0     # 테스트 시작구간 
     __seq_end           = 9999  # 테스트 종료구간
@@ -219,6 +221,7 @@ class MyApp(QWidget):
                 self.__start_btn.setEnabled(True)  
                 self.__work.stop()
                 self.__work.terminate()         # 강제 종료                
+                self.__whole_wait_time_flag = True
             elif( evt.name == 'z' or evt.name == 'Z' or evt.name == '+' ):
                 ''''''
                 print('??')
@@ -394,10 +397,15 @@ class MyApp(QWidget):
 
         def fnStart():
             '''매크로 시작 버튼'''                        
-            _h,_m,_s = self.convert_seconds( self.__whole_wait_time )
+            _h,_m,_s,_n = self.convert_seconds( self.__whole_wait_time )
             print( f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} || {_h}시 {_m}분 {_s}초 대기합니다..." ) 
+            print( f"다음 수행 예상 시간 => [{_n}] 입니다.")
             self.start_wait()
             print( f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} " ) 
+            if self.__whole_wait_time_flag:
+                self.__whole_wait_time_flag = False
+                return
+                
             
 
 
@@ -499,12 +507,14 @@ class MyApp(QWidget):
 
     def convert_seconds(self , total_seconds):
         # 1. 전체 초를 3600으로 나눠서 시간(hour)과 남은 초를 구함
-        hours, remainder = divmod(total_seconds, 3600)
-        
+        hours, remainder = divmod(total_seconds, 3600)        
         # 2. 남은 초를 60으로 나눠서 분(minute)과 최종 초(second)를 구함
         minutes, seconds = divmod(remainder, 60)
+        now = datetime.now()
+        future_time = now + timedelta(seconds=total_seconds)
+        next = f"{future_time.strftime('%Y-%m-%d %H:%M:%S')}"
         
-        return hours, minutes, seconds      
+        return hours, minutes, seconds , next
     
     def start_wait(self):
         ''' cpu 점유 대기 '''        
@@ -513,7 +523,9 @@ class MyApp(QWidget):
             # 아주 짧게 쉬어주면서 CPU 점유율 폭등을 방지
             time.sleep(0.1)             
             # 🔥 핵심: 이 코드가 대기 중에도 창이 응답 없음이 되지 않게 이벤트를 뺍니다.
-            QCoreApplication.processEvents()    
+            QCoreApplication.processEvents()
+            if self.__whole_wait_time_flag:                
+                break
 
     def fnAfterUiLoad(self, str): # 로드후 UI 함수
         ''''''
