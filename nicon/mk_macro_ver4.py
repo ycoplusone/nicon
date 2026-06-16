@@ -398,14 +398,23 @@ class MyApp(QWidget):
         def fnStart():
             '''매크로 시작 버튼'''                        
             _h,_m,_s,_n = self.convert_seconds( self.__whole_wait_time )
-            print( f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} || {_h}시 {_m}분 {_s}초 대기합니다..." ) 
-            print( f"다음 수행 예상 시간 => [{_n}] 입니다.")
-            self.start_wait()
-            print( f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} " ) 
+            print( f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} || {_h}시 {_m}분 {_s}초 대기 || 수행 예상 시간 {_n} 입니다." )             
+            
+            # cpu 점유 대기 
+            start_time = time.time()
+            while time.time() - start_time < self.__whole_wait_time : # 5초 동안 반복
+                # 아주 짧게 쉬어주면서 CPU 점유율 폭등을 방지
+                time.sleep(0.1)             
+                # 🔥 핵심: 이 코드가 대기 중에도 창이 응답 없음이 되지 않게 이벤트를 뺍니다.
+                QCoreApplication.processEvents()
+                if self.__whole_wait_time_flag:                
+                    break                        
+            # 중간 중단
             if self.__whole_wait_time_flag:
                 self.__whole_wait_time_flag = False
                 return
-                
+            
+            print( f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} " )     
             
 
 
@@ -516,16 +525,7 @@ class MyApp(QWidget):
         
         return hours, minutes, seconds , next
     
-    def start_wait(self):
-        ''' cpu 점유 대기 '''        
-        start_time = time.time()
-        while time.time() - start_time < self.__whole_wait_time : # 5초 동안 반복
-            # 아주 짧게 쉬어주면서 CPU 점유율 폭등을 방지
-            time.sleep(0.1)             
-            # 🔥 핵심: 이 코드가 대기 중에도 창이 응답 없음이 되지 않게 이벤트를 뺍니다.
-            QCoreApplication.processEvents()
-            if self.__whole_wait_time_flag:                
-                break
+
 
     def fnAfterUiLoad(self, str): # 로드후 UI 함수
         ''''''
