@@ -398,7 +398,7 @@ class MyApp(QWidget):
         def fnStart():
             '''매크로 시작 버튼'''                        
             _h,_m,_s,_n = self.convert_seconds( self.__whole_wait_time )
-            print( f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} || {_h}시 {_m}분 {_s}초 대기 || 수행 예상 시간 {_n} 입니다." )             
+            print( f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} || 대기시간 [{_h}:{_m}:{_s}] || 수행 예상 시간 [{_n}] " )             
             
             # cpu 점유 대기 
             start_time = time.time()
@@ -414,9 +414,7 @@ class MyApp(QWidget):
                 self.__whole_wait_time_flag = False
                 return
             
-            print( f"{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')} " )     
-            
-
+            print( f"수행 시작 시간 [{datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')}] " )   
 
             self.__start_btn.setEnabled(False)
             csv_data = self.readfile( self.__cvs_path )   
