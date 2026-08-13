@@ -9,7 +9,7 @@ import base64
 import openai                       # pip install openai == 0.28.0
 import re
 import ctypes
-
+import keyboard
 
 
 ''' 자동화 수행 클래스
@@ -60,8 +60,9 @@ class Core:
     def fnwrite(self, txt : str , wait_sec:float):
         '''복사 타이핑'''
         txt = '' if txt == 'nan' else txt
-        for n in txt:
-            pyautogui.press(n)
+        #for n in txt:
+        #    pyautogui.press(n)
+        keyboard.write(txt)  # 키보드 입력 
         
         time.sleep( wait_sec ) #대기        
     
@@ -69,14 +70,14 @@ class Core:
         '''키 입력'''
         if txt == 'ctrl+a': # 전체선택
             pyautogui.hotkey('ctrl', 'a' )
-        elif txt == 'ctrl+c': # 복사            
+        elif txt == 'ctrl+c': # 복사
             pyautogui.click(button='right')
             time.sleep(0.2)
             pyautogui.press('down', presses=cnt, interval=0.1) 
-            pyautogui.press('enter')     
+            pyautogui.press('enter')                       
         elif txt == 'ctrl+v': # 붙여넣기
             pyautogui.hotkey("ctrl", "v")
-         
+
         else : # 이외 전체 키 처리.
             pyautogui.press( txt , presses = cnt , interval=0.2)  
 
@@ -346,6 +347,4 @@ class Core:
         elif( step_name =='브라우저') :
             exe_path    = os.environ.get('brower_path')
             exe_option  = os.environ.get('brower_options')  
-
             self.run_as_admin(exe_path , exe_option , float(xy_wait))
-
