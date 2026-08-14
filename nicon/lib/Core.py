@@ -60,11 +60,10 @@ class Core:
     def fnwrite(self, txt : str , wait_sec:float):
         '''복사 타이핑'''
         txt = '' if txt == 'nan' else txt
-        #for n in txt:
-        #    pyautogui.press(n)
-        keyboard.write(txt)  # 키보드 입력 
-        
-        time.sleep( wait_sec ) #대기        
+        for n in txt:
+            #pyautogui.press(n)
+            keyboard.write(n)  # 키보드 입력 
+            time.sleep( wait_sec ) #글자 입력간 대기 
     
     def fnkey(self , txt : str , cnt : int , wait_sec:float ):
         '''키 입력'''
