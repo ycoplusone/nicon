@@ -4,7 +4,7 @@ import lib.dbcon as dbcon
 import lib.util as w2ji
 from tqdm import tqdm
 import time
-from datetime import datetime , timedelta
+from datetime import datetime , timedelta , date
 from pytz import timezone
 from apify_client import ApifyClient
 import re
@@ -13,7 +13,6 @@ from PIL import Image
 from io import BytesIO
 import os
 import numpy as np
-import pytesseract
 import cv2
 from pyzbar.pyzbar import decode
 from urllib.parse import urlparse, parse_qs , unquote 
@@ -25,7 +24,6 @@ import logging
 import pandas as pd
 import easyocr
 import json
-from datetime import datetime
 import urllib.request
 import urllib.error
 
@@ -65,7 +63,14 @@ class Search():
 
     def getGeminiProcess(self , event_text: str , max_retries: int = 4) -> str:
         # 1. API 키 확인
-        api_key = os.environ.get('google_gemini_api_key')
+        api_key = os.environ.get('google_gemini_api_key0')
+        # 오늘 날짜 확인
+        today = date.today()
+        day = today.day        
+        if day % 2 == 0:
+            api_key = os.environ.get('google_gemini_api_key1') # 짝수일 경우 다른 키 사용
+        else:
+            api_key = os.environ.get('google_gemini_api_key0') # 홀수일 경우 기본 키 사용
 
         # 3. 오늘 날짜 및 프롬프트 구성
         today_str = datetime.now().strftime("%Y년 %m월 %d일")
@@ -162,7 +167,7 @@ class Search():
         data = json.dumps(payload).encode("utf-8")
         headers = {"Content-Type": "application/json"}
 
-        candidate_models = ["gemini-3.1-flash-lite","gemini-flash-latest"]
+        candidate_models = ["gemini-3.5-flash-lite","gemini-3.1-flash-lite","gemini-flash-latest"]
         detail_ai       = 0  # 판단 1/0
         detail_comment  = '' # 판단 근거    
         for model_name in candidate_models:     
@@ -517,7 +522,7 @@ class Search():
                 if( url_chk >= 9 ):                    
                     self.__dbconn.upsert_nicon_survey_collection(__temp) # 검색어만 업데이트 한다.  
                     self.__log( f'※ 이미등록건[ url_chk:{url_chk} ]' )
-                elif( (url_pdf == True) or any(word in alt_text_chk for word in except_word) ): # PDF 파일이면 제외한다.                    
+                elif( (url_pdf == True) or any(word in url for word in except_word) or any(word in alt_text_chk for word in except_word) ): # PDF 파일이면 제외한다.                    
                     totfail += 1 # 실패 건수 등록
                     self.__dbconn.upsert_nicon_survey_worst_url_list(param=__temp) # 제외 url에 넣는다.
                     self.__log( f'※ url 이상건 & 설명에 금지단어 검출 [url_pdf:{url_pdf} , alt_text_chk:{any(word in alt_text_chk for word in except_word)}]' )
