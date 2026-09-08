@@ -165,6 +165,7 @@ class Search():
         }
 
         data = json.dumps(payload).encode("utf-8")
+        
         headers = {"Content-Type": "application/json"}
 
         candidate_models = ["gemini-3.5-flash-lite","gemini-3.1-flash-lite","gemini-flash-latest"]
@@ -178,11 +179,15 @@ class Search():
                 try:
                     with urllib.request.urlopen(req) as response:
                         res_json = json.loads(response.read().decode("utf-8"))
+                        print(res_json)
                         result_str = res_json["candidates"][0]["content"]["parts"][0]["text"]
                         #return json.loads(result_str)
                         json_data       = json.loads(result_str)
                         detail_ai       = 1 if json_data["final_verdict"] else 0 # 최종 판정 True/False를 1/0으로 변환
-                        detail_comment  = f"{json_data['reward_name']}|{json_data['target_reason']}|{json_data['period_reason']}"                       
+                        target_status   = json_data["target_status"]
+                        period_status   = json_data["period_status"]
+                        chk_txt         = '없음|' if target_status == "미충족" or period_status == "만료" or period_status == "불가"  else '' # 이상 데이터 제외 하기 위한 코드
+                        detail_comment  = f"{chk_txt}{json_data['reward_name']}|{json_data['target_reason']}|{json_data['period_reason']}"                       
                         break                   
 
                 except urllib.error.HTTPError as e:
