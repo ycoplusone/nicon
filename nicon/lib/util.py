@@ -415,7 +415,8 @@ def getFileCnt_v02( _dbconn , _flag:bool=True):
 def setJobLog( job_nm ,url_path, flag):
     '''작업 로그 생성 URL 호출'''
     try:
-        url = "https://themoreschool.cafe24.com/job_log_v2.php"
+        # url = "https://themoreschool.cafe24.com/job_log_v2.php"
+        url = "http://enfish.duckdns.org:5000/job_log"
         payload = {"job_nm": job_nm, "url_path":url_path, "flag": flag}
         response = requests.post(url, data=payload)  # ← json= → data= 로 변경
     except Exception as e:
