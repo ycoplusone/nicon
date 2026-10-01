@@ -1,22 +1,22 @@
 '''
 Created on 2022. 7. 22.
 
-@author: DLIVE
+@author: 
 '''
 import pymysql
 from pymysql.converters import escape_string
+import os
 
 class DbConn(object):
     '''
     '''
-    __url = 'themoreschool.cafe24.com'
-    __id = 'themoreschool'
-    __ps = 'school2@'
-    __db = 'themoreschool'    
-    __charset = 'utf8'
+    __url       = os.getenv('ora_mysql_url')
+    __id        = os.getenv('ora_mysql_id')
+    __ps        = os.getenv('ora_mysql_ps')
+    __db        = os.getenv('ora_mysql_db')
+    __charset   = os.getenv('ora_mysql_charset')
     
-    __conn = ''
-    
+    __conn = ''    
 
     def __init__(self):
         '''        
@@ -891,8 +891,10 @@ class DbConn(object):
             cur.execute( query )
             result = cur.fetchone()            
             return result['cnt']
-        finally:
+        except Exception as e:
             return 0
+        finally:
+            ''''''
 
     def upsert_nicon_survey_worst_url_list(self , param ):            
             try :
@@ -938,10 +940,12 @@ class DbConn(object):
 
                 query = (
                 " update nicon_survey_collection "
-                " set detail_chk = 1 "
-                " , detail_qr   = {chk_qr} "
-                " , detail_txt  = {chk_txt}  "
-                " where url     = '{url}'  "                
+                " set detail_chk    = 1 "
+                " , detail_qr       = {chk_qr} "
+                " , detail_txt      = {chk_txt}  "
+                " , detail_ai       = {detail_ai}"
+                " , detail_comment  = '{detail_comment}' "
+                " where url         = '{url}'  "                
                 )                  
                 query = query.format( **param )     
                 cur.execute( query )
@@ -997,3 +1001,38 @@ class DbConn(object):
             return word_list
         finally:
             pass
+
+    def get_test(self):            
+        try:
+            
+            # 2. 사용 중인(is_use='Y') 데이터만 조회
+            sql = f"select distinct url from nicon_survey_collection where 1=1 and collection_dt >= NOW() - INTERVAL 10 DAY and is_verified = 0 and detail_comment  is null order by reg_dt desc "
+            cur =  self.__conn.cursor( pymysql.cursors.DictCursor )
+            cur.execute( sql )
+            results = cur.fetchall()
+
+            # 3. [{column: '단어1'}, {column: '단어2'}] 형태를 ['단어1', '단어2'] 리스트로 변환
+            word_list = [row['url'] for row in results]                
+            return word_list
+        finally:
+            pass
+
+    def update_test(self , param ):
+            '''설문조사 detail 부분'''
+            try :
+                cur = self.__conn.cursor()                        
+
+                query = (
+                " update nicon_survey_collection "
+                " set  "
+                " detail_ai       = {detail_ai}"
+                " , detail_comment  = '{detail_comment}' "
+                " where url         = '{url}'  "                
+                )                  
+                query = query.format( **param )     
+                cur.execute( query )
+                self.__conn.commit()
+            except Exception as e:
+                print( 'upsert_nicon_survey_collection', e ,'\n',query ,'\n',param )
+            finally:
+                pass    
