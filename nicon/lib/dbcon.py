@@ -6,6 +6,9 @@ Created on 2022. 7. 22.
 import pymysql
 from pymysql.converters import escape_string
 import os
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.env')) #환경변수 로딩 (import 순서와 무관하게)
 
 class DbConn(object):
     '''
