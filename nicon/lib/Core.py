@@ -18,7 +18,7 @@ import keyboard
 
 class Core:
     
-    inputWait = False # 입력대기 z키 입력 대기 제어 변수
+    inputWait = False # 입력대기 `~+ 키를 입력해서 
     pyautogui.FAILSAFE = False
 
     ''' Work.py 혹은 work_army.py 가 수행되는 클래스'''
@@ -90,7 +90,7 @@ class Core:
 
     def fnInputWait( self ):
         '''입력 대기 외부 키 입력 이벤트를 위한 함수'''
-        print('\t\t (Z키 또는 +키) 입력대기 (Z키 또는 +키)를 입력해서 다음 단계를 수행하세요.','?'*10)
+        print('\t\t 입력대기 (+ 키 , `키 , ~키) 를 입력해서 다음 단계를 수행하세요.','?'*10)
         while True:
             if not self.inputWait:
                 break
