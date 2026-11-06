@@ -3,7 +3,7 @@ import os
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-import pyautogui
+import pyautogui # type: ignore
 import pyperclip
 import csv
 import pandas as pd
@@ -19,7 +19,7 @@ import lib.WorkSoldier as work
 import re
 
 import mouse        # 20241015 마우스 이벤트 pip install mouse
-import keyboard     # 20241015 키보드 이벤트 pip install keyboard
+import keyboard     # type: ignore # 20241015 키보드 이벤트 pip install keyboardcd
 
 
 '''
@@ -222,7 +222,7 @@ class MyApp(QWidget):
                 self.__work.stop()
                 self.__work.terminate()         # 강제 종료                
                 self.__whole_wait_time_flag = True
-            elif( evt.name == 'z' or evt.name == 'Z' or evt.name == '+' ):
+            elif( evt.name == '+' or evt.name == '`' or evt.name == '~' ):
                 ''''''
                 print('??')
                 self.__work.fnInputWait2()
